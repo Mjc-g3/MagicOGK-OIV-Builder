@@ -1,78 +1,359 @@
 using System;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Web.WebView2.Core;
 
 namespace MagicOGK_OIV_Builder
 {
     public partial class main : Form
     {
-        [DllImport("user32.dll")]
-        public static extern bool ReleaseCapture();
-
-        [DllImport("user32.dll")]
-        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-
-        private Size smallSize = new Size(100, 40);
-        private Size bigSize = new Size(140, 60);
-        private int speed = 3;
-
-        private System.Windows.Forms.Button currentButton = null;
-        private bool isHovering = false;
-
         private bool sidebarOpen = false;
-        private bool sidebarAnimating = false;
-        private bool sidebarOpening = false;
-        private int sidebarSpeed = 20;
+        private int sidebarTargetX = -160;
+        private Point dragStart;
+        private bool isDragging = false;
+        private string currentProjectPath = string.Empty;
+        private OIVProject currentProject = new OIVProject();
+        private string activeTab = "package";
 
         public main()
         {
             InitializeComponent();
-
-            this.Shown += main_Shown;
-
-            this.Opacity = 0;
-            this.WindowState = FormWindowState.Normal;
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.ShowInTaskbar = true;
         }
 
-        private async void main_Shown(object sender, EventArgs e)
+        private async void Form1_Load(object sender, EventArgs e)
         {
-            this.WindowState = FormWindowState.Normal;
-            this.Activate();
+            panelDrag.MouseDown += PanelDrag_MouseDown;
+            panelDrag.MouseMove += PanelDrag_MouseMove;
+            panelDrag.MouseUp += PanelDrag_MouseUp;
 
-            for (double i = 0; i <= 1; i += 0.05)
+            btnOpenP.Click += btnOpenP_Click;
+            btnSave.Click += btnSave_Click;
+            btnSaveAs.Click += btnSaveAs_Click;
+            btnBuildOIV.Click += btnBuildOIV_Click;
+            btnOpenOIV.Click += btnOpenOIV_Click;
+
+            dropdownVersionTag.SelectedIndex = 3;
+            dropdownOIVSpec.SelectedIndex = 3;
+
+            await webViewBackground.EnsureCoreWebView2Async();
+            webViewBackground.CoreWebView2.Settings.IsZoomControlEnabled = false;
+            webViewBackground.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
+            webViewBackground.CoreWebView2.Settings.AreDevToolsEnabled = false;
+            webViewBackground.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
+
+            LoadPackageTab();
+        }
+
+        private void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
+        {
+            string? rawMsg = e.TryGetWebMessageAsString();
+            if (rawMsg == null) return;
+            string msg = rawMsg;
+            if (msg.StartsWith("addFile:"))
             {
-                this.Opacity = i;
-                await Task.Delay(15);
+                string json = msg.Substring(8);
+                HandleAddFileMessage(json);
+            }
+            else if (msg.StartsWith("removeFile:"))
+            {
+                string idStr = msg.Substring(11);
+                if (int.TryParse(idStr, out int id))
+                    currentProject.Files.RemoveAll(f => f.Id == id);
+                RefreshCurrentTab();
+            }
+            else if (msg.StartsWith("updatePath:"))
+            {
+                string json = msg.Substring(11);
+                HandleUpdatePathMessage(json);
+            }
+            else if (msg == "openFilePicker")
+            {
+                OpenFilePicker();
+            }
+        }
+
+        private void HandleAddFileMessage(string json)
+        {
+            try
+            {
+                var parts = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, string>>(json);
+                if (parts == null) return;
+                var entry = new OIVFileEntry
+                {
+                    Id = currentProject.NextId++,
+                    SourcePath = parts.ContainsKey("source") ? parts["source"] : "",
+                    TargetPath = parts.ContainsKey("target") ? parts["target"] : "",
+                    FileName = parts.ContainsKey("name") ? parts["name"] : "",
+                    Type = parts.ContainsKey("type") ? parts["type"] : "content"
+                };
+                currentProject.Files.Add(entry);
+                RefreshCurrentTab();
+            }
+            catch { }
+        }
+
+        private void HandleUpdatePathMessage(string json)
+        {
+            try
+            {
+                var parts = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, string>>(json);
+                if (parts == null) return;
+                if (parts.ContainsKey("id") && int.TryParse(parts["id"], out int id))
+                {
+                    var entry = currentProject.Files.Find(f => f.Id == id);
+                    if (entry != null && parts.ContainsKey("target"))
+                        entry.TargetPath = parts["target"];
+                    if (entry != null && parts.ContainsKey("type"))
+                        entry.Type = parts["type"];
+                }
+            }
+            catch { }
+        }
+
+        private void OpenFilePicker()
+        {
+            if (InvokeRequired)
+            {
+                Invoke(new Action(OpenFilePicker));
+                return;
+            }
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Select mod file(s)",
+                Multiselect = true,
+                Filter = "All Files (*.*)|*.*|YFT Files (*.yft)|*.yft|YTD Files (*.ytd)|*.ytd|META Files (*.meta)|*.meta|XML Files (*.xml)|*.xml|ASI Files (*.asi)|*.asi"
+            };
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                foreach (string path in dlg.FileNames)
+                {
+                    string name = System.IO.Path.GetFileName(path);
+                    var entry = new OIVFileEntry
+                    {
+                        Id = currentProject.NextId++,
+                        SourcePath = path,
+                        TargetPath = "",
+                        FileName = name,
+                        Type = "content"
+                    };
+                    currentProject.Files.Add(entry);
+                }
+                RefreshCurrentTab();
+            }
+        }
+
+        private void LoadPackageTab()
+        {
+            activeTab = "package";
+            string html = PackageTabHtml();
+            webViewBackground.CoreWebView2.NavigateToString(html);
+        }
+
+        private void RefreshCurrentTab()
+        {
+            if (activeTab == "package")
+                LoadPackageTab();
+        }
+
+        private string PackageTabHtml()
+        {
+            var sb = new System.Text.StringBuilder();
+            sb.Append(@"<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<style>
+  html, body { margin:0; padding:0; background:#0d0d0d; color:#e8e8e8; font-family:'Segoe UI',Arial,sans-serif; font-size:14px; height:100%; overflow:hidden; }
+  .container { padding:24px 32px; height:calc(100vh - 48px); display:flex; flex-direction:column; gap:16px; }
+  .section-title { font-size:13px; font-weight:700; letter-spacing:1.4px; text-transform:uppercase; color:#bc8f8f; margin-bottom:8px; }
+  .toolbar { display:flex; gap:10px; align-items:center; }
+  .btn { background:#1a1a1a; border:1px solid #333; color:#e0e0e0; padding:8px 18px; border-radius:4px; cursor:pointer; font-size:13px; transition:background 0.15s,border-color 0.15s; }
+  .btn:hover { background:#400000; border-color:#bc8f8f; color:#fff; }
+  .btn-primary { background:#400000; border-color:#8b3a3a; color:#f0c0c0; }
+  .btn-primary:hover { background:#600000; border-color:#bc8f8f; }
+  .drop-zone { border:2px dashed #333; border-radius:8px; padding:24px; text-align:center; color:#666; cursor:pointer; transition:border-color 0.2s,background 0.2s; background:#111; }
+  .drop-zone:hover,.drop-zone.drag-over { border-color:#8b3a3a; background:#1a0a0a; color:#bc8f8f; }
+  .drop-zone-icon { font-size:28px; margin-bottom:4px; }
+  .drop-zone-hint { font-size:12px; color:#555; margin-top:4px; }
+  .files-table { flex:1; overflow-y:auto; background:#111; border:1px solid #222; border-radius:6px; }
+  table { width:100%; border-collapse:collapse; }
+  thead th { background:#181818; color:#bc8f8f; font-size:11px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:10px 14px; text-align:left; border-bottom:1px solid #222; position:sticky; top:0; }
+  tbody tr { border-bottom:1px solid #1a1a1a; transition:background 0.1s; }
+  tbody tr:hover { background:#161616; }
+  tbody td { padding:8px 14px; vertical-align:middle; color:#ccc; font-size:13px; }
+  .td-name { color:#e8e8e8; font-weight:500; max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .td-path input { background:#0d0d0d; border:1px solid #2a2a2a; color:#ccc; padding:5px 9px; border-radius:3px; width:100%; font-size:12px; font-family:'Consolas',monospace; box-sizing:border-box; transition:border-color 0.15s; }
+  .td-path input:focus { outline:none; border-color:#8b3a3a; color:#fff; }
+  .td-type select { background:#0d0d0d; border:1px solid #2a2a2a; color:#ccc; padding:5px 8px; border-radius:3px; font-size:12px; }
+  .td-type select:focus { outline:none; border-color:#8b3a3a; }
+  .td-remove button { background:transparent; border:1px solid #3a1a1a; color:#8b3a3a; padding:4px 10px; border-radius:3px; cursor:pointer; font-size:11px; transition:all 0.15s; }
+  .td-remove button:hover { background:#3a0000; color:#ff8080; border-color:#ff5555; }
+  .empty-state { display:flex; flex-direction:column; align-items:center; justify-content:center; padding:60px 20px; color:#444; }
+  .empty-state-icon { font-size:48px; margin-bottom:12px; }
+  ::-webkit-scrollbar { width:6px; }
+  ::-webkit-scrollbar-track { background:#111; }
+  ::-webkit-scrollbar-thumb { background:#333; border-radius:3px; }
+  ::-webkit-scrollbar-thumb:hover { background:#555; }
+  .path-presets { display:flex; flex-wrap:wrap; gap:6px; padding:10px 14px 4px; border-bottom:1px solid #1a1a1a; }
+  .preset-btn { background:#181818; border:1px solid #2a2a2a; color:#888; padding:3px 10px; border-radius:12px; cursor:pointer; font-size:11px; transition:all 0.15s; }
+  .preset-btn:hover { background:#400000; border-color:#8b3a3a; color:#f0c0c0; }
+  .preset-label { color:#555; font-size:11px; align-self:center; margin-right:4px; }
+</style>
+</head>
+<body>
+<div class='container'>
+  <div>
+    <div class='section-title'>Package Files</div>
+    <div class='toolbar'>
+      <button class='btn btn-primary' onclick='window.chrome.webview.postMessage(""openFilePicker"")'>+ Add Files</button>
+      <span style='color:#555;font-size:12px;margin-left:4px;'>or drag &amp; drop files below</span>
+    </div>
+  </div>
+  <div class='drop-zone' id='dropZone'
+    ondragover='event.preventDefault(); this.classList.add(""drag-over"");'
+    ondragleave='this.classList.remove(""drag-over"");'
+    ondrop='handleDrop(event)'>
+    <div class='drop-zone-icon'>&#128194;</div>
+    <div>Drop mod files here</div>
+    <div class='drop-zone-hint'>Supports .yft .ytd .meta .xml .asi .dlc and more</div>
+  </div>
+  <div class='files-table'>");
+
+            if (currentProject.Files.Count == 0)
+            {
+                sb.Append(@"<div class='empty-state'>
+    <div class='empty-state-icon'>&#128230;</div>
+    <div>No files added yet</div>
+    <div style='font-size:12px;margin-top:6px;'>Add mod files to include in your OIV package</div>
+  </div>");
+            }
+            else
+            {
+                sb.Append(@"<div class='path-presets'>
+    <span class='preset-label'>Quick paths:</span>
+    <span class='preset-btn' onclick='setPresetPath(""x64/models/cdimages/"")'>cdimages/</span>
+    <span class='preset-btn' onclick='setPresetPath(""x64/levels/gta5/vehicles/"")'>vehicles/</span>
+    <span class='preset-btn' onclick='setPresetPath(""x64/textures/"")'>textures/</span>
+    <span class='preset-btn' onclick='setPresetPath(""mods/update/x64/dlcpacks/"")'>dlcpacks/</span>
+    <span class='preset-btn' onclick='setPresetPath(""scripts/"")'>scripts/</span>
+    <span class='preset-btn' onclick='setPresetPath(""plugins/"")'>plugins/</span>
+    <span class='preset-btn' onclick='setPresetPath(""update/update.rpf/common/data/"")'>common/data/</span>
+  </div>
+  <table>
+    <thead>
+      <tr>
+        <th>File Name</th>
+        <th>Target Path in GTA 5</th>
+        <th>Type</th>
+        <th style='width:80px;'>Remove</th>
+      </tr>
+    </thead>
+    <tbody>");
+
+                foreach (var f in currentProject.Files)
+                {
+                    string safeName = f.FileName.Replace("&", "&amp;").Replace("<", "&lt;").Replace(">", "&gt;");
+                    string safeSource = f.SourcePath.Replace("\"", "&quot;").Replace("'", "&#39;");
+                    string safeTarget = f.TargetPath.Replace("\"", "&quot;").Replace("'", "&#39;");
+                    string selContent = f.Type == "content" ? " selected" : "";
+                    string selReplace = f.Type == "replace" ? " selected" : "";
+                    string selXml = f.Type == "xmledit" ? " selected" : "";
+
+                    sb.Append($@"<tr>
+      <td class='td-name' title='{safeSource}'>{safeName}</td>
+      <td class='td-path'>
+        <input type='text' id='path_{f.Id}' value='{safeTarget}' placeholder='e.g. x64/models/cdimages/'
+          onfocus='lastFocused={f.Id}'
+          onchange='updatePath({f.Id}, this.value)' />
+      </td>
+      <td class='td-type'>
+        <select onchange='updateType({f.Id}, this.value)'>
+          <option value='content'{selContent}>Content</option>
+          <option value='replace'{selReplace}>Replace</option>
+          <option value='xmledit'{selXml}>XML Edit</option>
+        </select>
+      </td>
+      <td class='td-remove'><button onclick='removeFile({f.Id})'>Remove</button></td>
+    </tr>");
+                }
+
+                sb.Append("</tbody></table>");
             }
 
-            this.Opacity = 1;
+            sb.Append(@"</div>
+</div>
+<script>
+var lastFocused = -1;
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('dropZone').classList.remove('drag-over');
+  window.chrome.webview.postMessage('openFilePicker');
+}
+function removeFile(id) {
+  window.chrome.webview.postMessage('removeFile:' + id);
+}
+function updatePath(id, val) {
+  window.chrome.webview.postMessage('updatePath:' + JSON.stringify({id: String(id), target: val}));
+}
+function updateType(id, val) {
+  var pathEl = document.getElementById('path_' + id);
+  var pathVal = pathEl ? pathEl.value : '';
+  window.chrome.webview.postMessage('updatePath:' + JSON.stringify({id: String(id), target: pathVal, type: val}));
+}
+function setPresetPath(path) {
+  if (lastFocused >= 0) {
+    var el = document.getElementById('path_' + lastFocused);
+    if (el) { el.value = path; updatePath(lastFocused, path); }
+  }
+}
+</script>
+</body>
+</html>");
+
+            return sb.ToString();
         }
 
-        private void DragWindow(object sender, MouseEventArgs e)
+        private void button1_Click(object sender, EventArgs e)
         {
-            if (e.Button == MouseButtons.Left)
+            LoadPackageTab();
+        }
+
+        private void MenuButton_MouseEnter(object sender, EventArgs e)
+        {
+            if (sender is Button btn)
             {
-                ReleaseCapture();
-                SendMessage(this.Handle, 0x112, 0xf012, 0);
+                btn.BackColor = Color.FromArgb(100, 0, 0);
+                btn.ForeColor = Color.White;
             }
         }
 
-        private void button5_Click(object sender, EventArgs e) //rød exit knapp
+        private void MenuButton_MouseLeave(object sender, EventArgs e)
+        {
+            if (sender is Button btn)
+            {
+                btn.BackColor = Color.FromArgb(64, 0, 0);
+                btn.ForeColor = Color.RosyBrown;
+            }
+        }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (dropdownVersionTag.SelectedItem != null)
+                currentProject.VersionTag = dropdownVersionTag.SelectedItem.ToString() ?? "Stable";
+        }
+
+        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (dropdownOIVSpec.SelectedItem != null)
+                currentProject.OIVSpec = dropdownOIVSpec.SelectedItem.ToString() ?? "Stable";
+        }
+
+        private void button5_Click(object sender, EventArgs e)
         {
             Application.Exit();
         }
 
-        private void button6_Click(object sender, EventArgs e) //gul minimize knapp
-        {
-            this.WindowState = FormWindowState.Minimized;
-        }
-
-        private void button7_Click(object sender, EventArgs e) //grønn maximize knapp
+        private void button6_Click(object sender, EventArgs e)
         {
             if (this.WindowState == FormWindowState.Maximized)
                 this.WindowState = FormWindowState.Normal;
@@ -80,307 +361,248 @@ namespace MagicOGK_OIV_Builder
                 this.WindowState = FormWindowState.Maximized;
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button7_Click(object sender, EventArgs e)
         {
-
+            this.WindowState = FormWindowState.Minimized;
         }
-
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string valgt = dropdownVersionTag.SelectedItem?.ToString();
-        }
-
-        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            string valgt = dropdownOIVSpec.SelectedItem?.ToString();
-        }
-
-
-
-        private async void Form1_Load(object sender, EventArgs e)
-        {
-            dropdownVersionTag.Items.Clear();
-            dropdownOIVSpec.Items.Clear();
-
-            dropdownVersionTag.Items.Add("Test");
-            dropdownVersionTag.Items.Add("Alpha");
-            dropdownVersionTag.Items.Add("Beta");
-            dropdownVersionTag.Items.Add("Stable");
-
-            dropdownOIVSpec.Items.Add("2.2");
-
-            dropdownVersionTag.SelectedIndex = 0;
-            dropdownOIVSpec.SelectedIndex = 0;
-
-            btnPackage.Size = smallSize;
-            btnDLCPacks.Size = smallSize;
-            btnReplaceV.Size = smallSize;
-            btnXML.Size = smallSize;
-            btnShowSidebar.Size = new Size(40, 40);
-
-            panelSidebar.Left = -panelSidebar.Width;
-            panelSidebar.BringToFront();
-
-            webViewBackground.SendToBack();
-
-            int bannerLeft = 60;
-            int bannerRightMargin = 130;
-
-            await webViewBackground.EnsureCoreWebView2Async();
-
-            webViewBackground.CoreWebView2.Settings.IsStatusBarEnabled = false;
-            webViewBackground.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
-            webViewBackground.CoreWebView2.Settings.AreDevToolsEnabled = false;
-
-            webViewBackground.CoreWebView2.NavigateToString(GetBackgroundHtml());
-
-            // Legg top controls foran banneret
-            btnShowSidebar.BringToFront();
-            button5.BringToFront(); // close
-            button6.BringToFront(); // minimize
-            button7.BringToFront(); // maximize
-            panelSidebar.BringToFront();
-
-            panelDrag.MouseDown += DragWindow;
-
-            btnShowSidebar.Text = "";
-            btnShowSidebar.ImageAlign = ContentAlignment.MiddleCenter;
-            btnShowSidebar.FlatStyle = FlatStyle.Flat;
-            btnShowSidebar.FlatAppearance.BorderSize = 0;
-            var img = Properties.Resources.Sidebar_open;
-            btnShowSidebar.Image = new Bitmap(img, new Size(50, 50));
-        }
-
-        private string GetBackgroundHtml()
-        {
-            return @"
-<!DOCTYPE html>
-<html>
-<body style='margin:0; overflow:hidden; background:black;'>
-<canvas id='c'></canvas>
-
-<script>
-const canvas = document.getElementById('c');
-const ctx = canvas.getContext('2d');
-
-function resizeCanvas() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-}
-resizeCanvas();
-window.addEventListener('resize', resizeCanvas);
-
-const STAR_COUNT = 260;
-const SPEED = 4;
-
-const stars = [];
-
-function resetStar(star, randomZ = true) {
-    star.x = (Math.random() - 0.5) * canvas.width;
-    star.y = (Math.random() - 0.5) * canvas.height;
-    star.z = randomZ ? Math.random() * canvas.width : canvas.width;
-    star.pz = star.z;
-}
-
-for (let i = 0; i < STAR_COUNT; i++) {
-    const star = {};
-    resetStar(star);
-    stars.push(star);
-}
-
-function drawGrain() {
-    const grainAmount = 1800;
-
-    for (let i = 0; i < grainAmount; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        const alpha = Math.random() * 0.03;
-
-        ctx.fillStyle = `rgba(255,255,255,${alpha})`;
-        ctx.fillRect(x, y, 1, 1);
-    }
-}
-
-function draw() {
-    ctx.fillStyle = '#161616';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    drawGrain();
-
-    const cx = canvas.width / 2;
-    const cy = canvas.height / 2;
-
-    for (let s of stars) {
-        s.z -= SPEED;
-
-        if (s.z <= 1) {
-            resetStar(s, false);
-            continue;
-        }
-
-        const sx = (s.x / s.z) * canvas.width + cx;
-        const sy = (s.y / s.z) * canvas.width + cy;
-
-        const px = (s.x / s.pz) * canvas.width + cx;
-        const py = (s.y / s.pz) * canvas.width + cy;
-
-        s.pz = s.z;
-
-        if (sx < 0 || sx >= canvas.width || sy < 0 || sy >= canvas.height) {
-            resetStar(s, false);
-            continue;
-        }
-
-        const radius = Math.max(0.6, (1 - s.z / canvas.width) * 3.5);
-        const alpha = Math.max(0.25, 1 - s.z / canvas.width);
-
-        ctx.beginPath();
-        ctx.strokeStyle = `rgba(180,220,255,${alpha})`;
-        ctx.lineWidth = radius;
-        ctx.shadowBlur = 10;
-        ctx.shadowColor = 'rgba(140,200,255,0.9)';
-        ctx.moveTo(px, py);
-        ctx.lineTo(sx, sy);
-        ctx.stroke();
-    }
-
-    ctx.shadowBlur = 0;
-    requestAnimationFrame(draw);
-}
-
-draw();
-</script>
-</body>
-</html>
-";
-        }
-
 
         private void btnShowSidebar_Click(object sender, EventArgs e)
         {
-            if (sidebarAnimating)
-                return;
-
-            panelSidebar.BringToFront();
-            panelSidebar.Visible = true;
-
-            sidebarOpening = !sidebarOpen;
-            sidebarAnimating = true;
-            timerSidebar.Start();
-        }
-
-        //mouse hover
-        private void MenuButton_MouseEnter(object sender, EventArgs e)
-        {
-            currentButton = sender as System.Windows.Forms.Button;
-            isHovering = true;
-            timerHover.Start();
-        }
-
-        private void MenuButton_MouseLeave(object sender, EventArgs e)
-        {
-            currentButton = sender as System.Windows.Forms.Button;
-            isHovering = false;
-            timerHover.Start();
-        }
-
-        private void timerHover_Tick(object sender, EventArgs e) //mouse hover timer
-        {
-            if (currentButton == null)
-            {
-                timerHover.Stop();
-                return;
-            }
-
-            Size targetSize;
-
-            if (currentButton == btnShowSidebar)
-                targetSize = isHovering ? new Size(48, 48) : new Size(40, 40);
-            else
-                targetSize = isHovering ? bigSize : smallSize;
-
-            int newWidth = currentButton.Width;
-            int newHeight = currentButton.Height;
-
-            if (currentButton.Width < targetSize.Width)
-                newWidth = Math.Min(currentButton.Width + speed, targetSize.Width);
-            else if (currentButton.Width > targetSize.Width)
-                newWidth = Math.Max(currentButton.Width - speed, targetSize.Width);
-
-            if (currentButton.Height < targetSize.Height)
-                newHeight = Math.Min(currentButton.Height + speed, targetSize.Height);
-            else if (currentButton.Height > targetSize.Height)
-                newHeight = Math.Max(currentButton.Height - speed, targetSize.Height);
-
-            int centerX = currentButton.Left + currentButton.Width / 2;
-            int centerY = currentButton.Top + currentButton.Height / 2;
-
-            currentButton.Size = new Size(newWidth, newHeight);
-            currentButton.Left = centerX - currentButton.Width / 2;
-            currentButton.Top = centerY - currentButton.Height / 2;
-
-            if (currentButton.Width == targetSize.Width && currentButton.Height == targetSize.Height)
-                timerHover.Stop();
-        }
-        private void timerSidebar_Tick(object sender, EventArgs e)
-        {
-            if (sidebarOpening)
-            {
-                panelSidebar.Left += sidebarSpeed;
-
-                if (panelSidebar.Left >= 0)
-                {
-                    panelSidebar.Left = 0;
-                    timerSidebar.Stop();
-                    sidebarAnimating = false;
-                    sidebarOpen = true;
-                }
-            }
-            else
-            {
-                panelSidebar.Left -= sidebarSpeed;
-
-                if (panelSidebar.Left <= -panelSidebar.Width)
-                {
-                    panelSidebar.Left = -panelSidebar.Width;
-                    timerSidebar.Stop();
-                    sidebarAnimating = false;
-                    sidebarOpen = false;
-                }
-            }
-        }
-
-        private void btnCloseSidebar_Click(object sender, EventArgs e)
-        {
-
-            if (sidebarAnimating || !sidebarOpen)
-                return;
-
-            sidebarOpening = false;
-            sidebarAnimating = true;
-            timerSidebar.Start();
-        }
-        private void Form1_Click(object sender, EventArgs e)
-        {
-            if (sidebarOpen && !sidebarAnimating)
-            {
-                sidebarOpening = false;
-                sidebarAnimating = true;
-                timerSidebar.Start();
-            }
+            OpenSidebar();
         }
 
         private void SidebarBtn1_Click(object sender, EventArgs e)
         {
-            if (sidebarAnimating)
-                return;
+            CloseSidebar();
+        }
 
-            panelSidebar.BringToFront();
+        private void OpenSidebar()
+        {
+            if (sidebarOpen) return;
+            sidebarOpen = true;
             panelSidebar.Visible = true;
-
-            sidebarOpening = !sidebarOpen;
-            sidebarAnimating = true;
+            sidebarTargetX = 0;
             timerSidebar.Start();
+        }
+
+        private void CloseSidebar()
+        {
+            if (!sidebarOpen) return;
+            sidebarOpen = false;
+            sidebarTargetX = -160;
+            timerSidebar.Start();
+        }
+
+        private void timerSidebar_Tick(object sender, EventArgs e)
+        {
+            int current = panelSidebar.Left;
+            int diff = sidebarTargetX - current;
+
+            if (Math.Abs(diff) <= 2)
+            {
+                panelSidebar.Left = sidebarTargetX;
+                timerSidebar.Stop();
+                if (!sidebarOpen)
+                    panelSidebar.Visible = false;
+            }
+            else
+            {
+                panelSidebar.Left = current + diff / 4;
+            }
+        }
+
+        private void PanelDrag_MouseDown(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                isDragging = true;
+                dragStart = e.Location;
+            }
+        }
+
+        private void PanelDrag_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (isDragging)
+            {
+                Point delta = new Point(e.X - dragStart.X, e.Y - dragStart.Y);
+                this.Location = new Point(this.Left + delta.X, this.Top + delta.Y);
+            }
+        }
+
+        private void PanelDrag_MouseUp(object sender, MouseEventArgs e)
+        {
+            isDragging = false;
+        }
+
+        private void btnOpenP_Click(object sender, EventArgs e)
+        {
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Open MagicOGK Project",
+                Filter = "MagicOGK Project (*.mogk)|*.mogk|All Files (*.*)|*.*"
+            };
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string json = System.IO.File.ReadAllText(dlg.FileName);
+                    var proj = System.Text.Json.JsonSerializer.Deserialize<OIVProject>(json);
+                    if (proj != null)
+                    {
+                        currentProject = proj;
+                        currentProjectPath = dlg.FileName;
+                        txtboxModName.Text = proj.ModName;
+                        txtboxAuthor.Text = proj.Author;
+                        txtboxVersion.Text = proj.Version;
+                        SetDropdownByValue(dropdownVersionTag, proj.VersionTag);
+                        SetDropdownByValue(dropdownOIVSpec, proj.OIVSpec);
+                        CloseSidebar();
+                        RefreshCurrentTab();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to open project: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(currentProjectPath))
+                SaveProjectAs();
+            else
+                SaveProject(currentProjectPath);
+        }
+
+        private void btnSaveAs_Click(object sender, EventArgs e)
+        {
+            SaveProjectAs();
+        }
+
+        private void SaveProjectAs()
+        {
+            using var dlg = new SaveFileDialog
+            {
+                Title = "Save MagicOGK Project",
+                Filter = "MagicOGK Project (*.mogk)|*.mogk|All Files (*.*)|*.*",
+                FileName = string.IsNullOrWhiteSpace(txtboxModName.Text) ? "MyMod" : txtboxModName.Text
+            };
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                currentProjectPath = dlg.FileName;
+                SaveProject(currentProjectPath);
+            }
+        }
+
+        private void SaveProject(string path)
+        {
+            try
+            {
+                SyncMetadataToProject();
+                string json = System.Text.Json.JsonSerializer.Serialize(currentProject, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+                System.IO.File.WriteAllText(path, json);
+                CloseSidebar();
+                MessageBox.Show("Project saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Failed to save: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void btnBuildOIV_Click(object sender, EventArgs e)
+        {
+            SyncMetadataToProject();
+
+            if (string.IsNullOrWhiteSpace(currentProject.ModName))
+            {
+                MessageBox.Show("Please enter a Mod Name before building.", "Missing Metadata", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            if (currentProject.Files.Count == 0)
+            {
+                MessageBox.Show("No files added. Please add at least one file to package.", "No Files", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            bool missingPaths = currentProject.Files.Exists(f => string.IsNullOrWhiteSpace(f.TargetPath));
+            if (missingPaths)
+            {
+                var result = MessageBox.Show(
+                    "Some files have no target path set. They will be placed in the root of the package.\n\nContinue building?",
+                    "Missing Paths",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+                if (result == DialogResult.No) return;
+            }
+
+            using var dlg = new SaveFileDialog
+            {
+                Title = "Save OIV Package",
+                Filter = "OIV Package (*.oiv)|*.oiv",
+                FileName = currentProject.ModName.Replace(" ", "_") + ".oiv"
+            };
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    OIVBuilder.Build(currentProject, dlg.FileName);
+                    CloseSidebar();
+                    MessageBox.Show($"OIV package built successfully!\n\n{dlg.FileName}", "Build Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Build failed: " + ex.Message, "Build Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void btnOpenOIV_Click(object sender, EventArgs e)
+        {
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Open OIV Package",
+                Filter = "OIV Package (*.oiv)|*.oiv|All Files (*.*)|*.*"
+            };
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = dlg.FileName,
+                        UseShellExecute = true
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Could not open file: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private void SyncMetadataToProject()
+        {
+            currentProject.ModName = txtboxModName.Text.Trim();
+            currentProject.Author = txtboxAuthor.Text.Trim();
+            currentProject.Version = txtboxVersion.Text.Trim();
+            if (dropdownVersionTag.SelectedItem != null)
+                currentProject.VersionTag = dropdownVersionTag.SelectedItem.ToString() ?? "Stable";
+            if (dropdownOIVSpec.SelectedItem != null)
+                currentProject.OIVSpec = dropdownOIVSpec.SelectedItem.ToString() ?? "Stable";
+        }
+
+        private void SetDropdownByValue(ComboBox cb, string value)
+        {
+            for (int i = 0; i < cb.Items.Count; i++)
+            {
+                if (cb.Items[i]?.ToString() == value)
+                {
+                    cb.SelectedIndex = i;
+                    return;
+                }
+            }
         }
     }
 }
