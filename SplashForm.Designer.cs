@@ -1,4 +1,4 @@
-﻿namespace MagicOGK_OIV_Builder
+namespace MagicOGK_OIV_Builder
 {
     partial class SplashForm
     {
