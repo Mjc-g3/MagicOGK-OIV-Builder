@@ -7,13 +7,20 @@ namespace MagicOGK_OIV_Builder
 {
     public partial class main : Form
     {
-        private bool sidebarOpen = false;
-        private int sidebarTargetX = -160;
         private Point dragStart;
         private bool isDragging = false;
         private string currentProjectPath = string.Empty;
         private OIVProject currentProject = new OIVProject();
         private string activeTab = "package";
+
+        private bool sidebarExpanded = false;
+        private bool sidebarOpening = false;
+        private const int SidebarExpandedWidth = 230;
+        private const int SidebarAnimationStep = 20;
+
+        private string sidebarAnimatedText = "placeholder text";
+        private int sidebarTextIndex = 0;
+        private bool sidebarTextForward = true;
 
         public main()
         {
@@ -26,24 +33,76 @@ namespace MagicOGK_OIV_Builder
             panelDrag.MouseMove += PanelDrag_MouseMove;
             panelDrag.MouseUp += PanelDrag_MouseUp;
 
-            btnOpenP.Click += btnOpenP_Click;
-            btnSave.Click += btnSave_Click;
-            btnSaveAs.Click += btnSaveAs_Click;
-            btnBuildOIV.Click += btnBuildOIV_Click;
-            btnOpenOIV.Click += btnOpenOIV_Click;
-
-            dropdownVersionTag.SelectedIndex = 3;
-            dropdownOIVSpec.SelectedIndex = 3;
-
             await webViewBackground.EnsureCoreWebView2Async();
             webViewBackground.CoreWebView2.Settings.IsZoomControlEnabled = false;
             webViewBackground.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
             webViewBackground.CoreWebView2.Settings.AreDevToolsEnabled = false;
             webViewBackground.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
 
+            SetupSidebar();
+
             LoadPackageTab();
         }
 
+        private void SetupSidebar()
+        {
+            panelSidebar.Width = 0;
+            panelSidebar.BringToFront();
+
+            btnSidebarToggle.BringToFront();
+            btnSidebarToggle.FlatStyle = FlatStyle.Flat;
+            btnSidebarToggle.FlatAppearance.BorderSize = 0;
+            btnSidebarToggle.Text = "";
+            btnSidebarToggle.Image = ResizeImage(Properties.Resources.Sidebar_open, 24, 24);
+            btnSidebarToggle.Click += btnSidebarToggle_Click;
+
+            lblSidebarTitle.Text = "";
+
+            btnSidebarOpenProject.Click += btnSidebarOpenProject_Click;
+            btnSidebarOpenOIV.Click += btnSidebarOpenOIV_Click;
+            btnSidebarSaveProjectAs.Click += btnSidebarSaveProjectAs_Click;
+            btnSidebarBuildOIV.Click += btnSidebarBuildOIV_Click;
+            btnSidebarFeedback.Click += btnSidebarFeedback_Click;
+
+            StyleSidebarButton(btnSidebarOpenProject);
+            StyleSidebarButton(btnSidebarOpenOIV);
+            StyleSidebarButton(btnSidebarSaveProjectAs);
+            StyleSidebarButton(btnSidebarBuildOIV);
+            StyleSidebarButton(btnSidebarFeedback);
+
+            btnSidebarOpenProject.MouseEnter += MenuButton_MouseEnter;
+            btnSidebarOpenProject.MouseLeave += MenuButton_MouseLeave;
+
+            btnSidebarOpenOIV.MouseEnter += MenuButton_MouseEnter;
+            btnSidebarOpenOIV.MouseLeave += MenuButton_MouseLeave;
+
+            btnSidebarSaveProjectAs.MouseEnter += MenuButton_MouseEnter;
+            btnSidebarSaveProjectAs.MouseLeave += MenuButton_MouseLeave;
+
+            btnSidebarBuildOIV.MouseEnter += MenuButton_MouseEnter;
+            btnSidebarBuildOIV.MouseLeave += MenuButton_MouseLeave;
+
+            btnSidebarFeedback.MouseEnter += MenuButton_MouseEnter;
+            btnSidebarFeedback.MouseLeave += MenuButton_MouseLeave;
+
+            sidebarTimer.Tick += sidebarTimer_Tick;
+            sidebarTextTimer.Tick += sidebarTextTimer_Tick;
+            sidebarTextTimer.Start();
+
+            btnSidebarToggle.Left = panelSidebar.Width + 0;
+            btnSidebarToggle.Top = 0;
+        }
+        private void StyleSidebarButton(Button btn)
+        {
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 0;
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(64, 0, 0);
+            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(64, 0, 0);
+            btn.UseVisualStyleBackColor = false;
+            btn.BackColor = Color.FromArgb(64, 0, 0);
+            btn.ForeColor = Color.RosyBrown;
+            btn.TabStop = false;
+        }
         private void CoreWebView2_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             string? rawMsg = e.TryGetWebMessageAsString();
@@ -336,17 +395,9 @@ function setPresetPath(path) {
             }
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (dropdownVersionTag.SelectedItem != null)
-                currentProject.VersionTag = dropdownVersionTag.SelectedItem.ToString() ?? "Stable";
-        }
+        
 
-        private void comboBox2_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (dropdownOIVSpec.SelectedItem != null)
-                currentProject.OIVSpec = dropdownOIVSpec.SelectedItem.ToString() ?? "Stable";
-        }
+        
 
         private void button5_Click(object sender, EventArgs e)
         {
@@ -365,52 +416,6 @@ function setPresetPath(path) {
         {
             this.WindowState = FormWindowState.Minimized;
         }
-
-        private void btnShowSidebar_Click(object sender, EventArgs e)
-        {
-            OpenSidebar();
-        }
-
-        private void SidebarBtn1_Click(object sender, EventArgs e)
-        {
-            CloseSidebar();
-        }
-
-        private void OpenSidebar()
-        {
-            if (sidebarOpen) return;
-            sidebarOpen = true;
-            panelSidebar.Visible = true;
-            sidebarTargetX = 0;
-            timerSidebar.Start();
-        }
-
-        private void CloseSidebar()
-        {
-            if (!sidebarOpen) return;
-            sidebarOpen = false;
-            sidebarTargetX = -160;
-            timerSidebar.Start();
-        }
-
-        private void timerSidebar_Tick(object sender, EventArgs e)
-        {
-            int current = panelSidebar.Left;
-            int diff = sidebarTargetX - current;
-
-            if (Math.Abs(diff) <= 2)
-            {
-                panelSidebar.Left = sidebarTargetX;
-                timerSidebar.Stop();
-                if (!sidebarOpen)
-                    panelSidebar.Visible = false;
-            }
-            else
-            {
-                panelSidebar.Left = current + diff / 4;
-            }
-        }
-
         private void PanelDrag_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button == MouseButtons.Left)
@@ -451,12 +456,6 @@ function setPresetPath(path) {
                     {
                         currentProject = proj;
                         currentProjectPath = dlg.FileName;
-                        txtboxModName.Text = proj.ModName;
-                        txtboxAuthor.Text = proj.Author;
-                        txtboxVersion.Text = proj.Version;
-                        SetDropdownByValue(dropdownVersionTag, proj.VersionTag);
-                        SetDropdownByValue(dropdownOIVSpec, proj.OIVSpec);
-                        CloseSidebar();
                         RefreshCurrentTab();
                     }
                 }
@@ -467,53 +466,10 @@ function setPresetPath(path) {
             }
         }
 
-        private void btnSave_Click(object sender, EventArgs e)
-        {
-            if (string.IsNullOrEmpty(currentProjectPath))
-                SaveProjectAs();
-            else
-                SaveProject(currentProjectPath);
-        }
-
-        private void btnSaveAs_Click(object sender, EventArgs e)
-        {
-            SaveProjectAs();
-        }
-
-        private void SaveProjectAs()
-        {
-            using var dlg = new SaveFileDialog
-            {
-                Title = "Save MagicOGK Project",
-                Filter = "MagicOGK Project (*.mogk)|*.mogk|All Files (*.*)|*.*",
-                FileName = string.IsNullOrWhiteSpace(txtboxModName.Text) ? "MyMod" : txtboxModName.Text
-            };
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                currentProjectPath = dlg.FileName;
-                SaveProject(currentProjectPath);
-            }
-        }
-
-        private void SaveProject(string path)
-        {
-            try
-            {
-                SyncMetadataToProject();
-                string json = System.Text.Json.JsonSerializer.Serialize(currentProject, new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
-                System.IO.File.WriteAllText(path, json);
-                CloseSidebar();
-                MessageBox.Show("Project saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Failed to save: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+        
 
         private void btnBuildOIV_Click(object sender, EventArgs e)
         {
-            SyncMetadataToProject();
 
             if (string.IsNullOrWhiteSpace(currentProject.ModName))
             {
@@ -548,7 +504,6 @@ function setPresetPath(path) {
                 try
                 {
                     OIVBuilder.Build(currentProject, dlg.FileName);
-                    CloseSidebar();
                     MessageBox.Show($"OIV package built successfully!\n\n{dlg.FileName}", "Build Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
@@ -582,15 +537,125 @@ function setPresetPath(path) {
             }
         }
 
-        private void SyncMetadataToProject()
+        private Image ResizeImage(Image image, int width, int height)
         {
-            currentProject.ModName = txtboxModName.Text.Trim();
-            currentProject.Author = txtboxAuthor.Text.Trim();
-            currentProject.Version = txtboxVersion.Text.Trim();
-            if (dropdownVersionTag.SelectedItem != null)
-                currentProject.VersionTag = dropdownVersionTag.SelectedItem.ToString() ?? "Stable";
-            if (dropdownOIVSpec.SelectedItem != null)
-                currentProject.OIVSpec = dropdownOIVSpec.SelectedItem.ToString() ?? "Stable";
+            Bitmap bmp = new Bitmap(width, height);
+            using (Graphics g = Graphics.FromImage(bmp))
+            {
+                g.InterpolationMode = System.Drawing.Drawing2D.InterpolationMode.HighQualityBicubic;
+                g.DrawImage(image, 0, 0, width, height);
+            }
+            return bmp;
+        }
+
+        private void btnSidebarToggle_Click(object sender, EventArgs e)
+        {
+            sidebarOpening = !sidebarExpanded;
+            sidebarTimer.Start();
+        }
+
+        private void sidebarTimer_Tick(object sender, EventArgs e)
+        {
+            if (sidebarOpening)
+            {
+                if (panelSidebar.Width < SidebarExpandedWidth)
+                {
+                    panelSidebar.Width += SidebarAnimationStep;
+                    if (panelSidebar.Width > SidebarExpandedWidth)
+                        panelSidebar.Width = SidebarExpandedWidth;
+                }
+                else
+                {
+                    sidebarTimer.Stop();
+                    sidebarExpanded = true;
+                    btnSidebarToggle.Image = ResizeImage(Properties.Resources.Sidebar_close, 24, 24);
+                }
+            }
+            else
+            {
+                if (panelSidebar.Width > 0)
+                {
+                    panelSidebar.Width -= SidebarAnimationStep;
+                    if (panelSidebar.Width < 0)
+                        panelSidebar.Width = 0;
+                }
+                else
+                {
+                    sidebarTimer.Stop();
+                    sidebarExpanded = false;
+                    btnSidebarToggle.Image = ResizeImage(Properties.Resources.Sidebar_open, 24, 24);
+                }
+            }
+
+            btnSidebarToggle.Left = panelSidebar.Width + 0;
+        }
+
+        private void btnSidebarOpenProject_Click(object sender, EventArgs e)
+        {
+            btnOpenP_Click(sender, e);
+        }
+        private void btnSidebarBuildOIV_Click(object sender, EventArgs e)
+        {
+            btnBuildOIV_Click(sender, e);
+        }
+        private void btnSidebarOpenOIV_Click(object sender, EventArgs e)
+        {
+            btnOpenOIV_Click(sender, e);
+        }
+        private void btnSidebarSaveProjectAs_Click(object sender, EventArgs e)
+        {
+            using var dlg = new SaveFileDialog
+            {
+                Title = "Save MagicOGK Project As",
+                Filter = "MagicOGK Project (*.mogk)|*.mogk|All Files (*.*)|*.*",
+                FileName = string.IsNullOrWhiteSpace(currentProject.ModName)
+                    ? "NewProject.mogk"
+                    : currentProject.ModName.Replace(" ", "_") + ".mogk"
+            };
+
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    string json = System.Text.Json.JsonSerializer.Serialize(
+                        currentProject,
+                        new System.Text.Json.JsonSerializerOptions { WriteIndented = true });
+
+                    System.IO.File.WriteAllText(dlg.FileName, json);
+                    currentProjectPath = dlg.FileName;
+
+                    MessageBox.Show("Project saved successfully.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Failed to save project: " + ex.Message, "Save Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+        private void btnSidebarFeedback_Click(object sender, EventArgs e)
+        {
+            string feedbackUrl = "https://forms.gle/your-placeholder-link";
+
+            try
+            {
+                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = feedbackUrl,
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Could not open feedback link: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        protected override void OnResize(EventArgs e)
+        {
+            base.OnResize(e);
+
+            panelSidebar.Height = this.ClientSize.Height;
+            btnSidebarToggle.Top = 10;
+            btnSidebarToggle.Left = panelSidebar.Width + 10;
         }
 
         private void SetDropdownByValue(ComboBox cb, string value)
@@ -603,6 +668,32 @@ function setPresetPath(path) {
                     return;
                 }
             }
+        }
+        private void sidebarTextTimer_Tick(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(sidebarAnimatedText))
+                return;
+
+            if (sidebarTextForward)
+            {
+                sidebarTextIndex++;
+                if (sidebarTextIndex >= sidebarAnimatedText.Length)
+                {
+                    sidebarTextIndex = sidebarAnimatedText.Length;
+                    sidebarTextForward = false;
+                }
+            }
+            else
+            {
+                sidebarTextIndex--;
+                if (sidebarTextIndex <= 0)
+                {
+                    sidebarTextIndex = 0;
+                    sidebarTextForward = true;
+                }
+            }
+
+            lblSidebarTitle.Text = sidebarAnimatedText.Substring(0, sidebarTextIndex);
         }
     }
 }

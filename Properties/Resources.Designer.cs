@@ -75,7 +75,7 @@ namespace MagicOGK_OIV_Builder.Properties {
         /// </summary>
         internal static System.Drawing.Bitmap Sidebar_close {
             get {
-                object obj = ResourceManager.GetObject("Sidebar-close", resourceCulture);
+                object obj = ResourceManager.GetObject("Sidebar_close", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
@@ -85,7 +85,7 @@ namespace MagicOGK_OIV_Builder.Properties {
         /// </summary>
         internal static System.Drawing.Bitmap Sidebar_open {
             get {
-                object obj = ResourceManager.GetObject("Sidebar-open", resourceCulture);
+                object obj = ResourceManager.GetObject("Sidebar_open", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
