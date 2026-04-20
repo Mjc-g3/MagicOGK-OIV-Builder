@@ -1,3 +1,6 @@
+using System.Drawing;
+using System.Windows.Forms;
+
 namespace MagicOGK_OIV_Builder
 {
     partial class main
@@ -7,9 +10,7 @@ namespace MagicOGK_OIV_Builder
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
-            {
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
@@ -17,533 +18,451 @@ namespace MagicOGK_OIV_Builder
         {
             components = new System.ComponentModel.Container();
 
-            button5 = new Button();
-            button6 = new Button();
-            button7 = new Button();
-            panelDrag = new Panel();
-            panelLeft = new Panel();
-            panelRight = new Panel();
-            panelEditorRight = new Panel();
+            sidebarTimer    = new System.Windows.Forms.Timer(components);
+            editorTimer     = new System.Windows.Forms.Timer(components);
 
-            panelSidebar = new Panel();
-            btnSidebarToggle = new Button();
-            btnSidebarOpenProject = new Button();
-            btnSidebarOpenOIV = new Button();
-            btnSidebarSaveProjectAs = new Button();
-            btnSidebarBuildOIV = new Button();
-            btnSidebarFeedback = new Button();
+            panelDrag       = new Panel();
+            panelLeft       = new Panel();
+            panelEditorRight= new Panel();
+            panelRight      = new Panel();
+            panelSidebar    = new Panel();
+            panelDropZone   = new Panel();
+            panelPhotoPreview = new Panel();
+            panelColorPicker  = new Panel();
+
+            button5         = new Button();
+            button6         = new Button();
+            button7         = new Button();
+            btnHamburger    = new Button();
+
+            lblAuthor       = new Label();
+            lblModName      = new Label();
+            lblVersionTag   = new Label();
+            lblVersion      = new Label();
+            lblDescription  = new Label();
+            lblPhotoLabel   = new Label();
+            lblColorLabel   = new Label();
+            lblPackageFiles = new Label();
+            lblAddFilesHint = new Label();
+            lblNoFiles      = new Label();
             lblSidebarTitle = new Label();
 
-            lblAuthor = new Label();
-            txtAuthor = new TextBox();
-            lblModName = new Label();
-            txtModName = new TextBox();
-            lblVersionTag = new Label();
+            txtAuthor       = new TextBox();
+            txtModName      = new TextBox();
+            txtVersion      = new TextBox();
+            txtDescription  = new TextBox();
             dropdownVersionTag = new ComboBox();
-            lblVersion = new Label();
-            txtVersion = new TextBox();
-            lblDescription = new Label();
-            txtDescription = new TextBox();
-            lblPhoto = new Label();
-            btnAddPhoto = new Button();
-            panelColorPicker = new Panel();
-            btnOpenEditor = new Button();
-            btnBuildOIV = new Button();
 
-            lblPackageFiles = new Label();
-            btnAddFiles = new Button();
-            lblAddFilesHint = new Label();
-            panelDropZone = new Panel();
-            lblNoFiles = new Label();
+            btnAddPhoto     = new Button();
+            btnOpenEditor   = new Button();
+            btnBuildOIV     = new Button();
+            btnAddFiles     = new Button();
+
+            btnSidebarOpenProject   = new Button();
+            btnSidebarOpenOIV       = new Button();
+            btnSidebarSaveProjectAs = new Button();
+            btnSidebarBuildOIV      = new Button();
+            btnSidebarFeedback      = new Button();
+
             webViewFileList = new Microsoft.Web.WebView2.WinForms.WebView2();
-
-            sidebarTimer = new System.Windows.Forms.Timer(components);
-            sidebarTextTimer = new System.Windows.Forms.Timer(components);
-            editorTimer = new System.Windows.Forms.Timer(components);
-
             ((System.ComponentModel.ISupportInitialize)webViewFileList).BeginInit();
-            panelLeft.SuspendLayout();
-            panelRight.SuspendLayout();
-            panelSidebar.SuspendLayout();
+
             SuspendLayout();
 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = AutoScaleMode.Font;
-            this.BackColor = System.Drawing.Color.FromArgb(13, 13, 13);
-            this.ClientSize = new System.Drawing.Size(1030, 660);
-            this.ControlBox = false;
-            this.Font = new System.Drawing.Font("Syne", 9F);
-            this.FormBorderStyle = FormBorderStyle.None;
-            this.Name = "main";
-            this.StartPosition = FormStartPosition.CenterScreen;
-            this.Text = "MagicOGK OIV Builder";
+            // ────────── FORM ──────────
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode       = AutoScaleMode.Font;
+            BackColor           = Color.FromArgb(13, 13, 13);
+            ClientSize          = new Size(1030, 660);
+            ControlBox          = false;
+            Font                = new Font("Syne", 9F);
+            FormBorderStyle     = FormBorderStyle.None;
+            Name                = "main";
+            StartPosition       = FormStartPosition.CenterScreen;
+            Text                = "MagicOGK OIV Builder";
 
-            panelDrag.BackColor = System.Drawing.Color.Transparent;
-            panelDrag.Dock = DockStyle.Top;
-            panelDrag.Height = 22;
-            panelDrag.Name = "panelDrag";
-            this.Controls.Add(panelDrag);
-
-            button5.BackColor = System.Drawing.Color.IndianRed;
-            button5.FlatAppearance.BorderColor = System.Drawing.Color.DimGray;
-            button5.FlatAppearance.BorderSize = 2;
-            button5.FlatStyle = FlatStyle.Flat;
-            button5.Location = new System.Drawing.Point(1011, 7);
-            button5.Name = "button5";
-            button5.Size = new System.Drawing.Size(20, 20);
-            button5.TabIndex = 0;
-            button5.Click += button5_Click;
+            // ────────── panelDrag (DockTop) ──────────
+            panelDrag.BackColor = Color.FromArgb(10, 10, 10);
+            panelDrag.Dock      = DockStyle.Top;
+            panelDrag.Height    = 28;
+            panelDrag.Controls.Add(btnHamburger);
+            panelDrag.Controls.Add(button7);
+            panelDrag.Controls.Add(button6);
             panelDrag.Controls.Add(button5);
 
-            button6.BackColor = System.Drawing.Color.Khaki;
-            button6.FlatAppearance.BorderColor = System.Drawing.Color.DimGray;
-            button6.FlatAppearance.BorderSize = 2;
-            button6.FlatStyle = FlatStyle.Flat;
-            button6.Location = new System.Drawing.Point(990, 7);
-            button6.Name = "button6";
-            button6.Size = new System.Drawing.Size(20, 20);
-            button6.TabIndex = 1;
-            button6.Click += button6_Click;
-            panelDrag.Controls.Add(button6);
+            btnHamburger.BackColor = Color.Transparent;
+            btnHamburger.FlatStyle = FlatStyle.Flat;
+            btnHamburger.FlatAppearance.BorderSize = 0;
+            btnHamburger.ForeColor = Color.FromArgb(188, 143, 143);
+            btnHamburger.Font      = new Font("Segoe UI", 12F, FontStyle.Bold);
+            btnHamburger.Text      = "\u2630";
+            btnHamburger.Size      = new Size(36, 28);
+            btnHamburger.Location  = new Point(4, 0);
+            btnHamburger.TabStop   = false;
 
-            button7.BackColor = System.Drawing.Color.LimeGreen;
-            button7.FlatAppearance.BorderColor = System.Drawing.Color.DimGray;
-            button7.FlatAppearance.BorderSize = 2;
+            button7.BackColor = Color.LimeGreen;
             button7.FlatStyle = FlatStyle.Flat;
-            button7.Location = new System.Drawing.Point(969, 7);
-            button7.Name = "button7";
-            button7.Size = new System.Drawing.Size(20, 20);
-            button7.TabIndex = 2;
-            button7.Click += button7_Click;
-            panelDrag.Controls.Add(button7);
+            button7.FlatAppearance.BorderColor = Color.DimGray;
+            button7.FlatAppearance.BorderSize  = 1;
+            button7.Size     = new Size(14, 14);
+            button7.Location = new Point(969, 7);
+            button7.TabStop  = false;
 
-            panelLeft.BackColor = System.Drawing.Color.FromArgb(20, 20, 20);
-            panelLeft.Dock = DockStyle.Left;
-            panelLeft.Width = 360;
-            panelLeft.Name = "panelLeft";
-            panelLeft.AutoScroll = true;
-            this.Controls.Add(panelLeft);
+            button6.BackColor = Color.Khaki;
+            button6.FlatStyle = FlatStyle.Flat;
+            button6.FlatAppearance.BorderColor = Color.DimGray;
+            button6.FlatAppearance.BorderSize  = 1;
+            button6.Size     = new Size(14, 14);
+            button6.Location = new Point(986, 7);
+            button6.TabStop  = false;
 
-            panelRight.BackColor = System.Drawing.Color.FromArgb(13, 13, 13);
-            panelRight.Dock = DockStyle.Fill;
-            panelRight.Name = "panelRight";
-            this.Controls.Add(panelRight);
+            button5.BackColor = Color.IndianRed;
+            button5.FlatStyle = FlatStyle.Flat;
+            button5.FlatAppearance.BorderColor = Color.DimGray;
+            button5.FlatAppearance.BorderSize  = 1;
+            button5.Size     = new Size(14, 14);
+            button5.Location = new Point(1003, 7);
+            button5.TabStop  = false;
 
-            panelSidebar.BackColor = System.Drawing.Color.Black;
-            panelSidebar.Dock = DockStyle.Left;
-            panelSidebar.Width = 0;
-            panelSidebar.Name = "panelSidebar";
-            panelSidebar.Controls.Add(btnSidebarToggle);
+            // ────────── panelSidebar (DockLeft, starts width=0) ──────────
+            panelSidebar.BackColor     = Color.FromArgb(15, 15, 15);
+            panelSidebar.Dock          = DockStyle.Left;
+            panelSidebar.Width         = 0;
+            panelSidebar.Name          = "panelSidebar";
+
+            lblSidebarTitle.Text      = "MAGICOGK";
+            lblSidebarTitle.ForeColor = Color.FromArgb(139, 58, 58);
+            lblSidebarTitle.Font      = new Font("Syne", 9F, FontStyle.Bold);
+            lblSidebarTitle.Location  = new Point(14, 14);
+            lblSidebarTitle.AutoSize  = true;
+
+            StyleSidebarBtn(btnSidebarOpenProject,   "  Open Project",   55);
+            StyleSidebarBtn(btnSidebarSaveProjectAs, "  Save Project As", 105);
+            StyleSidebarBtn(btnSidebarOpenOIV,       "  Open OIV",        155);
+            StyleSidebarBtn(btnSidebarBuildOIV,      "  Build OIV",       205);
+            StyleSidebarBtn(btnSidebarFeedback,      "  Feedback",        530);
+
+            panelSidebar.Controls.Add(lblSidebarTitle);
             panelSidebar.Controls.Add(btnSidebarOpenProject);
-            panelSidebar.Controls.Add(btnSidebarOpenOIV);
             panelSidebar.Controls.Add(btnSidebarSaveProjectAs);
+            panelSidebar.Controls.Add(btnSidebarOpenOIV);
             panelSidebar.Controls.Add(btnSidebarBuildOIV);
             panelSidebar.Controls.Add(btnSidebarFeedback);
-            panelSidebar.Controls.Add(lblSidebarTitle);
-            this.Controls.Add(panelSidebar);
 
-            SetupLeftPanel();
-            SetupRightPanel();
-            SetupSidebarControls();
-            SetupEditorPanel();
+            // ────────── panelLeft (DockLeft) ──────────
+            panelLeft.BackColor  = Color.FromArgb(18, 18, 18);
+            panelLeft.Dock       = DockStyle.Left;
+            panelLeft.Width      = 360;
+            panelLeft.AutoScroll = false;
+
+            SetupLeftPanelControls();
+
+            // ────────── panelEditorRight (DockRight, starts width=0) ──────────
+            panelEditorRight.BackColor = Color.FromArgb(22, 22, 22);
+            panelEditorRight.Dock      = DockStyle.Right;
+            panelEditorRight.Width     = 0;
+            panelEditorRight.AutoScroll = true;
+
+            // ────────── panelRight (DockFill) ──────────
+            panelRight.BackColor = Color.FromArgb(13, 13, 13);
+            panelRight.Dock      = DockStyle.Fill;
+
+            SetupRightPanelControls();
+
+            // ────────── Add to form in correct dock order ──────────
+            // DockTop first, then Left panels left-to-right, then Right, then Fill
+            Controls.Add(panelRight);        // Fill
+            Controls.Add(panelEditorRight);  // Right
+            Controls.Add(panelLeft);         // Left (inner)
+            Controls.Add(panelSidebar);      // Left (outer, over panelLeft)
+            Controls.Add(panelDrag);         // Top
+
+            // wire window button events
+            button5.Click += button5_Click;
+            button6.Click += button6_Click;
+            button7.Click += button7_Click;
+            btnHamburger.Click += btnHamburger_Click;
 
             ((System.ComponentModel.ISupportInitialize)webViewFileList).EndInit();
-            panelLeft.ResumeLayout(false);
-            panelRight.ResumeLayout(false);
-            panelSidebar.ResumeLayout(false);
             ResumeLayout(false);
         }
 
-        private void SetupLeftPanel()
+        private void StyleSidebarBtn(Button btn, string text, int y)
         {
-            lblAuthor = new Label
-            {
-                Text = "AUTHOR",
-                ForeColor = System.Drawing.Color.RosyBrown,
-                AutoSize = true,
-                Font = new System.Drawing.Font("Syne", 10F, System.Drawing.FontStyle.Bold)
-            };
-            lblAuthor.Location = new System.Drawing.Point(30, 30);
-            panelLeft.Controls.Add(lblAuthor);
+            btn.Text      = text;
+            btn.ForeColor = Color.FromArgb(188, 143, 143);
+            btn.BackColor = Color.FromArgb(15, 15, 15);
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize  = 0;
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 0, 0);
+            btn.TextAlign = ContentAlignment.MiddleLeft;
+            btn.Font      = new Font("Syne", 9F);
+            btn.Size      = new Size(200, 40);
+            btn.Location  = new Point(0, y);
+            btn.TabStop   = false;
+        }
 
-            txtAuthor = new TextBox
-            {
-                BackColor = System.Drawing.Color.Black,
-                ForeColor = System.Drawing.Color.White,
-                BorderStyle = BorderStyle.FixedSingle,
-                PlaceholderText = "Mod author's name...",
-                Size = new System.Drawing.Size(300, 23)
-            };
-            txtAuthor.Location = new System.Drawing.Point(30, 55);
-            panelLeft.Controls.Add(txtAuthor);
+        private void SetupLeftPanelControls()
+        {
+            // ── Author ──
+            lblAuthor.Text      = "AUTHOR";
+            lblAuthor.ForeColor = Color.FromArgb(188, 143, 143);
+            lblAuthor.Font      = new Font("Syne", 8F, FontStyle.Bold);
+            lblAuthor.Location  = new Point(30, 28);
+            lblAuthor.AutoSize  = true;
 
-            lblModName = new Label
-            {
-                Text = "MOD NAME",
-                ForeColor = System.Drawing.Color.RosyBrown,
-                AutoSize = true,
-                Font = new System.Drawing.Font("Syne", 10F, System.Drawing.FontStyle.Bold)
-            };
-            lblModName.Location = new System.Drawing.Point(30, 95);
-            panelLeft.Controls.Add(lblModName);
+            txtAuthor.BackColor       = Color.Black;
+            txtAuthor.ForeColor       = Color.FromArgb(200, 200, 200);
+            txtAuthor.BorderStyle     = BorderStyle.FixedSingle;
+            txtAuthor.PlaceholderText = "Mod author's name...";
+            txtAuthor.Size            = new Size(300, 24);
+            txtAuthor.Location        = new Point(30, 50);
+            txtAuthor.Font            = new Font("Syne", 9F);
 
-            txtModName = new TextBox
-            {
-                BackColor = System.Drawing.Color.Black,
-                ForeColor = System.Drawing.Color.White,
-                BorderStyle = BorderStyle.FixedSingle,
-                PlaceholderText = "Mod name...",
-                Size = new System.Drawing.Size(300, 23)
-            };
-            txtModName.Location = new System.Drawing.Point(30, 120);
-            panelLeft.Controls.Add(txtModName);
+            // ── Mod Name ──
+            lblModName.Text      = "MOD NAME";
+            lblModName.ForeColor = Color.FromArgb(188, 143, 143);
+            lblModName.Font      = new Font("Syne", 8F, FontStyle.Bold);
+            lblModName.Location  = new Point(30, 88);
+            lblModName.AutoSize  = true;
 
-            lblVersionTag = new Label
-            {
-                Text = "VERSION TAG",
-                ForeColor = System.Drawing.Color.RosyBrown,
-                AutoSize = true,
-                Font = new System.Drawing.Font("Syne", 10F, System.Drawing.FontStyle.Bold)
-            };
-            lblVersionTag.Location = new System.Drawing.Point(30, 160);
-            panelLeft.Controls.Add(lblVersionTag);
+            txtModName.BackColor       = Color.Black;
+            txtModName.ForeColor       = Color.FromArgb(200, 200, 200);
+            txtModName.BorderStyle     = BorderStyle.FixedSingle;
+            txtModName.PlaceholderText = "Mod name...";
+            txtModName.Size            = new Size(300, 24);
+            txtModName.Location        = new Point(30, 110);
+            txtModName.Font            = new Font("Syne", 9F);
 
-            dropdownVersionTag = new ComboBox
-            {
-                BackColor = System.Drawing.Color.Black,
-                ForeColor = System.Drawing.Color.White,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                FlatStyle = FlatStyle.Flat,
-                Size = new System.Drawing.Size(140, 25)
-            };
+            // ── Version Tag ──
+            lblVersionTag.Text      = "VERSION TAG";
+            lblVersionTag.ForeColor = Color.FromArgb(188, 143, 143);
+            lblVersionTag.Font      = new Font("Syne", 8F, FontStyle.Bold);
+            lblVersionTag.Location  = new Point(30, 150);
+            lblVersionTag.AutoSize  = true;
+
+            dropdownVersionTag.BackColor     = Color.Black;
+            dropdownVersionTag.ForeColor     = Color.FromArgb(200, 200, 200);
+            dropdownVersionTag.DropDownStyle = ComboBoxStyle.DropDownList;
+            dropdownVersionTag.FlatStyle     = FlatStyle.Flat;
+            dropdownVersionTag.Size          = new Size(140, 24);
+            dropdownVersionTag.Location      = new Point(30, 172);
+            dropdownVersionTag.Font          = new Font("Syne", 9F);
             dropdownVersionTag.Items.AddRange(new object[] { "Test", "Alpha", "Beta", "Stable" });
             dropdownVersionTag.SelectedIndex = 3;
-            dropdownVersionTag.Location = new System.Drawing.Point(30, 185);
-            panelLeft.Controls.Add(dropdownVersionTag);
 
-            lblVersion = new Label
-            {
-                Text = "VERSION",
-                ForeColor = System.Drawing.Color.RosyBrown,
-                AutoSize = true,
-                Font = new System.Drawing.Font("Syne", 10F, System.Drawing.FontStyle.Bold)
-            };
-            lblVersion.Location = new System.Drawing.Point(180, 160);
-            panelLeft.Controls.Add(lblVersion);
+            // ── Version ──
+            lblVersion.Text      = "VERSION";
+            lblVersion.ForeColor = Color.FromArgb(188, 143, 143);
+            lblVersion.Font      = new Font("Syne", 8F, FontStyle.Bold);
+            lblVersion.Location  = new Point(185, 150);
+            lblVersion.AutoSize  = true;
 
-            txtVersion = new TextBox
-            {
-                BackColor = System.Drawing.Color.Black,
-                ForeColor = System.Drawing.Color.White,
-                BorderStyle = BorderStyle.FixedSingle,
-                Text = "1.0",
-                Size = new System.Drawing.Size(150, 23)
-            };
-            txtVersion.Location = new System.Drawing.Point(180, 185);
-            panelLeft.Controls.Add(txtVersion);
+            txtVersion.BackColor   = Color.Black;
+            txtVersion.ForeColor   = Color.FromArgb(200, 200, 200);
+            txtVersion.BorderStyle = BorderStyle.FixedSingle;
+            txtVersion.Text        = "1.0";
+            txtVersion.Size        = new Size(145, 24);
+            txtVersion.Location    = new Point(185, 172);
+            txtVersion.Font        = new Font("Syne", 9F);
 
-            lblDescription = new Label
-            {
-                Text = "DESCRIPTION",
-                ForeColor = System.Drawing.Color.RosyBrown,
-                AutoSize = true,
-                Font = new System.Drawing.Font("Syne", 10F, System.Drawing.FontStyle.Bold)
-            };
-            lblDescription.Location = new System.Drawing.Point(30, 225);
-            panelLeft.Controls.Add(lblDescription);
+            // ── Description ──
+            lblDescription.Text      = "DESCRIPTION";
+            lblDescription.ForeColor = Color.FromArgb(188, 143, 143);
+            lblDescription.Font      = new Font("Syne", 8F, FontStyle.Bold);
+            lblDescription.Location  = new Point(30, 212);
+            lblDescription.AutoSize  = true;
 
-            txtDescription = new TextBox
-            {
-                BackColor = System.Drawing.Color.Black,
-                ForeColor = System.Drawing.Color.White,
-                BorderStyle = BorderStyle.FixedSingle,
-                PlaceholderText = "Write a description for you mod...",
-                Multiline = true,
-                Size = new System.Drawing.Size(300, 80),
-                ScrollBars = ScrollBars.Vertical
-            };
-            txtDescription.Location = new System.Drawing.Point(30, 250);
-            panelLeft.Controls.Add(txtDescription);
+            txtDescription.BackColor       = Color.Black;
+            txtDescription.ForeColor       = Color.FromArgb(200, 200, 200);
+            txtDescription.BorderStyle     = BorderStyle.FixedSingle;
+            txtDescription.PlaceholderText = "Write a description for your mod...";
+            txtDescription.Multiline       = true;
+            txtDescription.Size            = new Size(300, 75);
+            txtDescription.Location        = new Point(30, 234);
+            txtDescription.Font            = new Font("Syne", 9F);
+            txtDescription.ScrollBars      = ScrollBars.Vertical;
 
-            lblPhoto = new Label
-            {
-                Text = "PHOTO PREVIEW",
-                ForeColor = System.Drawing.Color.RosyBrown,
-                AutoSize = true,
-                Font = new System.Drawing.Font("Syne", 10F, System.Drawing.FontStyle.Bold)
-            };
-            lblPhoto.Location = new System.Drawing.Point(30, 350);
-            panelLeft.Controls.Add(lblPhoto);
+            // ── Photo preview ──
+            lblPhotoLabel.Text      = "PHOTO PREVIEW";
+            lblPhotoLabel.ForeColor = Color.FromArgb(188, 143, 143);
+            lblPhotoLabel.Font      = new Font("Syne", 8F, FontStyle.Bold);
+            lblPhotoLabel.Location  = new Point(30, 325);
+            lblPhotoLabel.AutoSize  = true;
 
-            btnAddPhoto = new Button
-            {
-                BackColor = System.Drawing.Color.FromArgb(100, 100, 100),
-                ForeColor = System.Drawing.Color.White,
-                FlatStyle = FlatStyle.Flat,
-                Text = "ADD PHOTO",
-                Size = new System.Drawing.Size(140, 100),
-                Location = new System.Drawing.Point(30, 375)
-            };
-            btnAddPhoto.Click += btnAddPhoto_Click;
-            panelLeft.Controls.Add(btnAddPhoto);
+            panelPhotoPreview.BackColor   = Color.FromArgb(35, 35, 35);
+            panelPhotoPreview.BorderStyle = BorderStyle.FixedSingle;
+            panelPhotoPreview.Size        = new Size(140, 100);
+            panelPhotoPreview.Location    = new Point(30, 347);
 
-            panelColorPicker = new Panel
-            {
-                BackColor = System.Drawing.Color.FromArgb(200, 0, 0),
-                Size = new System.Drawing.Size(140, 100),
-                Location = new System.Drawing.Point(180, 375),
-                BorderStyle = BorderStyle.FixedSingle
-            };
-            panelColorPicker.Click += panelColorPicker_Click;
-            panelLeft.Controls.Add(panelColorPicker);
+            btnAddPhoto.BackColor = Color.FromArgb(50, 50, 50);
+            btnAddPhoto.ForeColor = Color.FromArgb(200, 200, 200);
+            btnAddPhoto.FlatStyle = FlatStyle.Flat;
+            btnAddPhoto.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
+            btnAddPhoto.Text      = "ADD PHOTO";
+            btnAddPhoto.Size      = new Size(140, 28);
+            btnAddPhoto.Location  = new Point(30, 452);
+            btnAddPhoto.Font      = new Font("Syne", 8F, FontStyle.Bold);
 
-            btnOpenEditor = new Button
-            {
-                BackColor = System.Drawing.Color.FromArgb(64, 0, 0),
-                ForeColor = System.Drawing.Color.RosyBrown,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = new FlatButtonAppearance { BorderColor = System.Drawing.Color.FromArgb(139, 58, 58), BorderSize = 1 },
-                Text = "Open Editor",
-                Size = new System.Drawing.Size(300, 45),
-                Location = new System.Drawing.Point(30, 490),
-                Font = new System.Drawing.Font("Syne", 11F)
-            };
-            btnOpenEditor.Click += btnOpenEditor_Click;
-            panelLeft.Controls.Add(btnOpenEditor);
+            // ── Banner color picker ──
+            lblColorLabel.Text      = "BANNER COLOR";
+            lblColorLabel.ForeColor = Color.FromArgb(188, 143, 143);
+            lblColorLabel.Font      = new Font("Syne", 8F, FontStyle.Bold);
+            lblColorLabel.Location  = new Point(185, 325);
+            lblColorLabel.AutoSize  = true;
 
-            btnBuildOIV = new Button
+            panelColorPicker.BackColor   = Color.FromArgb(160, 0, 0);
+            panelColorPicker.BorderStyle = BorderStyle.FixedSingle;
+            panelColorPicker.Size        = new Size(145, 100);
+            panelColorPicker.Location    = new Point(185, 347);
+            panelColorPicker.Cursor      = Cursors.Hand;
+
+            // ── Open Editor ──
+            btnOpenEditor.BackColor = Color.FromArgb(64, 0, 0);
+            btnOpenEditor.ForeColor = Color.FromArgb(200, 140, 140);
+            btnOpenEditor.FlatStyle = FlatStyle.Flat;
+            btnOpenEditor.FlatAppearance.BorderColor = Color.FromArgb(110, 40, 40);
+            btnOpenEditor.Text     = "Open Editor";
+            btnOpenEditor.Size     = new Size(300, 46);
+            btnOpenEditor.Location = new Point(30, 496);
+            btnOpenEditor.Font     = new Font("Syne", 11F);
+
+            // ── Build OIV ──
+            btnBuildOIV.BackColor = Color.FromArgb(80, 0, 0);
+            btnBuildOIV.ForeColor = Color.FromArgb(220, 160, 160);
+            btnBuildOIV.FlatStyle = FlatStyle.Flat;
+            btnBuildOIV.FlatAppearance.BorderColor = Color.FromArgb(110, 40, 40);
+            btnBuildOIV.Text     = "Build OIV";
+            btnBuildOIV.Size     = new Size(300, 46);
+            btnBuildOIV.Location = new Point(30, 554);
+            btnBuildOIV.Font     = new Font("Syne", 11F);
+
+            // Separator line at bottom of left panel
+            var sep = new Panel
             {
-                BackColor = System.Drawing.Color.FromArgb(64, 0, 0),
-                ForeColor = System.Drawing.Color.RosyBrown,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = new FlatButtonAppearance { BorderColor = System.Drawing.Color.FromArgb(139, 58, 58), BorderSize = 1 },
-                Text = "Build OIV",
-                Size = new System.Drawing.Size(300, 45),
-                Location = new System.Drawing.Point(30, 550),
-                Font = new System.Drawing.Font("Syne", 11F)
+                BackColor = Color.FromArgb(35, 35, 35),
+                Dock      = DockStyle.Bottom,
+                Height    = 1
             };
-            btnBuildOIV.Click += btnBuildOIV_Click;
-            panelLeft.Controls.Add(btnBuildOIV);
+
+            panelLeft.Controls.AddRange(new Control[] {
+                lblAuthor, txtAuthor,
+                lblModName, txtModName,
+                lblVersionTag, dropdownVersionTag,
+                lblVersion, txtVersion,
+                lblDescription, txtDescription,
+                lblPhotoLabel, panelPhotoPreview, btnAddPhoto,
+                lblColorLabel, panelColorPicker,
+                btnOpenEditor, btnBuildOIV,
+                sep
+            });
         }
 
-        private void SetupRightPanel()
+        private void SetupRightPanelControls()
         {
-            lblPackageFiles = new Label
+            // ── Top toolbar panel (DockTop) ──
+            var panelRightTop = new Panel
             {
-                Text = "PACKAGE FILES",
-                ForeColor = System.Drawing.Color.FromArgb(188, 143, 143),
-                AutoSize = true,
-                Font = new System.Drawing.Font("Syne", 11F, System.Drawing.FontStyle.Bold),
-                Location = new System.Drawing.Point(30, 30)
+                BackColor = Color.FromArgb(13, 13, 13),
+                Dock      = DockStyle.Top,
+                Height    = 240,
+                Padding   = new Padding(30, 20, 30, 10)
             };
-            panelRight.Controls.Add(lblPackageFiles);
 
-            btnAddFiles = new Button
-            {
-                BackColor = System.Drawing.Color.FromArgb(139, 30, 30),
-                ForeColor = System.Drawing.Color.FromArgb(240, 192, 192),
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = new FlatButtonAppearance { BorderColor = System.Drawing.Color.FromArgb(139, 58, 58), BorderSize = 1 },
-                Text = "+ Add Files",
-                Size = new System.Drawing.Size(100, 30),
-                Location = new System.Drawing.Point(30, 55),
-                Font = new System.Drawing.Font("Syne", 9F)
-            };
-            btnAddFiles.Click += btnAddFiles_Click;
-            panelRight.Controls.Add(btnAddFiles);
+            // PACKAGE FILES label
+            lblPackageFiles.Text      = "PACKAGE FILES";
+            lblPackageFiles.ForeColor = Color.FromArgb(188, 143, 143);
+            lblPackageFiles.Font      = new Font("Syne", 11F, FontStyle.Bold);
+            lblPackageFiles.Location  = new Point(30, 20);
+            lblPackageFiles.AutoSize  = true;
 
-            lblAddFilesHint = new Label
-            {
-                Text = "or drag & drop files below",
-                ForeColor = System.Drawing.Color.FromArgb(100, 100, 100),
-                AutoSize = true,
-                Location = new System.Drawing.Point(140, 62),
-                Font = new System.Drawing.Font("Syne", 8F)
-            };
-            panelRight.Controls.Add(lblAddFilesHint);
+            // Add Files button
+            btnAddFiles.BackColor = Color.FromArgb(139, 30, 30);
+            btnAddFiles.ForeColor = Color.FromArgb(240, 192, 192);
+            btnAddFiles.FlatStyle = FlatStyle.Flat;
+            btnAddFiles.FlatAppearance.BorderColor = Color.FromArgb(139, 58, 58);
+            btnAddFiles.Text     = "+ Add Files";
+            btnAddFiles.Size     = new Size(105, 30);
+            btnAddFiles.Location = new Point(30, 55);
+            btnAddFiles.Font     = new Font("Syne", 9F);
 
-            panelDropZone = new Panel
-            {
-                BackColor = System.Drawing.Color.FromArgb(17, 17, 17),
-                BorderStyle = BorderStyle.FixedSingle,
-                Location = new System.Drawing.Point(30, 100),
-                Size = new System.Drawing.Size(430, 130),
-                AllowDrop = true
-            };
-            panelDropZone.DragEnter += PanelDropZone_DragEnter;
-            panelDropZone.DragDrop += PanelDropZone_DragDrop;
-            panelRight.Controls.Add(panelDropZone);
+            lblAddFilesHint.Text      = "or drag & drop files below";
+            lblAddFilesHint.ForeColor = Color.FromArgb(90, 90, 90);
+            lblAddFilesHint.AutoSize  = true;
+            lblAddFilesHint.Location  = new Point(145, 63);
+            lblAddFilesHint.Font      = new Font("Syne", 8F);
 
-            lblNoFiles = new Label
-            {
-                Text = "No files added yet\nAdd mod files to include in your OIV package",
-                ForeColor = System.Drawing.Color.FromArgb(100, 100, 100),
-                AutoSize = false,
-                TextAlign = System.Drawing.ContentAlignment.MiddleCenter,
-                Size = new System.Drawing.Size(430, 130),
-                Location = new System.Drawing.Point(0, 0),
-                Dock = DockStyle.Fill,
-                Font = new System.Drawing.Font("Syne", 9F)
-            };
+            // Drop zone
+            panelDropZone.BackColor   = Color.FromArgb(17, 17, 17);
+            panelDropZone.BorderStyle = BorderStyle.FixedSingle;
+            panelDropZone.Location    = new Point(30, 96);
+            panelDropZone.Size        = new Size(530, 120);
+            panelDropZone.AllowDrop   = true;
+
+            lblNoFiles.Text      = "Drop mod files here\r\nSupports .yft .ytd .meta .xml .asi .dlc and more";
+            lblNoFiles.ForeColor = Color.FromArgb(90, 90, 90);
+            lblNoFiles.TextAlign = ContentAlignment.MiddleCenter;
+            lblNoFiles.Dock      = DockStyle.Fill;
+            lblNoFiles.Font      = new Font("Syne", 9F);
+
             panelDropZone.Controls.Add(lblNoFiles);
 
-            webViewFileList = new Microsoft.Web.WebView2.WinForms.WebView2
-            {
-                Location = new System.Drawing.Point(30, 250),
-                Size = new System.Drawing.Size(430, 350),
-                Dock = DockStyle.None
-            };
+            panelRightTop.Controls.AddRange(new Control[] {
+                lblPackageFiles, btnAddFiles, lblAddFilesHint, panelDropZone
+            });
+
+            // WebView fills the rest
+            webViewFileList.Dock = DockStyle.Fill;
+
             panelRight.Controls.Add(webViewFileList);
+            panelRight.Controls.Add(panelRightTop);
         }
 
-        private void SetupSidebarControls()
-        {
-            btnSidebarToggle = new Button
-            {
-                BackColor = System.Drawing.Color.Black,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = new FlatButtonAppearance { BorderSize = 0 },
-                Size = new System.Drawing.Size(40, 40),
-                Location = new System.Drawing.Point(0, 0),
-                Text = ""
-            };
-            panelSidebar.Controls.Add(btnSidebarToggle);
+        // ── Field declarations ──────────────────────────────────────────────
+        private Panel       panelDrag;
+        private Panel       panelLeft;
+        private Panel       panelRight;
+        private Panel       panelEditorRight;
+        private Panel       panelSidebar;
+        private Panel       panelDropZone;
+        private Panel       panelPhotoPreview;
+        private Panel       panelColorPicker;
 
-            btnSidebarOpenProject = new Button
-            {
-                BackColor = System.Drawing.Color.FromArgb(64, 0, 0),
-                ForeColor = System.Drawing.Color.RosyBrown,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = new FlatButtonAppearance { BorderSize = 0 },
-                Text = "Open Project",
-                Size = new System.Drawing.Size(200, 45),
-                Location = new System.Drawing.Point(0, 50),
-                TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
-                Padding = new Padding(10, 0, 0, 0)
-            };
-            panelSidebar.Controls.Add(btnSidebarOpenProject);
+        private Label       lblAuthor;
+        private Label       lblModName;
+        private Label       lblVersionTag;
+        private Label       lblVersion;
+        private Label       lblDescription;
+        private Label       lblPhotoLabel;
+        private Label       lblColorLabel;
+        private Label       lblPackageFiles;
+        private Label       lblAddFilesHint;
+        private Label       lblNoFiles;
+        private Label       lblSidebarTitle;
 
-            btnSidebarOpenOIV = new Button
-            {
-                BackColor = System.Drawing.Color.FromArgb(64, 0, 0),
-                ForeColor = System.Drawing.Color.RosyBrown,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = new FlatButtonAppearance { BorderSize = 0 },
-                Text = "Open OIV",
-                Size = new System.Drawing.Size(200, 45),
-                Location = new System.Drawing.Point(0, 100),
-                TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
-                Padding = new Padding(10, 0, 0, 0)
-            };
-            panelSidebar.Controls.Add(btnSidebarOpenOIV);
+        private TextBox     txtAuthor;
+        private TextBox     txtModName;
+        private TextBox     txtVersion;
+        private TextBox     txtDescription;
+        private ComboBox    dropdownVersionTag;
 
-            btnSidebarSaveProjectAs = new Button
-            {
-                BackColor = System.Drawing.Color.FromArgb(64, 0, 0),
-                ForeColor = System.Drawing.Color.RosyBrown,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = new FlatButtonAppearance { BorderSize = 0 },
-                Text = "Save Project As",
-                Size = new System.Drawing.Size(200, 45),
-                Location = new System.Drawing.Point(0, 150),
-                TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
-                Padding = new Padding(10, 0, 0, 0)
-            };
-            panelSidebar.Controls.Add(btnSidebarSaveProjectAs);
-
-            btnSidebarBuildOIV = new Button
-            {
-                BackColor = System.Drawing.Color.FromArgb(64, 0, 0),
-                ForeColor = System.Drawing.Color.RosyBrown,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = new FlatButtonAppearance { BorderSize = 0 },
-                Text = "Build OIV",
-                Size = new System.Drawing.Size(200, 45),
-                Location = new System.Drawing.Point(0, 200),
-                TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
-                Padding = new Padding(10, 0, 0, 0)
-            };
-            panelSidebar.Controls.Add(btnSidebarBuildOIV);
-
-            btnSidebarFeedback = new Button
-            {
-                BackColor = System.Drawing.Color.FromArgb(64, 0, 0),
-                ForeColor = System.Drawing.Color.RosyBrown,
-                FlatStyle = FlatStyle.Flat,
-                FlatAppearance = new FlatButtonAppearance { BorderSize = 0 },
-                Text = "Feedback",
-                Size = new System.Drawing.Size(200, 45),
-                Location = new System.Drawing.Point(0, 250),
-                TextAlign = System.Drawing.ContentAlignment.MiddleLeft,
-                Padding = new Padding(10, 0, 0, 0)
-            };
-            panelSidebar.Controls.Add(btnSidebarFeedback);
-
-            lblSidebarTitle = new Label
-            {
-                ForeColor = System.Drawing.Color.RosyBrown,
-                Location = new System.Drawing.Point(10, 550),
-                Size = new System.Drawing.Size(180, 100)
-            };
-            panelSidebar.Controls.Add(lblSidebarTitle);
-        }
-
-        private void SetupEditorPanel()
-        {
-            panelEditorRight = new Panel
-            {
-                BackColor = System.Drawing.Color.FromArgb(20, 20, 20),
-                Dock = DockStyle.Right,
-                Width = 0,
-                Name = "panelEditorRight"
-            };
-            this.Controls.Add(panelEditorRight);
-        }
-
-        private Panel panelLeft;
-        private Panel panelRight;
-        private Panel panelEditorRight;
-        private Panel panelSidebar;
-        private Panel panelDrag;
-        private Panel panelDropZone;
-        private Panel panelColorPicker;
-
-        private Label lblAuthor;
-        private Label lblModName;
-        private Label lblVersionTag;
-        private Label lblVersion;
-        private Label lblDescription;
-        private Label lblPhoto;
-        private Label lblPackageFiles;
-        private Label lblAddFilesHint;
-        private Label lblNoFiles;
-        private Label lblSidebarTitle;
-
-        private TextBox txtAuthor;
-        private TextBox txtModName;
-        private TextBox txtVersion;
-        private TextBox txtDescription;
-
-        private ComboBox dropdownVersionTag;
-
-        private Button button5;
-        private Button button6;
-        private Button button7;
-        private Button btnAddPhoto;
-        private Button btnOpenEditor;
-        private Button btnBuildOIV;
-        private Button btnAddFiles;
-        private Button btnSidebarToggle;
-        private Button btnSidebarOpenProject;
-        private Button btnSidebarOpenOIV;
-        private Button btnSidebarSaveProjectAs;
-        private Button btnSidebarBuildOIV;
-        private Button btnSidebarFeedback;
+        private Button      button5;
+        private Button      button6;
+        private Button      button7;
+        private Button      btnHamburger;
+        private Button      btnAddPhoto;
+        private Button      btnOpenEditor;
+        private Button      btnBuildOIV;
+        private Button      btnAddFiles;
+        private Button      btnSidebarOpenProject;
+        private Button      btnSidebarOpenOIV;
+        private Button      btnSidebarSaveProjectAs;
+        private Button      btnSidebarBuildOIV;
+        private Button      btnSidebarFeedback;
 
         private Microsoft.Web.WebView2.WinForms.WebView2 webViewFileList;
 
         private System.Windows.Forms.Timer sidebarTimer;
-        private System.Windows.Forms.Timer sidebarTextTimer;
         private System.Windows.Forms.Timer editorTimer;
     }
 }
