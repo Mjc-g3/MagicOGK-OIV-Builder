@@ -72,22 +72,22 @@ namespace MagicOGK_OIV_Builder
         }
 
         // ─── Target path resolution ───────────────────────────────────────────
-        // If a file is assigned to a folder node, prepend that folder's archive path + folder name.
-        // Otherwise use the file's TargetPath as-is (user typed the full path manually).
+        // Walks up the parent chain to build the full install path for a file.
+        // e.g. Root → update → x64 → dlcpacks → mod1 → dlc.rpf  produces:
+        //   update\x64\dlcpacks\mod1\dlc.rpf
 
         private static string ResolveTargetPath(OIVFileEntry file, OIVProject project)
         {
-            if (file.FolderId.HasValue)
+            var parts = new List<string> { file.FileName };
+            int? cur = file.FolderId;
+            while (cur.HasValue)
             {
-                var folder = project.Folders.Find(f => f.Id == file.FolderId.Value);
-                if (folder != null)
-                {
-                    string basePath = folder.ArchivePath.TrimEnd('\\') + "\\" + folder.Name;
-                    string inner    = file.TargetPath.Trim().TrimStart('\\');
-                    return string.IsNullOrWhiteSpace(inner) ? basePath : basePath + "\\" + inner;
-                }
+                var folder = project.Folders.Find(f => f.Id == cur.Value);
+                if (folder == null) break;
+                parts.Insert(0, folder.Name);
+                cur = folder.ParentId;
             }
-            return file.TargetPath.Trim();
+            return string.Join("\\", parts);
         }
 
         // ─── assembly.xml ─────────────────────────────────────────────────────

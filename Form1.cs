@@ -217,9 +217,15 @@ namespace MagicOGK_OIV_Builder
             }
         }
 
+        // ── Tree view state ───────────────────────────────────────────────────
+        private TreeView?  editorTree      = null;
+        private Panel?     editorPropPanel = null;
+
         private void BuildEditorPanel()
         {
             panelEditorRight.Controls.Clear();
+            editorTree      = null;
+            editorPropPanel = null;
 
             // ── Header ────────────────────────────────────────────────────────
             var header = new Panel
@@ -252,548 +258,532 @@ namespace MagicOGK_OIV_Builder
             header.Controls.Add(btnClose);
             panelEditorRight.Controls.Add(header);
 
-            // ── Toolbar: Add Folder button ─────────────────────────────────────
+            // ── Tree toolbar ──────────────────────────────────────────────────
             var toolbar = new Panel
             {
                 Dock      = DockStyle.Top,
-                Height    = 38,
-                BackColor = Color.FromArgb(20, 20, 20),
-                Padding   = new Padding(10, 6, 10, 6)
+                Height    = 36,
+                BackColor = Color.FromArgb(18, 18, 18)
             };
-            var btnAddFolder = new Button
-            {
-                Text      = "+ Add Folder",
-                BackColor = Color.FromArgb(50, 0, 0),
-                ForeColor = Color.FromArgb(200, 140, 140),
-                FlatStyle = FlatStyle.Flat,
-                Size      = new Size(110, 26),
-                Location  = new Point(10, 6),
-                Font      = new Font("Syne", 8F),
-                TabStop   = false
-            };
-            btnAddFolder.FlatAppearance.BorderColor = Color.FromArgb(100, 40, 40);
-            btnAddFolder.Click += (s, ev) => AddFolder_Click();
-            toolbar.Controls.Add(btnAddFolder);
 
-            // "Unassigned Files" label shown when there are files without a folder
-            int unassigned = currentProject.Files.Count(f => !f.FolderId.HasValue);
-            if (unassigned > 0)
+            // Toolbar icon buttons: new folder | new RPF | add file | rename | delete
+            (string text, string tip, Action act)[] toolActions = {
+                ("\uD83D\uDCC1", "New Folder",     () => TreeCmd_NewFolder()),
+                ("\uD83D\uDDC4",  "New RPF Archive",() => TreeCmd_NewRpf()),
+                ("\uD83D\uDCC4", "Add File Here",  () => TreeCmd_AddFile()),
+                ("\u270F",       "Rename",          () => TreeCmd_Rename()),
+                ("\uD83D\uDDD1", "Delete",          () => TreeCmd_Delete()),
+            };
+            int tbx = 6;
+            foreach (var (text, tip, act) in toolActions)
             {
-                toolbar.Controls.Add(new Label
+                var a = act;
+                var btn = new Button
                 {
-                    Text      = $"{unassigned} unassigned",
-                    ForeColor = Color.FromArgb(100, 100, 100),
-                    Font      = new Font("Syne", 7F),
-                    AutoSize  = true,
-                    Location  = new Point(128, 12)
-                });
+                    Text      = text,
+                    BackColor = Color.Transparent,
+                    ForeColor = Color.FromArgb(170, 120, 120),
+                    FlatStyle = FlatStyle.Flat,
+                    Size      = new Size(32, 28),
+                    Location  = new Point(tbx, 4),
+                    Font      = new Font("Segoe UI Emoji", 11F),
+                    TabStop   = false
+                };
+                btn.FlatAppearance.BorderSize = 0;
+                btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 30, 30);
+                var tooltip = new ToolTip();
+                tooltip.SetToolTip(btn, tip);
+                btn.Click += (s, ev) => a();
+                toolbar.Controls.Add(btn);
+                tbx += 34;
             }
             panelEditorRight.Controls.Add(toolbar);
 
-            // ── Scroll canvas ─────────────────────────────────────────────────
-            // Fix #4: use a plain Panel with AutoScroll so the first card is NOT
-            // hidden behind the header.  All DockStyle.Top items above are already
-            // outside the scroll area, so y=0 inside the scroll panel is correct.
-            var scrollPanel = new Panel
+            // ── Properties panel (docked bottom, shown when node selected) ────
+            editorPropPanel = new Panel
             {
-                Dock       = DockStyle.Fill,
-                AutoScroll = true,
-                BackColor  = Color.FromArgb(15, 15, 15)
+                Dock      = DockStyle.Bottom,
+                Height    = 0,
+                BackColor = Color.FromArgb(20, 10, 10)
             };
-            panelEditorRight.Controls.Add(scrollPanel);
+            panelEditorRight.Controls.Add(editorPropPanel);
 
-            int yPos = 10;
-
-            // ── Folder sections ───────────────────────────────────────────────
-            foreach (var folder in currentProject.Folders)
+            // ── TreeView ──────────────────────────────────────────────────────
+            editorTree = new TreeView
             {
-                yPos = AddFolderSection(scrollPanel, folder, yPos);
-                yPos += 6;
+                Dock            = DockStyle.Fill,
+                BackColor       = Color.FromArgb(15, 15, 15),
+                ForeColor       = Color.FromArgb(210, 180, 180),
+                BorderStyle     = BorderStyle.None,
+                Font            = new Font("Segoe UI", 9.5F),
+                ItemHeight      = 22,
+                ShowLines       = true,
+                ShowPlusMinus   = true,
+                ShowRootLines   = true,
+                FullRowSelect   = true,
+                HideSelection   = false,
+                LineColor       = Color.FromArgb(70, 50, 50),
+                DrawMode        = TreeViewDrawMode.OwnerDrawAll,
+                Indent          = 18
+            };
+            editorTree.DrawNode          += EditorTree_DrawNode;
+            editorTree.AfterSelect       += EditorTree_AfterSelect;
+            editorTree.KeyDown           += EditorTree_KeyDown;
+            editorTree.MouseDoubleClick  += EditorTree_MouseDoubleClick;
+            editorTree.DragEnter         += (s, ev) => ev.Effect = DragDropEffects.Copy;
+            editorTree.DragDrop          += EditorTree_DragDrop;
+            editorTree.AllowDrop          = true;
+            panelEditorRight.Controls.Add(editorTree);
+
+            RebuildTree();
+        }
+
+        // ─── Tree building ────────────────────────────────────────────────────
+
+        private void RebuildTree()
+        {
+            if (editorTree == null) return;
+            editorTree.BeginUpdate();
+            editorTree.Nodes.Clear();
+
+            var root = new TreeNode("Root") { Tag = "root" };
+            root.ForeColor = Color.FromArgb(220, 170, 170);
+
+            // Recursively add folder nodes and their files
+            AddFolderNodes(root, parentId: null);
+
+            // Unassigned files go under root directly
+            foreach (var file in currentProject.Files.Where(f => !f.FolderId.HasValue))
+                root.Nodes.Add(MakeFileNode(file));
+
+            editorTree.Nodes.Add(root);
+            root.Expand();
+            editorTree.EndUpdate();
+        }
+
+        private void AddFolderNodes(TreeNode parent, int? parentId)
+        {
+            foreach (var folder in currentProject.Folders.Where(f => f.ParentId == parentId))
+            {
+                var node = MakeFolderNode(folder);
+                // Recurse into children
+                AddFolderNodes(node, folder.Id);
+                // Files assigned to this folder
+                foreach (var file in currentProject.Files.Where(f => f.FolderId == folder.Id))
+                    node.Nodes.Add(MakeFileNode(file));
+                parent.Nodes.Add(node);
             }
+        }
 
-            // ── Unassigned files ──────────────────────────────────────────────
-            var unassignedFiles = currentProject.Files.Where(f => !f.FolderId.HasValue).ToList();
-            if (unassignedFiles.Count > 0)
+        private TreeNode MakeFolderNode(OIVFolder folder)
+        {
+            string icon = folder.IsRpf ? "\uD83D\uDDC4 " : "\uD83D\uDCC1 ";
+            var node = new TreeNode(icon + folder.Name)
             {
-                // Section header
-                var secLabel = new Label
+                Tag       = folder,
+                ForeColor = folder.IsRpf
+                    ? Color.FromArgb(150, 200, 255)
+                    : Color.FromArgb(220, 160, 160)
+            };
+            return node;
+        }
+
+        private TreeNode MakeFileNode(OIVFileEntry file)
+        {
+            return new TreeNode("\uD83D\uDCC4 " + file.FileName)
+            {
+                Tag       = file,
+                ForeColor = Color.FromArgb(180, 180, 180)
+            };
+        }
+
+        // ─── Tree drawing ─────────────────────────────────────────────────────
+
+        private void EditorTree_DrawNode(object sender, DrawTreeNodeEventArgs e)
+        {
+            bool selected = (e.State & TreeNodeStates.Selected) != 0;
+            var bounds    = e.Bounds;
+            if (bounds.Width == 0 && bounds.Height == 0) { e.DrawDefault = true; return; }
+
+            // Background
+            e.Graphics.FillRectangle(
+                new SolidBrush(selected ? Color.FromArgb(70, 30, 30) : Color.FromArgb(15, 15, 15)),
+                new Rectangle(0, bounds.Y, editorTree!.Width, bounds.Height));
+
+            // Indent lines — drawn by WinForms when ShowLines=true, we just handle colours
+            // Text
+            var textBrush = new SolidBrush(e.Node?.ForeColor ?? Color.FromArgb(200, 200, 200));
+            if (e.Node != null)
+                e.Graphics.DrawString(e.Node.Text, e.Node.NodeFont ?? editorTree.Font,
+                    textBrush, bounds.X + 2, bounds.Y + 2);
+        }
+
+        // ─── Tree selection → properties panel ───────────────────────────────
+
+        private void EditorTree_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (editorPropPanel == null || e.Node?.Tag == null) return;
+            ShowPropertiesFor(e.Node.Tag);
+        }
+
+        private void ShowPropertiesFor(object tag)
+        {
+            if (editorPropPanel == null) return;
+            editorPropPanel.Controls.Clear();
+
+            if (tag is OIVFolder folder)
+            {
+                editorPropPanel.Height = 95;
+
+                editorPropPanel.Controls.Add(new Label
                 {
-                    Text      = "UNASSIGNED FILES",
-                    ForeColor = Color.FromArgb(100, 80, 80),
+                    Text      = folder.IsRpf ? "RPF ARCHIVE" : "FOLDER",
+                    ForeColor = Color.FromArgb(140, 90, 90),
                     Font      = new Font("Syne", 7F, FontStyle.Bold),
                     AutoSize  = true,
-                    Location  = new Point(10, yPos)
+                    Location  = new Point(10, 8)
+                });
+
+                editorPropPanel.Controls.Add(new Label
+                {
+                    Text      = "NAME:",
+                    ForeColor = Color.FromArgb(120, 80, 80),
+                    Font      = new Font("Syne", 7F, FontStyle.Bold),
+                    AutoSize  = true,
+                    Location  = new Point(10, 26)
+                });
+                var txtName = new TextBox
+                {
+                    BackColor   = Color.Black,
+                    ForeColor   = Color.FromArgb(210, 210, 210),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    Text        = folder.Name,
+                    Size        = new Size(220, 20),
+                    Location    = new Point(56, 23),
+                    Font        = new Font("Consolas", 8F)
                 };
-                scrollPanel.Controls.Add(secLabel);
-                yPos += 20;
-
-                foreach (var file in unassignedFiles)
+                txtName.TextChanged += (s, ev) =>
                 {
-                    yPos = AddFileCard(scrollPanel, file, folder: null, yPos, indent: 0);
-                    yPos += 6;
-                }
+                    folder.Name = txtName.Text;
+                    RebuildTree();
+                    RenderFileList();
+                };
+                editorPropPanel.Controls.Add(txtName);
+
+                var chkDlc = new CheckBox
+                {
+                    Text      = "Add to dlclist.xml on install",
+                    ForeColor = Color.FromArgb(170, 130, 130),
+                    BackColor = Color.Transparent,
+                    Font      = new Font("Syne", 7F),
+                    Checked   = folder.AddToDlcList,
+                    AutoSize  = true,
+                    Location  = new Point(10, 50)
+                };
+                chkDlc.CheckedChanged += (s, ev) => folder.AddToDlcList = chkDlc.Checked;
+                editorPropPanel.Controls.Add(chkDlc);
+
+                var chkRpf = new CheckBox
+                {
+                    Text      = "This is an RPF archive",
+                    ForeColor = Color.FromArgb(130, 160, 200),
+                    BackColor = Color.Transparent,
+                    Font      = new Font("Syne", 7F),
+                    Checked   = folder.IsRpf,
+                    AutoSize  = true,
+                    Location  = new Point(10, 70)
+                };
+                chkRpf.CheckedChanged += (s, ev) =>
+                {
+                    folder.IsRpf = chkRpf.Checked;
+                    RebuildTree();
+                };
+                editorPropPanel.Controls.Add(chkRpf);
             }
-
-            if (currentProject.Files.Count == 0 && currentProject.Folders.Count == 0)
+            else if (tag is OIVFileEntry file)
             {
-                scrollPanel.Controls.Add(new Label
+                editorPropPanel.Height = 95;
+
+                editorPropPanel.Controls.Add(new Label
                 {
-                    Text      = "No files added yet.\nUse + Add Folder to create a\nfolder, then add files.",
+                    Text      = "FILE",
+                    ForeColor = Color.FromArgb(140, 90, 90),
+                    Font      = new Font("Syne", 7F, FontStyle.Bold),
+                    AutoSize  = true,
+                    Location  = new Point(10, 8)
+                });
+
+                editorPropPanel.Controls.Add(new Label
+                {
+                    Text      = TruncatePath(file.SourcePath, 48),
                     ForeColor = Color.FromArgb(80, 80, 80),
-                    Font      = new Font("Syne", 9F),
-                    Size      = new Size(350, 70),
-                    Location  = new Point(10, 30),
-                    TextAlign = ContentAlignment.MiddleCenter
+                    Font      = new Font("Consolas", 7F),
+                    AutoSize  = true,
+                    Location  = new Point(10, 26)
+                });
+
+                editorPropPanel.Controls.Add(new Label
+                {
+                    Text      = "TYPE:",
+                    ForeColor = Color.FromArgb(120, 80, 80),
+                    Font      = new Font("Syne", 7F, FontStyle.Bold),
+                    AutoSize  = true,
+                    Location  = new Point(10, 50)
+                });
+
+                var typeBox = new ComboBox
+                {
+                    BackColor     = Color.Black,
+                    ForeColor     = Color.FromArgb(200, 200, 200),
+                    FlatStyle     = FlatStyle.Flat,
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    Size          = new Size(110, 20),
+                    Location      = new Point(48, 48),
+                    Font          = new Font("Syne", 7F)
+                };
+                typeBox.Items.AddRange(new object[] { "Content", "Replace", "XML Edit" });
+                typeBox.SelectedIndex = file.Type switch { "replace" => 1, "xmledit" => 2, _ => 0 };
+                typeBox.SelectedIndexChanged += (s, ev) =>
+                    file.Type = typeBox.SelectedIndex switch { 1 => "replace", 2 => "xmledit", _ => "content" };
+                editorPropPanel.Controls.Add(typeBox);
+
+                // Full resolved path preview
+                string resolved = ResolveFilePath(file);
+                editorPropPanel.Controls.Add(new Label
+                {
+                    Text      = "→ " + TruncatePath(resolved, 50),
+                    ForeColor = Color.FromArgb(100, 130, 100),
+                    Font      = new Font("Consolas", 7F),
+                    AutoSize  = true,
+                    Location  = new Point(10, 72)
                 });
             }
-
-            // Keep the inner panel tall enough to scroll
-            scrollPanel.AutoScrollMinSize = new Size(0, yPos + 20);
+            else
+            {
+                editorPropPanel.Height = 0;
+            }
         }
 
-        // ─── Folder section ───────────────────────────────────────────────────
-
-        private int AddFolderSection(Panel parent, OIVFolder folder, int yPos)
+        // Resolve the full install path for a file by walking up the folder tree
+        private string ResolveFilePath(OIVFileEntry file)
         {
-            // Folder header bar
-            var folderHeader = new Panel
+            var parts = new List<string> { file.FileName };
+            int? cur = file.FolderId;
+            while (cur.HasValue)
             {
-                BackColor   = Color.FromArgb(32, 10, 10),
-                Size        = new Size(360, 66),
-                Location    = new Point(6, yPos),
-                BorderStyle = BorderStyle.FixedSingle
-            };
-
-            // Folder icon + name
-            folderHeader.Controls.Add(new Label
-            {
-                Text      = "\uD83D\uDCC1 " + folder.Name,
-                ForeColor = Color.FromArgb(220, 160, 160),
-                Font      = new Font("Syne", 9F, FontStyle.Bold),
-                AutoSize  = true,
-                Location  = new Point(8, 6)
-            });
-
-            // Archive path field
-            folderHeader.Controls.Add(new Label
-            {
-                Text      = "PATH:",
-                ForeColor = Color.FromArgb(120, 80, 80),
-                Font      = new Font("Syne", 7F, FontStyle.Bold),
-                AutoSize  = true,
-                Location  = new Point(8, 28)
-            });
-
-            var txtArchive = new TextBox
-            {
-                BackColor       = Color.Black,
-                ForeColor       = Color.FromArgb(200, 200, 200),
-                BorderStyle     = BorderStyle.FixedSingle,
-                Text            = folder.ArchivePath,
-                PlaceholderText = "e.g. mods\\update\\x64\\dlcpacks",
-                Size            = new Size(200, 20),
-                Location        = new Point(44, 25),
-                Font            = new Font("Consolas", 7F)
-            };
-            txtArchive.TextChanged += (s, ev) =>
-            {
-                folder.ArchivePath = txtArchive.Text;
-            };
-            folderHeader.Controls.Add(txtArchive);
-
-            // dlclist toggle
-            var chkDlc = new CheckBox
-            {
-                Text      = "Add to dlclist.xml",
-                ForeColor = Color.FromArgb(160, 120, 120),
-                BackColor = Color.Transparent,
-                Font      = new Font("Syne", 7F),
-                Checked   = folder.AddToDlcList,
-                AutoSize  = true,
-                Location  = new Point(8, 46)
-            };
-            chkDlc.CheckedChanged += (s, ev) => folder.AddToDlcList = chkDlc.Checked;
-            folderHeader.Controls.Add(chkDlc);
-
-            // Delete folder button
-            var btnDelFolder = new Button
-            {
-                Text      = "\u2715",
-                ForeColor = Color.FromArgb(180, 60, 60),
-                BackColor = Color.Transparent,
-                FlatStyle = FlatStyle.Flat,
-                Size      = new Size(24, 22),
-                Location  = new Point(344, 4),
-                TabStop   = false,
-                Font      = new Font("Segoe UI", 8F)
-            };
-            btnDelFolder.FlatAppearance.BorderSize = 0;
-            int folderId = folder.Id;
-            btnDelFolder.Click += (s, ev) =>
-            {
-                // Unassign files from this folder
-                foreach (var f in currentProject.Files.Where(f => f.FolderId == folderId))
-                    f.FolderId = null;
-                currentProject.Folders.RemoveAll(f => f.Id == folderId);
-                BuildEditorPanel();
-                RenderFileList();
-            };
-            folderHeader.Controls.Add(btnDelFolder);
-
-            parent.Controls.Add(folderHeader);
-            yPos += 70;
-
-            // Files assigned to this folder
-            var assignedFiles = currentProject.Files.Where(f => f.FolderId == folder.Id).ToList();
-            foreach (var file in assignedFiles)
-            {
-                yPos = AddFileCard(parent, file, folder, yPos, indent: 16);
-                yPos += 4;
+                var folder = currentProject.Folders.Find(f => f.Id == cur.Value);
+                if (folder == null) break;
+                parts.Insert(0, folder.Name);
+                cur = folder.ParentId;
             }
-
-            // "Assign file here" drop area
-            var btnAssign = new Button
-            {
-                Text      = "+ Assign file to this folder",
-                BackColor = Color.FromArgb(20, 20, 20),
-                ForeColor = Color.FromArgb(100, 80, 80),
-                FlatStyle = FlatStyle.Flat,
-                Size      = new Size(344, 24),
-                Location  = new Point(16, yPos),
-                Font      = new Font("Syne", 7F),
-                TabStop   = false
-            };
-            btnAssign.FlatAppearance.BorderColor = Color.FromArgb(50, 30, 30);
-            int assignFolderId = folder.Id;
-            btnAssign.Click += (s, ev) => AssignFileToFolder_Click(assignFolderId);
-            parent.Controls.Add(btnAssign);
-            yPos += 28;
-
-            return yPos;
+            return string.Join("\\", parts);
         }
 
-        // ─── File card ────────────────────────────────────────────────────────
+        // ─── Toolbar commands ─────────────────────────────────────────────────
 
-        private int AddFileCard(Panel parent, OIVFileEntry file, OIVFolder? folder, int yPos, int indent)
+        private int? SelectedFolderId()
         {
-            int cardWidth = 362 - indent;
-
-            var card = new Panel
-            {
-                BackColor   = Color.FromArgb(26, 26, 26),
-                BorderStyle = BorderStyle.FixedSingle,
-                Size        = new Size(cardWidth, 108),
-                Location    = new Point(indent, yPos)
-            };
-
-            // Filename
-            card.Controls.Add(new Label
-            {
-                Text      = file.FileName,
-                ForeColor = Color.FromArgb(220, 220, 220),
-                Font      = new Font("Syne", 9F, FontStyle.Bold),
-                Size      = new Size(cardWidth - 80, 18),
-                Location  = new Point(8, 7)
-            });
-
-            // Source path hint
-            card.Controls.Add(new Label
-            {
-                Text      = TruncatePath(file.SourcePath, 52),
-                ForeColor = Color.FromArgb(70, 70, 70),
-                Font      = new Font("Consolas", 7F),
-                AutoSize  = true,
-                Location  = new Point(8, 26)
-            });
-
-            // Show the resolved full target path as a hint
-            string resolvedHint = folder != null
-                ? folder.ArchivePath.TrimEnd('\\') + "\\" + folder.Name + (string.IsNullOrWhiteSpace(file.TargetPath) ? "" : "\\" + file.TargetPath.TrimStart('\\')) + "\\" + file.FileName
-                : (string.IsNullOrWhiteSpace(file.TargetPath) ? file.FileName : file.TargetPath.TrimEnd('\\') + "\\" + file.FileName);
-
-            card.Controls.Add(new Label
-            {
-                Text      = "SUB-PATH (optional):",
-                ForeColor = Color.FromArgb(120, 80, 80),
-                Font      = new Font("Syne", 7F, FontStyle.Bold),
-                AutoSize  = true,
-                Location  = new Point(8, 44)
-            });
-
-            var txtPath = new TextBox
-            {
-                BackColor       = Color.Black,
-                ForeColor       = Color.FromArgb(200, 200, 200),
-                BorderStyle     = BorderStyle.FixedSingle,
-                Text            = file.TargetPath,
-                PlaceholderText = folder != null ? "sub-path inside folder (optional)" : "full target path",
-                Size            = new Size(cardWidth - 20, 20),
-                Location        = new Point(8, 60),
-                Font            = new Font("Consolas", 7F)
-            };
-            txtPath.TextChanged += (s, ev) =>
-            {
-                file.TargetPath = txtPath.Text;
-                RenderFileList();
-            };
-            card.Controls.Add(txtPath);
-
-            // Type dropdown
-            var typeBox = new ComboBox
-            {
-                BackColor     = Color.Black,
-                ForeColor     = Color.FromArgb(200, 200, 200),
-                FlatStyle     = FlatStyle.Flat,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Size          = new Size(90, 20),
-                Location      = new Point(8, 84),
-                Font          = new Font("Syne", 7F)
-            };
-            typeBox.Items.AddRange(new object[] { "Content", "Replace", "XML Edit" });
-            typeBox.SelectedIndex = file.Type switch { "replace" => 1, "xmledit" => 2, _ => 0 };
-            typeBox.SelectedIndexChanged += (s, ev) =>
-            {
-                file.Type = typeBox.SelectedIndex switch { 1 => "replace", 2 => "xmledit", _ => "content" };
-            };
-            card.Controls.Add(typeBox);
-
-            // Unassign button (only when inside a folder)
-            if (folder != null)
-            {
-                var btnUnassign = new Button
-                {
-                    Text      = "Unassign",
-                    BackColor = Color.FromArgb(30, 30, 30),
-                    ForeColor = Color.FromArgb(140, 100, 100),
-                    FlatStyle = FlatStyle.Flat,
-                    Size      = new Size(64, 20),
-                    Location  = new Point(cardWidth - 146, 84),
-                    Font      = new Font("Syne", 7F),
-                    TabStop   = false
-                };
-                btnUnassign.FlatAppearance.BorderSize = 0;
-                btnUnassign.Click += (s, ev) =>
-                {
-                    file.FolderId = null;
-                    file.TargetPath = string.Empty;
-                    BuildEditorPanel();
-                };
-                card.Controls.Add(btnUnassign);
-            }
-
-            // Remove button
-            var btnRem = new Button
-            {
-                Text      = "Remove",
-                BackColor = Color.FromArgb(60, 0, 0),
-                ForeColor = Color.FromArgb(220, 130, 130),
-                FlatStyle = FlatStyle.Flat,
-                Size      = new Size(60, 20),
-                Location  = new Point(cardWidth - 76, 84),
-                Font      = new Font("Syne", 7F),
-                TabStop   = false
-            };
-            btnRem.FlatAppearance.BorderSize = 0;
-            int fid = file.Id;
-            btnRem.Click += (s, ev) =>
-            {
-                currentProject.Files.RemoveAll(f => f.Id == fid);
-                BuildEditorPanel();
-                RenderFileList();
-            };
-            card.Controls.Add(btnRem);
-
-            parent.Controls.Add(card);
-            return yPos + card.Height;
+            var tag = editorTree?.SelectedNode?.Tag;
+            if (tag is OIVFolder f) return f.Id;
+            if (tag is OIVFileEntry file) return file.FolderId;
+            return null; // root or nothing selected
         }
 
-        // ─── Add Folder dialog ────────────────────────────────────────────────
+        private void TreeCmd_NewFolder() => TreeCmd_NewNode(isRpf: false);
+        private void TreeCmd_NewRpf()    => TreeCmd_NewNode(isRpf: true);
 
-        private void AddFolder_Click()
+        private void TreeCmd_NewNode(bool isRpf)
         {
-            // Simple inline dialog using a small Form
-            using var dlg = new Form
-            {
-                Text            = "New Folder",
-                BackColor       = Color.FromArgb(20, 20, 20),
-                ForeColor       = Color.FromArgb(200, 160, 160),
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                StartPosition   = FormStartPosition.CenterParent,
-                ClientSize      = new Size(380, 175),
-                MaximizeBox     = false,
-                MinimizeBox     = false,
-                ControlBox      = false,
-                Font            = new Font("Syne", 9F)
-            };
-
-            void AddLbl(string text, int y) => dlg.Controls.Add(new Label
-            {
-                Text = text, ForeColor = Color.FromArgb(160, 110, 110),
-                Font = new Font("Syne", 8F, FontStyle.Bold),
-                AutoSize = true, Location = new Point(14, y)
-            });
-
-            TextBox MakeTxt(string placeholder, int y, string val = "")
-            {
-                var t = new TextBox
-                {
-                    BackColor = Color.Black, ForeColor = Color.FromArgb(200, 200, 200),
-                    BorderStyle = BorderStyle.FixedSingle, PlaceholderText = placeholder,
-                    Text = val, Size = new Size(350, 22), Location = new Point(14, y),
-                    Font = new Font("Consolas", 9F)
-                };
-                dlg.Controls.Add(t);
-                return t;
-            }
-
-            AddLbl("FOLDER NAME (e.g. MyMod_dlc)", 12);
-            var txtName = MakeTxt("MyMod_dlc", 30);
-
-            AddLbl("ARCHIVE PATH (where the folder lives)", 62);
-            var txtPath = MakeTxt(@"mods\update\x64\dlcpacks", 80);
-
-            var chkDlc = new CheckBox
-            {
-                Text      = "Add to dlclist.xml on install",
-                ForeColor = Color.FromArgb(180, 120, 120),
-                BackColor = Color.Transparent,
-                Font      = new Font("Syne", 8F),
-                AutoSize  = true,
-                Location  = new Point(14, 112),
-                Checked   = true
-            };
-            dlg.Controls.Add(chkDlc);
-
-            var btnOk = new Button
-            {
-                Text      = "Add Folder",
-                BackColor = Color.FromArgb(80, 0, 0),
-                ForeColor = Color.FromArgb(220, 160, 160),
-                FlatStyle = FlatStyle.Flat,
-                Size      = new Size(110, 28),
-                Location  = new Point(14, 138),
-                DialogResult = DialogResult.OK
-            };
-            btnOk.FlatAppearance.BorderColor = Color.FromArgb(120, 40, 40);
-            dlg.Controls.Add(btnOk);
-            dlg.Controls.Add(new Button
-            {
-                Text         = "Cancel",
-                BackColor    = Color.FromArgb(30, 30, 30),
-                ForeColor    = Color.FromArgb(140, 100, 100),
-                FlatStyle    = FlatStyle.Flat,
-                Size         = new Size(80, 28),
-                Location     = new Point(132, 138),
-                DialogResult = DialogResult.Cancel
-            });
-            dlg.AcceptButton = btnOk;
-
-            if (dlg.ShowDialog(this) != DialogResult.OK) return;
-
-            string name = txtName.Text.Trim();
+            string kind = isRpf ? "RPF archive" : "folder";
+            string name = PromptName($"New {kind} name:", isRpf ? "myarchive.rpf" : "MyFolder");
             if (string.IsNullOrWhiteSpace(name)) return;
 
             currentProject.Folders.Add(new OIVFolder
             {
-                Id          = currentProject.NextId++,
-                Name        = name,
-                ArchivePath = txtPath.Text.Trim(),
-                AddToDlcList = chkDlc.Checked
+                Id       = currentProject.NextId++,
+                Name     = name,
+                ParentId = SelectedFolderId(),
+                IsRpf    = isRpf
             });
-
-            BuildEditorPanel();
-        }
-
-        // ─── Assign file to folder ────────────────────────────────────────────
-
-        private void AssignFileToFolder_Click(int folderId)
-        {
-            var unassigned = currentProject.Files.Where(f => !f.FolderId.HasValue).ToList();
-            if (unassigned.Count == 0)
-            {
-                MessageBox.Show("All files are already assigned to a folder.", "Nothing to assign",
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            using var dlg = new Form
-            {
-                Text            = "Assign File",
-                BackColor       = Color.FromArgb(20, 20, 20),
-                FormBorderStyle = FormBorderStyle.FixedDialog,
-                StartPosition   = FormStartPosition.CenterParent,
-                ClientSize      = new Size(340, unassigned.Count * 32 + 70),
-                MaximizeBox     = false,
-                MinimizeBox     = false,
-                ControlBox      = false,
-                Font            = new Font("Syne", 9F)
-            };
-
-            dlg.Controls.Add(new Label
-            {
-                Text      = "SELECT FILE TO ASSIGN:",
-                ForeColor = Color.FromArgb(160, 110, 110),
-                Font      = new Font("Syne", 8F, FontStyle.Bold),
-                AutoSize  = true,
-                Location  = new Point(14, 12)
-            });
-
-            var listBox = new ListBox
-            {
-                BackColor     = Color.Black,
-                ForeColor     = Color.FromArgb(200, 200, 200),
-                BorderStyle   = BorderStyle.FixedSingle,
-                Size          = new Size(310, unassigned.Count * 20 + 4),
-                Location      = new Point(14, 34),
-                Font          = new Font("Syne", 9F),
-                SelectionMode = SelectionMode.MultiExtended
-            };
-            foreach (var f in unassigned) listBox.Items.Add(f.FileName);
-            dlg.Controls.Add(listBox);
-
-            int btnY = 34 + listBox.Height + 8;
-            dlg.ClientSize = new Size(340, btnY + 38);
-
-            var btnOk = new Button
-            {
-                Text         = "Assign",
-                BackColor    = Color.FromArgb(80, 0, 0),
-                ForeColor    = Color.FromArgb(220, 160, 160),
-                FlatStyle    = FlatStyle.Flat,
-                Size         = new Size(90, 28),
-                Location     = new Point(14, btnY),
-                DialogResult = DialogResult.OK
-            };
-            dlg.Controls.Add(btnOk);
-            dlg.AcceptButton = btnOk;
-            dlg.Controls.Add(new Button
-            {
-                Text         = "Cancel",
-                BackColor    = Color.FromArgb(30, 30, 30),
-                ForeColor    = Color.FromArgb(140, 100, 100),
-                FlatStyle    = FlatStyle.Flat,
-                Size         = new Size(70, 28),
-                Location     = new Point(112, btnY),
-                DialogResult = DialogResult.Cancel
-            });
-
-            if (dlg.ShowDialog(this) != DialogResult.OK) return;
-
-            foreach (int i in listBox.SelectedIndices)
-            {
-                unassigned[i].FolderId  = folderId;
-                unassigned[i].TargetPath = string.Empty;
-            }
-
-            BuildEditorPanel();
+            RebuildTree();
             RenderFileList();
         }
 
-        private TextBox? lastFocusedPathBox = null;
-        private void ApplyPresetToLastFocused(string path)
+        private void TreeCmd_AddFile()
         {
-            if (lastFocusedPathBox != null)
-                lastFocusedPathBox.Text = path;
+            int? parentFolderId = SelectedFolderId();
+
+            using var dlg = new OpenFileDialog
+            {
+                Title       = "Add file to selected folder",
+                Multiselect = true,
+                Filter      = "All Files (*.*)|*.*"
+            };
+            if (dlg.ShowDialog() != DialogResult.OK) return;
+
+            foreach (string path in dlg.FileNames)
+            {
+                currentProject.Files.Add(new OIVFileEntry
+                {
+                    Id         = currentProject.NextId++,
+                    SourcePath = path,
+                    FileName   = Path.GetFileName(path),
+                    SubPath    = string.Empty,
+                    Type       = "content",
+                    FolderId   = parentFolderId
+                });
+            }
+            RebuildTree();
+            RenderFileList();
+        }
+
+        private void TreeCmd_Rename()
+        {
+            var node = editorTree?.SelectedNode;
+            if (node == null) return;
+
+            if (node.Tag is OIVFolder folder)
+            {
+                string name = PromptName("Rename folder:", folder.Name);
+                if (!string.IsNullOrWhiteSpace(name))
+                {
+                    folder.Name = name;
+                    RebuildTree();
+                    RenderFileList();
+                }
+            }
+            else if (node.Tag is OIVFileEntry)
+            {
+                MessageBox.Show("File names are determined by the source file.\nRe-add the file to change it.",
+                    "Cannot Rename", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
+
+        private void TreeCmd_Delete()
+        {
+            var node = editorTree?.SelectedNode;
+            if (node == null) return;
+
+            if (node.Tag is OIVFolder folder)
+            {
+                // Collect all descendant folder IDs
+                var toRemove = new HashSet<int>();
+                CollectDescendants(folder.Id, toRemove);
+                toRemove.Add(folder.Id);
+
+                // Unassign / remove files in those folders
+                foreach (var file in currentProject.Files.ToList())
+                {
+                    if (file.FolderId.HasValue && toRemove.Contains(file.FolderId.Value))
+                        currentProject.Files.Remove(file);
+                }
+                currentProject.Folders.RemoveAll(f => toRemove.Contains(f.Id));
+            }
+            else if (node.Tag is OIVFileEntry file)
+            {
+                int fid = file.Id;
+                currentProject.Files.RemoveAll(f => f.Id == fid);
+            }
+
+            RebuildTree();
+            RenderFileList();
+        }
+
+        private void CollectDescendants(int folderId, HashSet<int> set)
+        {
+            foreach (var child in currentProject.Folders.Where(f => f.ParentId == folderId))
+            {
+                set.Add(child.Id);
+                CollectDescendants(child.Id, set);
+            }
+        }
+
+        private void EditorTree_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Delete) TreeCmd_Delete();
+            if (e.KeyCode == Keys.F2)     TreeCmd_Rename();
+        }
+
+        private void EditorTree_MouseDoubleClick(object? sender, MouseEventArgs e)
+        {
+            // Double-clicking a file node opens its source in Explorer
+            if (editorTree?.SelectedNode?.Tag is OIVFileEntry file && File.Exists(file.SourcePath))
+            {
+                System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{file.SourcePath}\"");
+            }
+        }
+
+        private void EditorTree_DragDrop(object? sender, DragEventArgs e)
+        {
+            if (e.Data == null) return;
+            string[]? paths = e.Data.GetData(DataFormats.FileDrop) as string[];
+            if (paths == null) return;
+
+            int? parentFolderId = SelectedFolderId();
+            foreach (string path in paths)
+            {
+                if (!File.Exists(path)) continue;
+                currentProject.Files.Add(new OIVFileEntry
+                {
+                    Id         = currentProject.NextId++,
+                    SourcePath = path,
+                    FileName   = Path.GetFileName(path),
+                    SubPath    = string.Empty,
+                    Type       = "content",
+                    FolderId   = parentFolderId
+                });
+            }
+            RebuildTree();
+            RenderFileList();
+        }
+
+        // ─── Prompt helper ────────────────────────────────────────────────────
+
+        private string PromptName(string label, string defaultVal)
+        {
+            using var dlg = new Form
+            {
+                Text            = label,
+                BackColor       = Color.FromArgb(20, 20, 20),
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                StartPosition   = FormStartPosition.CenterParent,
+                ClientSize      = new Size(320, 86),
+                MaximizeBox     = false,
+                MinimizeBox     = false,
+                ControlBox      = false
+            };
+            dlg.Controls.Add(new Label
+            {
+                Text = label, ForeColor = Color.FromArgb(160, 110, 110),
+                Font = new Font("Syne", 8F, FontStyle.Bold),
+                AutoSize = true, Location = new Point(12, 10)
+            });
+            var txt = new TextBox
+            {
+                BackColor = Color.Black, ForeColor = Color.FromArgb(210, 210, 210),
+                BorderStyle = BorderStyle.FixedSingle, Text = defaultVal,
+                Size = new Size(294, 22), Location = new Point(12, 28),
+                Font = new Font("Consolas", 9F)
+            };
+            dlg.Controls.Add(txt);
+            var ok = new Button
+            {
+                Text = "OK", DialogResult = DialogResult.OK,
+                BackColor = Color.FromArgb(70, 0, 0), ForeColor = Color.FromArgb(220, 160, 160),
+                FlatStyle = FlatStyle.Flat, Size = new Size(70, 26), Location = new Point(12, 54)
+            };
+            ok.FlatAppearance.BorderColor = Color.FromArgb(110, 40, 40);
+            dlg.Controls.Add(ok);
+            dlg.Controls.Add(new Button
+            {
+                Text = "Cancel", DialogResult = DialogResult.Cancel,
+                BackColor = Color.FromArgb(30, 30, 30), ForeColor = Color.FromArgb(140, 100, 100),
+                FlatStyle = FlatStyle.Flat, Size = new Size(70, 26), Location = new Point(90, 54)
+            });
+            dlg.AcceptButton = ok;
+            txt.SelectAll();
+
+            return dlg.ShowDialog(this) == DialogResult.OK ? txt.Text.Trim() : string.Empty;
         }
 
         // ─────────────────── FILE LIST (WebView) ───────────────────

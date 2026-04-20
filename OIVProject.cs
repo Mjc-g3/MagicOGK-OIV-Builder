@@ -7,20 +7,28 @@ namespace MagicOGK_OIV_Builder
         public int    Id         { get; set; }
         public string FileName   { get; set; } = string.Empty;
         public string SourcePath { get; set; } = string.Empty;
-        public string TargetPath { get; set; } = string.Empty;
-        public string Type       { get; set; } = "content";
-        // Which folder node this file lives under (null = unassigned root)
-        public int? FolderId { get; set; } = null;
+        // SubPath is the path inside the parent folder (usually empty — file sits directly in folder)
+        public string SubPath    { get; set; } = string.Empty;
+        public string Type       { get; set; } = "content";  // content | replace | xmledit
+        // Which OIVFolder node this file is placed under (null = unassigned / loose)
+        public int?   FolderId   { get; set; } = null;
+
+        // Legacy compat — kept so old .mogk files deserialise cleanly
+        public string TargetPath { get => SubPath; set => SubPath = value; }
     }
 
-    // Represents a named folder the user defines inside the OIV (e.g. a dlcpack folder)
+    // A node in the virtual folder tree inside the .oiv.
+    // The tree is: Root → any number of nested OIVFolders → files at the leaves.
     public class OIVFolder
     {
         public int    Id          { get; set; }
-        public string Name        { get; set; } = string.Empty;  // folder name, e.g. "MyMod_dlc"
-        // Full RPF path this folder lives inside, e.g. "mods\update\x64\dlcpacks"
-        public string ArchivePath { get; set; } = string.Empty;
-        // Whether to register this folder in dlclist.xml automatically on install
+        public string Name        { get; set; } = string.Empty;
+        // null = direct child of Root
+        public int?   ParentId    { get; set; } = null;
+        // True if this node is an RPF archive (shown with a different icon, affects assembly.xml)
+        public bool   IsRpf       { get; set; } = false;
+        // Whether to register this folder in dlclist.xml automatically on install.
+        // Only meaningful on leaf folders that represent DLC packs.
         public bool   AddToDlcList { get; set; } = false;
     }
 
