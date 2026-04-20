@@ -683,6 +683,13 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             currentProject.Description = txtDescription.Text.Trim();
             if (dropdownVersionTag.SelectedItem != null)
                 currentProject.VersionTag = dropdownVersionTag.SelectedItem.ToString() ?? "Stable";
+
+            // Store banner color as hex string (RRGGBB)
+            var c = panelColorPicker.BackColor;
+            currentProject.BannerColor = $"{c.R:X2}{c.G:X2}{c.B:X2}";
+
+            if (selectedPhotoPath != null)
+                currentProject.PhotoPath = selectedPhotoPath;
         }
 
         private void LoadProjectIntoUI()
@@ -699,6 +706,31 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
                     dropdownVersionTag.SelectedIndex = i;
                     break;
                 }
+            }
+
+            // Restore banner color
+            if (!string.IsNullOrWhiteSpace(currentProject.BannerColor))
+            {
+                try
+                {
+                    string hex = currentProject.BannerColor.TrimStart('#');
+                    if (hex.Length == 6)
+                    {
+                        int r = Convert.ToInt32(hex.Substring(0, 2), 16);
+                        int g = Convert.ToInt32(hex.Substring(2, 2), 16);
+                        int b = Convert.ToInt32(hex.Substring(4, 2), 16);
+                        panelColorPicker.BackColor = Color.FromArgb(r, g, b);
+                    }
+                }
+                catch { }
+            }
+
+            // Restore photo
+            if (!string.IsNullOrWhiteSpace(currentProject.PhotoPath) && File.Exists(currentProject.PhotoPath))
+            {
+                selectedPhotoPath = currentProject.PhotoPath;
+                btnAddPhoto.Text  = "CHANGE";
+                panelPhotoPreview.Invalidate();
             }
         }
 
