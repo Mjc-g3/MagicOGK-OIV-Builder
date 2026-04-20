@@ -11,41 +11,10 @@ using System.Xml;
 
 namespace MagicOGK_OIV_Builder
 {
-    // ── Internal model ────────────────────────────────────────────────────────
-
-    // Represents one RPF archive block in the assembly.xml <content> section.
-    // Mirrors the OIVArchive model from the reference source.
-    internal class ArchiveBlock
-    {
-        // Full path of the RPF as seen by OpenIV, e.g. "mods\update\x64\dlcpacks\mod1\dlc.rpf"
-        public string  RpfPath         { get; set; } = string.Empty;
-        // The short name used for the rpf/ subfolder inside the .oiv content folder
-        public string  ContentFolderName { get; set; } = string.Empty;
-        public bool    CreateIfNotExist  { get; set; } = true;
-        // Always RPF7 for GTA5
-        public string  ArchiveType       { get; set; } = "RPF7";
-        // Files inside this archive
-        public List<ArchiveFile> Files   { get; set; } = new List<ArchiveFile>();
-    }
-
-    internal class ArchiveFile
-    {
-        public string SourcePath   { get; set; } = string.Empty; // absolute path on disk
-        public string NameInRpf    { get; set; } = string.Empty; // path+name inside the RPF
-        public string Type         { get; set; } = "content";    // content | xmledit
-    }
-
-    internal class LooseFile
-    {
-        public string SourcePath { get; set; } = string.Empty;
-        public string Destination { get; set; } = string.Empty; // path as seen by OpenIV
-        public string Type        { get; set; } = "content";
-    }
-
-    // ── Builder ───────────────────────────────────────────────────────────────
-
     public static class OIVBuilder
     {
+        // ── Entry point ───────────────────────────────────────────────────────
+
         public static void Build(OIVProject project, string outputPath)
         {
             foreach (var file in project.Files)
@@ -57,112 +26,45 @@ namespace MagicOGK_OIV_Builder
 
             try
             {
-                // ── Classify every file into RPF archives vs loose files ──────
-                var archives   = new Dictionary<string, ArchiveBlock>(StringComparer.OrdinalIgnoreCase);
-                var looseFiles = new List<LooseFile>();
+                // ── content/ folder: all mod files copied here, flat ─────────
+                // Per spec: source attribute = filename inside content/, no subfolders needed.
+                string contentDir = Path.Combine(tempDir, "content");
+                Directory.CreateDirectory(contentDir);
+
+                // Build a deduplication map: source file path → safe content filename
+                var sourceToContentName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                var usedNames           = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
                 foreach (var file in project.Files)
                 {
-                    string fullTarget = ResolveTargetPath(file, project).Replace('/', '\\').TrimStart('\\');
-
-                    // Find the deepest .rpf segment — everything before it is the
-                    // archive path, everything after is the path inside the RPF.
-                    string rpfPath = ExtractDeepestRpfPath(fullTarget);
-
-                    if (string.IsNullOrEmpty(rpfPath))
-                    {
-                        // Loose file — no RPF in path
-                        looseFiles.Add(new LooseFile
-                        {
-                            SourcePath  = file.SourcePath,
-                            Destination = fullTarget,
-                            Type        = file.Type
-                        });
-                    }
-                    else
-                    {
-                        // File goes inside an RPF archive
-                        string nameInRpf = fullTarget.Length > rpfPath.Length
-                            ? fullTarget.Substring(rpfPath.Length).TrimStart('\\')
-                            : file.FileName;
-
-                        if (!archives.ContainsKey(rpfPath))
-                        {
-                            // Content folder name = last segment of the rpf path without extension
-                            string rpfShortName = Path.GetFileNameWithoutExtension(rpfPath);
-                            // Make unique if two RPFs share a short name
-                            string contentFolderName = MakeUnique(rpfShortName,
-                                new HashSet<string>(archives.Values.Select(a => a.ContentFolderName),
-                                    StringComparer.OrdinalIgnoreCase));
-
-                            archives[rpfPath] = new ArchiveBlock
-                            {
-                                RpfPath          = rpfPath,
-                                ContentFolderName = contentFolderName,
-                                CreateIfNotExist  = true,
-                                ArchiveType       = "RPF7"
-                            };
-                        }
-
-                        archives[rpfPath].Files.Add(new ArchiveFile
-                        {
-                            SourcePath = file.SourcePath,
-                            NameInRpf  = string.IsNullOrWhiteSpace(nameInRpf) ? file.FileName : nameInRpf,
-                            Type       = file.Type
-                        });
-                    }
+                    if (sourceToContentName.ContainsKey(file.SourcePath)) continue;
+                    string name = MakeUniqueName(file.FileName, usedNames);
+                    usedNames.Add(name);
+                    sourceToContentName[file.SourcePath] = name;
+                    File.Copy(file.SourcePath, Path.Combine(contentDir, name), overwrite: true);
                 }
 
-                // ── Write content/ directory structure ────────────────────────
-                // RPF files:   content/rpf/<ContentFolderName>/<NameInRpf>
-                // Loose files: content/file/<Destination>
-                // DLC patches: content/file/__dlclist_<id>.xml
-
-                // RPF content
-                foreach (var arc in archives.Values)
-                {
-                    string arcDir = Path.Combine(tempDir, "content", "rpf", arc.ContentFolderName);
-                    Directory.CreateDirectory(arcDir);
-                    foreach (var f in arc.Files)
-                    {
-                        string destPath = Path.Combine(arcDir, f.NameInRpf.Replace('\\', Path.DirectorySeparatorChar));
-                        Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
-                        File.Copy(f.SourcePath, destPath, overwrite: true);
-                    }
-                }
-
-                // Loose file content
-                if (looseFiles.Count > 0)
-                {
-                    Directory.CreateDirectory(Path.Combine(tempDir, "content", "file"));
-                    foreach (var f in looseFiles)
-                    {
-                        // Preserve the destination path structure inside file/
-                        string rel      = f.Destination.TrimStart('\\');
-                        string destPath = Path.Combine(tempDir, "content", "file", rel.Replace('\\', Path.DirectorySeparatorChar));
-                        Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
-                        File.Copy(f.SourcePath, destPath, overwrite: true);
-                    }
-                }
-
-                // DLC list patch XMLs
-                WriteDlcListPatches(project, Path.Combine(tempDir, "content", "file"));
-
-                // ── icon.png ──────────────────────────────────────────────────
-                // Must be exactly 128×128 per the reference source
-                string iconDest = Path.Combine(tempDir, "icon.png");
+                // ── icon.png in package root ──────────────────────────────────
+                // Spec: optional, must be exactly 128×128 px, named icon.png at root.
+                string iconPath = Path.Combine(tempDir, "icon.png");
                 if (!string.IsNullOrWhiteSpace(project.PhotoPath) && File.Exists(project.PhotoPath))
-                    CreateIcon128(project.PhotoPath, iconDest);
+                    CreateIcon128(project.PhotoPath, iconPath);
                 else
-                    CreateDefaultIcon(iconDest);
+                    CreateDefaultIcon(iconPath);
 
                 // ── assembly.xml ──────────────────────────────────────────────
-                string xml = BuildAssemblyXml(project, archives.Values.ToList(), looseFiles);
-                File.WriteAllText(Path.Combine(tempDir, "assembly.xml"), xml, new UTF8Encoding(false));
+                string assemblyXml = BuildAssemblyXml(project, sourceToContentName);
+                File.WriteAllText(
+                    Path.Combine(tempDir, "assembly.xml"),
+                    assemblyXml,
+                    new UTF8Encoding(false));
 
-                // ── Zip into .oiv ─────────────────────────────────────────────
+                // ── Zip to .oiv ───────────────────────────────────────────────
                 if (File.Exists(outputPath)) File.Delete(outputPath);
-                ZipFile.CreateFromDirectory(tempDir, outputPath, CompressionLevel.Optimal, includeBaseDirectory: false);
+                ZipFile.CreateFromDirectory(
+                    tempDir, outputPath,
+                    CompressionLevel.Optimal,
+                    includeBaseDirectory: false);
             }
             finally
             {
@@ -170,15 +72,244 @@ namespace MagicOGK_OIV_Builder
             }
         }
 
-        // ─── Target path resolution ───────────────────────────────────────────
-        // Walks up the parent folder chain to build the full install path.
-        // Root → update → x64 → dlcpacks → mod1 → dlc.rpf → "" (file sits in RPF root)
-        // produces: update\x64\dlcpacks\mod1\dlc.rpf
+        // ── assembly.xml generation ───────────────────────────────────────────
 
-        private static string ResolveTargetPath(OIVFileEntry file, OIVProject project)
+        private static string BuildAssemblyXml(
+            OIVProject project,
+            Dictionary<string, string> sourceToContentName)
+        {
+            var doc = new XmlDocument();
+            doc.InsertBefore(
+                doc.CreateXmlDeclaration("1.0", "UTF-8", null),
+                doc.DocumentElement);
+
+            // <package version="2.2" id="{GUID}" target="Five">
+            var pkg = AppendElem(doc, doc, "package");
+            pkg.SetAttribute("version", "2.2");
+            pkg.SetAttribute("id",     "{" + Guid.NewGuid().ToString().ToUpper() + "}");
+            pkg.SetAttribute("target", "Five");
+
+            WriteMetadata(doc, pkg, project);
+            WriteColors(doc, pkg, project);
+            WriteContent(doc, pkg, project, sourceToContentName);
+
+            var sb = new StringBuilder();
+            using (var sw = new StringWriterUtf8(sb))
+            using (var w  = new XmlTextWriter(sw) { Formatting = Formatting.Indented, Indentation = 1, IndentChar = '\t' })
+                doc.Save(w);
+            return sb.ToString();
+        }
+
+        // ── <metadata> ────────────────────────────────────────────────────────
+
+        private static void WriteMetadata(XmlDocument doc, XmlElement pkg, OIVProject p)
+        {
+            var meta = AppendElem(doc, pkg, "metadata");
+            AppendElem(doc, meta, "name").InnerText = p.ModName;
+
+            var ver = AppendElem(doc, meta, "version");
+            AppendElem(doc, ver, "major").InnerText = GetVersionPart(p.Version, 0);
+            AppendElem(doc, ver, "minor").InnerText = GetVersionPart(p.Version, 1);
+            if (!string.IsNullOrWhiteSpace(p.VersionTag))
+                AppendElem(doc, ver, "tag").InnerText = p.VersionTag.ToUpper();
+
+            var author = AppendElem(doc, meta, "author");
+            AppendElem(doc, author, "displayName").InnerText = p.Author;
+
+            var desc = AppendElem(doc, meta, "description");
+            desc.AppendChild(doc.CreateCDataSection(
+                string.IsNullOrWhiteSpace(p.Description)
+                    ? $"{p.ModName} by {p.Author}"
+                    : p.Description));
+        }
+
+        // ── <colors> ─────────────────────────────────────────────────────────
+
+        private static void WriteColors(XmlDocument doc, XmlElement pkg, OIVProject p)
+        {
+            Color hdr = string.IsNullOrWhiteSpace(p.BannerColor)
+                ? Color.FromArgb(255, 35, 54, 106)
+                : ParseHexColor(p.BannerColor);
+
+            var colors = AppendElem(doc, pkg, "colors");
+
+            var hdrBg = AppendElem(doc, colors, "headerBackground");
+            hdrBg.SetAttribute("useBlackTextColor", "False");
+            hdrBg.InnerText = ToArgbHex(hdr);
+
+            AppendElem(doc, colors, "iconBackground").InnerText =
+                ToArgbHex(Color.FromArgb(255, 59, 89, 152));
+        }
+
+        // ── <content> ────────────────────────────────────────────────────────
+        //
+        // The spec uses a recursive <archive> nesting model.
+        // We reconstruct that tree from the project's flat folder list + file list.
+        //
+        // Key rules from spec:
+        //   <add source="FileName.ext">install\path\FileName.ext</add>
+        //     source = just the filename inside content/ (no subfolder)
+        //     inner text = full install path in the game (may include subdirs inside the archive)
+        //
+        //   <archive path="full\path\to.rpf" createIfNotExist="True" type="RPF7">
+        //     ... <add> or nested <archive> children ...
+        //   </archive>
+        //
+        //   dlclist injection uses the inline <xml> command, no external patch files needed.
+
+        private static void WriteContent(
+            XmlDocument doc,
+            XmlElement pkg,
+            OIVProject project,
+            Dictionary<string, string> sourceToContentName)
+        {
+            var content = AppendElem(doc, pkg, "content");
+
+            // Separate files into RPF-bound vs loose
+            // RPF-bound: the resolved install path contains a .rpf segment
+            // Loose: installed directly into the game folder (scripts/, plugins/, etc.)
+
+            var looseFiles = new List<OIVFileEntry>();
+            // Map from top-level archive path → list of (file, path-inside-archive)
+            // We need to build a proper nested structure.
+
+            // Step 1: resolve every file's full install path
+            var resolved = new Dictionary<OIVFileEntry, string>();
+            foreach (var file in project.Files)
+                resolved[file] = ResolveInstallPath(file, project);
+
+            // Step 2: group by the outermost RPF in their path
+            // e.g. "update\update.rpf\common\data\water.xml"
+            //   → outermost RPF = "update\update.rpf"
+            //   → path inside RPF = "common\data\water.xml"
+            //
+            // Nested archives (rpf inside rpf) are handled recursively below.
+
+            foreach (var file in project.Files)
+            {
+                string path = resolved[file];
+                string outerRpf = ExtractFirstRpfPath(path);
+                if (string.IsNullOrEmpty(outerRpf))
+                    looseFiles.Add(file);
+                // RPF files are handled via the folder tree — see WriteArchiveNode
+            }
+
+            // Step 3: Write top-level archive nodes by recursing the folder tree
+            // Root-level folders (ParentId == null) that are RPF nodes become top-level <archive> elements.
+            // Non-RPF root folders contribute their path prefix but don't produce their own <archive> node
+            // (the children do).
+            WriteArchiveChildren(doc, content, project, project.Folders.Where(f => f.ParentId == null).ToList(), resolved, sourceToContentName);
+
+            // Step 4: Write loose files (no RPF in path)
+            foreach (var file in looseFiles)
+            {
+                string contentName = sourceToContentName[file.SourcePath];
+                string installPath = resolved[file];
+                var add = AppendElem(doc, content, "add");
+                add.SetAttribute("source", contentName);
+                add.InnerText = installPath;
+            }
+
+            // Step 5: dlclist.xml inline XML edits
+            // Per spec: use <xml path="common\data\dlclist.xml"> with <add append="Last" xpath="...">
+            // wrapped inside the update.rpf archive node.
+            var dlcFolders = project.Folders.Where(f => f.AddToDlcList).ToList();
+            if (dlcFolders.Count > 0)
+            {
+                // Check whether update.rpf is already in the tree; if not add it
+                // We always emit a separate block for dlclist edits to keep it clean
+                var updateRpf = AppendElem(doc, content, "archive");
+                updateRpf.SetAttribute("path",             @"update\update.rpf");
+                updateRpf.SetAttribute("createIfNotExist", "False");
+                updateRpf.SetAttribute("type",             "RPF7");
+
+                var xmlNode = AppendElem(doc, updateRpf, "xml");
+                xmlNode.SetAttribute("path", @"common\data\dlclist.xml");
+
+                foreach (var folder in dlcFolders)
+                {
+                    string dlcEntry = $@"dlcpacks:\{folder.Name}\";
+                    var addNode = AppendElem(doc, xmlNode, "add");
+                    addNode.SetAttribute("append", "Last");
+                    addNode.SetAttribute("xpath",  "/SMandatoryPacksData/Paths");
+                    AppendElem(doc, addNode, "Item").InnerText = dlcEntry;
+                }
+            }
+        }
+
+        // Recursively writes <archive> nodes for the folder tree, then <add> for files inside them.
+        private static void WriteArchiveChildren(
+            XmlDocument doc,
+            XmlElement parent,
+            OIVProject project,
+            List<OIVFolder> folders,
+            Dictionary<OIVFileEntry, string> resolved,
+            Dictionary<string, string> sourceToContentName)
+        {
+            foreach (var folder in folders)
+            {
+                // Files directly assigned to this folder
+                var filesHere = project.Files.Where(f => f.FolderId == folder.Id).ToList();
+                // Child folders
+                var children  = project.Folders.Where(f => f.ParentId == folder.Id).ToList();
+
+                if (folder.IsRpf)
+                {
+                    // This folder is an RPF archive — emit <archive path="...">
+                    string rpfPath = BuildFolderInstallPath(folder, project);
+
+                    var arc = AppendElem(doc, parent, "archive");
+                    arc.SetAttribute("path",             rpfPath);
+                    arc.SetAttribute("createIfNotExist", "True");
+                    arc.SetAttribute("type",             "RPF7");
+
+                    // Files inside this RPF: their install path is relative to the RPF root
+                    foreach (var file in filesHere)
+                    {
+                        string contentName = sourceToContentName[file.SourcePath];
+                        string fullPath    = resolved[file];
+                        // Strip the RPF path prefix — what remains is the path inside the RPF
+                        string insideRpf   = StripPrefix(fullPath, rpfPath);
+
+                        var add = AppendElem(doc, arc, "add");
+                        add.SetAttribute("source", contentName);
+                        // Inner text = path inside RPF (just the filename if at RPF root)
+                        add.InnerText = string.IsNullOrEmpty(insideRpf) ? file.FileName : insideRpf;
+                    }
+
+                    // Recurse child folders inside this RPF
+                    WriteArchiveChildren(doc, arc, project, children, resolved, sourceToContentName);
+                }
+                else
+                {
+                    // Non-RPF folder: its children either go into the parent archive node
+                    // or further down. Files here are loose relative to the parent context.
+                    foreach (var file in filesHere)
+                    {
+                        string contentName = sourceToContentName[file.SourcePath];
+                        string fullPath    = resolved[file];
+                        var add = AppendElem(doc, parent, "add");
+                        add.SetAttribute("source", contentName);
+                        add.InnerText = fullPath;
+                    }
+                    // Recurse into children under the same parent node
+                    WriteArchiveChildren(doc, parent, project, children, resolved, sourceToContentName);
+                }
+            }
+        }
+
+        // ── Path resolution ───────────────────────────────────────────────────
+
+        // Resolves the full install path for a file by walking up the folder tree.
+        // e.g. folders: update(non-rpf) → x64(non-rpf) → dlcpacks(non-rpf) → mod1(non-rpf) → dlc.rpf(rpf)
+        // file: dlc.rpf → install path = "update\x64\dlcpacks\mod1\dlc.rpf\dlc.rpf" ← file at root of RPF
+        // Actually the file sits INSIDE the rpf, so:
+        // install path for the <add> inner text = file.FileName (path inside the RPF)
+        // and the <archive path="..."> = "update\x64\dlcpacks\mod1\dlc.rpf"
+        private static string ResolveInstallPath(OIVFileEntry file, OIVProject project)
         {
             var parts = new List<string> { file.FileName };
-            int? cur = file.FolderId;
+            int? cur  = file.FolderId;
             while (cur.HasValue)
             {
                 var folder = project.Folders.Find(f => f.Id == cur.Value);
@@ -189,152 +320,47 @@ namespace MagicOGK_OIV_Builder
             return string.Join("\\", parts);
         }
 
-        // ─── assembly.xml ─────────────────────────────────────────────────────
-
-        private static string BuildAssemblyXml(
-            OIVProject project,
-            List<ArchiveBlock> archives,
-            List<LooseFile> looseFiles)
+        // Builds the install path for a folder node itself (used as archive path).
+        private static string BuildFolderInstallPath(OIVFolder target, OIVProject project)
         {
-            var doc = new XmlDocument();
-            doc.InsertBefore(doc.CreateXmlDeclaration("1.0", "UTF-8", null), doc.DocumentElement);
-
-            var pkg = doc.CreateElement("package");
-            SetAttr(doc, pkg, "version", "2.1");
-            SetAttr(doc, pkg, "id",      "{" + Guid.NewGuid().ToString().ToUpper() + "}");
-            SetAttr(doc, pkg, "target",  "Five");
-            doc.AppendChild(pkg);
-
-            // ── metadata ──────────────────────────────────────────────────────
-            var meta = Elem(doc, pkg, "metadata");
-            Elem(doc, meta, "name").InnerText = project.ModName;
-
-            var ver = Elem(doc, meta, "version");
-            Elem(doc, ver, "major").InnerText = GetVersionPart(project.Version, 0);
-            Elem(doc, ver, "minor").InnerText = GetVersionPart(project.Version, 1);
-            if (!string.IsNullOrWhiteSpace(project.VersionTag))
-                Elem(doc, ver, "tag").InnerText = project.VersionTag.ToUpper();
-
-            var auth = Elem(doc, meta, "author");
-            Elem(doc, auth, "displayName").InnerText = project.Author;
-
-            var desc = Elem(doc, meta, "description");
-            desc.AppendChild(doc.CreateCDataSection(
-                string.IsNullOrWhiteSpace(project.Description)
-                    ? $"{project.ModName} by {project.Author}"
-                    : project.Description));
-
-            // ── colors ────────────────────────────────────────────────────────
-            Color headerColor = string.IsNullOrWhiteSpace(project.BannerColor)
-                ? Color.FromArgb(255, 35, 54, 106)
-                : ParseHexColor(project.BannerColor);
-
-            var colors = Elem(doc, pkg, "colors");
-
-            var hdrBg = Elem(doc, colors, "headerBackground");
-            SetAttr(doc, hdrBg, "useBlackTextColor", "False");
-            hdrBg.InnerText = ToOivColor(headerColor);
-
-            Elem(doc, colors, "iconBackground").InnerText =
-                ToOivColor(Color.FromArgb(255, 59, 89, 152));
-
-            // ── content ───────────────────────────────────────────────────────
-            var content = Elem(doc, pkg, "content");
-
-            // Generic / loose files
-            foreach (var f in looseFiles)
+            var parts = new List<string> { target.Name };
+            int? cur  = target.ParentId;
+            while (cur.HasValue)
             {
-                var add = Elem(doc, content, "add");
-                SetAttr(doc, add, "source", @"file\" + f.Destination.TrimEnd('\\'));
-                add.InnerText = f.Destination.TrimEnd('\\');
+                var folder = project.Folders.Find(f => f.Id == cur.Value);
+                if (folder == null) break;
+                parts.Insert(0, folder.Name);
+                cur = folder.ParentId;
             }
-
-            // DLC list patches (written as generic files)
-            foreach (var folder in project.Folders.Where(f => f.AddToDlcList))
-            {
-                var add = Elem(doc, content, "add");
-                SetAttr(doc, add, "source", $@"file\__dlclist_{folder.Id}.xml");
-                add.InnerText = $@"__dlclist_{folder.Id}.xml";
-            }
-
-            // RPF archives
-            foreach (var arc in archives)
-            {
-                var arcElem = Elem(doc, content, "archive");
-                SetAttr(doc, arcElem, "path",            arc.RpfPath);
-                SetAttr(doc, arcElem, "createIfNotExist", arc.CreateIfNotExist.ToString());
-                SetAttr(doc, arcElem, "type",            arc.ArchiveType);
-
-                foreach (var f in arc.Files)
-                {
-                    string tag = f.Type == "xmledit" ? "xml" : "add";
-                    var fileElem = Elem(doc, arcElem, tag);
-                    // source path inside the .oiv content folder
-                    SetAttr(doc, fileElem, "source", $@"rpf\{arc.ContentFolderName}\{f.NameInRpf.TrimStart('\\')}");
-                    fileElem.InnerText = f.NameInRpf.TrimStart('\\');
-                }
-            }
-
-            // dlclist.xml edits as archive references in update.rpf
-            var dlcFolders = project.Folders.Where(f => f.AddToDlcList).ToList();
-            if (dlcFolders.Count > 0)
-            {
-                var updateRpf = Elem(doc, content, "archive");
-                SetAttr(doc, updateRpf, "path",            @"update\update.rpf");
-                SetAttr(doc, updateRpf, "createIfNotExist", "False");
-                SetAttr(doc, updateRpf, "type",            "RPF7");
-
-                var commonData = Elem(doc, updateRpf, "archive");
-                SetAttr(doc, commonData, "path",            @"common\data");
-                SetAttr(doc, commonData, "createIfNotExist", "False");
-                SetAttr(doc, commonData, "type",            "RPF7");
-
-                foreach (var folder in dlcFolders)
-                {
-                    var xmlElem = Elem(doc, commonData, "xml");
-                    SetAttr(doc, xmlElem, "source", $@"file\__dlclist_{folder.Id}.xml");
-                    xmlElem.InnerText = "dlclist.xml";
-                }
-            }
-
-            // Serialize
-            var ms = new MemoryStream();
-            using (var writer = new XmlTextWriter(ms, new UTF8Encoding(false)))
-            {
-                writer.Formatting = Formatting.Indented;
-                doc.Save(writer);
-            }
-            return Encoding.UTF8.GetString(ms.ToArray());
+            return string.Join("\\", parts);
         }
 
-        // ─── DLC list patch XMLs ──────────────────────────────────────────────
-
-        private static void WriteDlcListPatches(OIVProject project, string fileContentDir)
+        // Returns the path of the outermost .rpf segment.
+        // "update\update.rpf\common\data\water.xml" → "update\update.rpf"
+        // "scripts\asi.asi" → ""
+        private static string ExtractFirstRpfPath(string path)
         {
-            var dlcFolders = project.Folders.Where(f => f.AddToDlcList).ToList();
-            if (dlcFolders.Count == 0) return;
-
-            Directory.CreateDirectory(fileContentDir);
-
-            foreach (var folder in dlcFolders)
+            string[] parts = path.Split('\\');
+            var sb = new StringBuilder();
+            foreach (string p in parts)
             {
-                string dlcEntry = $"dlcpacks:/{folder.Name}/";
-                string patchXml =
-$@"<?xml version=""1.0"" encoding=""UTF-8""?>
-<SMandatoryPacksData>
-	<Paths>
-		<Item>{dlcEntry}</Item>
-	</Paths>
-</SMandatoryPacksData>";
-                File.WriteAllText(
-                    Path.Combine(fileContentDir, $"__dlclist_{folder.Id}.xml"),
-                    patchXml,
-                    new UTF8Encoding(false));
+                if (sb.Length > 0) sb.Append('\\');
+                sb.Append(p);
+                if (p.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase))
+                    return sb.ToString();
             }
+            return string.Empty;
         }
 
-        // ─── Icon helpers ─────────────────────────────────────────────────────
-        // Reference source: normalise to 128×128 with high quality resampling.
+        // Strips a prefix from a path (case-insensitive), leaving the remainder without leading backslash.
+        private static string StripPrefix(string path, string prefix)
+        {
+            if (path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                return path.Substring(prefix.Length).TrimStart('\\');
+            return path;
+        }
+
+        // ── Icon ──────────────────────────────────────────────────────────────
 
         private static void CreateIcon128(string sourcePath, string destPng)
         {
@@ -353,7 +379,7 @@ $@"<?xml version=""1.0"" encoding=""UTF-8""?>
             }
             catch
             {
-                File.Copy(sourcePath, destPng, overwrite: true);
+                try { File.Copy(sourcePath, destPng, overwrite: true); } catch { }
             }
         }
 
@@ -369,62 +395,38 @@ $@"<?xml version=""1.0"" encoding=""UTF-8""?>
             catch { }
         }
 
-        // ─── XML helpers ──────────────────────────────────────────────────────
+        // ── XML helpers ───────────────────────────────────────────────────────
 
-        private static XmlElement Elem(XmlDocument doc, XmlNode parent, string name)
+        private static XmlElement AppendElem(XmlDocument doc, XmlNode parent, string name)
         {
             var e = doc.CreateElement(name);
             parent.AppendChild(e);
             return e;
         }
 
-        private static void SetAttr(XmlDocument doc, XmlElement elem, string name, string value)
-        {
-            var attr = doc.CreateAttribute(name);
-            attr.Value = value;
-            elem.Attributes.Append(attr);
-        }
+        // ── Misc helpers ──────────────────────────────────────────────────────
 
-        // ─── Path helpers ─────────────────────────────────────────────────────
-
-        // Returns the deepest path prefix that ends at a .rpf segment.
-        // "update\x64\dlcpacks\mod1\dlc.rpf" → "update\x64\dlcpacks\mod1\dlc.rpf"
-        // "update\x64\dlcpacks\mod1\dlc.rpf\somefile.txt" → "update\x64\dlcpacks\mod1\dlc.rpf"
-        // "scripts\myscript.asi" → ""
-        private static string ExtractDeepestRpfPath(string target)
-        {
-            string[] parts = target.Split('\\');
-            var sb   = new StringBuilder();
-            string last = string.Empty;
-            foreach (string p in parts)
-            {
-                if (sb.Length > 0) sb.Append('\\');
-                sb.Append(p);
-                if (p.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase))
-                    last = sb.ToString();
-            }
-            return last;
-        }
-
-        private static string MakeUnique(string name, HashSet<string> used)
+        private static string MakeUniqueName(string name, HashSet<string> used)
         {
             if (!used.Contains(name)) return name;
+            string stem = Path.GetFileNameWithoutExtension(name);
+            string ext  = Path.GetExtension(name);
             int n = 2;
             string candidate;
-            do { candidate = $"{name}_{n++}"; } while (used.Contains(candidate));
+            do { candidate = $"{stem}_{n++}{ext}"; } while (used.Contains(candidate));
             return candidate;
         }
 
         private static string GetVersionPart(string version, int index)
         {
             if (string.IsNullOrWhiteSpace(version)) return "0";
-            string[] parts = version.Split('.');
-            return (index < parts.Length && int.TryParse(parts[index].Trim(), out int v))
+            var parts = version.Split('.');
+            return index < parts.Length && int.TryParse(parts[index].Trim(), out int v)
                 ? v.ToString() : "0";
         }
 
-        // OIV color format: $AARRGGBB
-        private static string ToOivColor(Color c)
+        // OIV color format per spec: $AARRGGBB (hex, uppercase OK)
+        private static string ToArgbHex(Color c)
             => $"${c.A:X2}{c.R:X2}{c.G:X2}{c.B:X2}";
 
         private static Color ParseHexColor(string hex)
@@ -434,12 +436,20 @@ $@"<?xml version=""1.0"" encoding=""UTF-8""?>
                 hex = hex.TrimStart('#');
                 if (hex.Length == 6)
                     return Color.FromArgb(255,
-                        Convert.ToInt32(hex.Substring(0, 2), 16),
-                        Convert.ToInt32(hex.Substring(2, 2), 16),
-                        Convert.ToInt32(hex.Substring(4, 2), 16));
+                        Convert.ToInt32(hex[..2], 16),
+                        Convert.ToInt32(hex[2..4], 16),
+                        Convert.ToInt32(hex[4..6], 16));
             }
             catch { }
             return Color.FromArgb(255, 35, 54, 106);
+        }
+
+        // XmlTextWriter needs a TextWriter that reports UTF-8 encoding
+        private sealed class StringWriterUtf8 : System.IO.StringWriter
+        {
+            private readonly StringBuilder _sb;
+            public StringWriterUtf8(StringBuilder sb) : base(sb) { _sb = sb; }
+            public override Encoding Encoding => new UTF8Encoding(false);
         }
     }
 }
