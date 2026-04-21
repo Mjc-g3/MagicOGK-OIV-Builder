@@ -17,172 +17,392 @@ namespace MagicOGK_OIV_Builder
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-
-            sidebarTimer    = new System.Windows.Forms.Timer(components);
-            editorTimer     = new System.Windows.Forms.Timer(components);
-
-            panelDrag       = new Panel();
-            panelLeft       = new Panel();
-            panelEditorRight= new Panel();
-            panelRight      = new Panel();
-            panelSidebar    = new Panel();
-            panelDropZone   = new Panel();
+            sidebarTimer = new System.Windows.Forms.Timer(components);
+            editorTimer = new System.Windows.Forms.Timer(components);
+            panelDrag = new Panel();
+            btnHamburger = new Button();
+            button7 = new Button();
+            button6 = new Button();
+            button5 = new Button();
+            panelLeft = new Panel();
+            panelEditorRight = new Panel();
+            panelRight = new Panel();
+            panelSidebar = new Panel();
+            lblSidebarTitle = new Label();
+            btnSidebarOpenProject = new Button();
+            btnSidebarSaveProjectAs = new Button();
+            btnSidebarOpenOIV = new Button();
+            btnSidebarBuildOIV = new Button();
+            btnSidebarFeedback = new Button();
+            panelDropZone = new Panel();
             panelPhotoPreview = new Panel();
-            panelColorPicker  = new Panel();
-
-            button5         = new Button();
-            button6         = new Button();
-            button7         = new Button();
-            btnHamburger    = new Button();
-
-            lblAuthor       = new Label();
-            lblModName      = new Label();
-            lblVersionTag   = new Label();
-            lblVersion      = new Label();
-            lblDescription  = new Label();
-            lblPhotoLabel   = new Label();
-            lblColorLabel   = new Label();
+            panelColorPicker = new Panel();
+            lblAuthor = new Label();
+            lblModName = new Label();
+            lblVersionTag = new Label();
+            lblVersion = new Label();
+            lblDescription = new Label();
+            lblPhotoLabel = new Label();
+            lblColorLabel = new Label();
             lblPackageFiles = new Label();
             lblAddFilesHint = new Label();
-            lblNoFiles      = new Label();
-            lblSidebarTitle = new Label();
-
-            txtAuthor       = new TextBox();
-            txtModName      = new TextBox();
-            txtVersion      = new TextBox();
-            txtDescription  = new TextBox();
+            lblNoFiles = new Label();
+            txtAuthor = new TextBox();
+            txtModName = new TextBox();
+            txtVersion = new TextBox();
+            txtDescription = new TextBox();
             dropdownVersionTag = new ComboBox();
-
-            btnAddPhoto     = new Button();
-            btnOpenEditor   = new Button();
-            btnBuildOIV     = new Button();
-            btnAddFiles     = new Button();
-
-            btnSidebarOpenProject   = new Button();
-            btnSidebarOpenOIV       = new Button();
-            btnSidebarSaveProjectAs = new Button();
-            btnSidebarBuildOIV      = new Button();
-            btnSidebarFeedback      = new Button();
-
+            btnAddPhoto = new Button();
+            btnOpenEditor = new Button();
+            btnBuildOIV = new Button();
+            btnAddFiles = new Button();
             webViewFileList = new Microsoft.Web.WebView2.WinForms.WebView2();
+            panelDrag.SuspendLayout();
+            panelSidebar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webViewFileList).BeginInit();
-
             SuspendLayout();
-
-            // ────────── FORM ──────────
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode       = AutoScaleMode.Font;
-            BackColor           = Color.FromArgb(13, 13, 13);
-            ClientSize          = new Size(1030, 660);
-            ControlBox          = false;
-            Font                = new Font("Syne", 9F);
-            FormBorderStyle     = FormBorderStyle.None;
-            Name                = "main";
-            StartPosition       = FormStartPosition.CenterScreen;
-            Text                = "MagicOGK OIV Builder";
-
-            // ────────── panelDrag (DockTop) ──────────
+            // 
+            // panelDrag
+            // 
             panelDrag.BackColor = Color.FromArgb(10, 10, 10);
-            panelDrag.Dock      = DockStyle.Top;
-            panelDrag.Height    = 28;
             panelDrag.Controls.Add(btnHamburger);
             panelDrag.Controls.Add(button7);
             panelDrag.Controls.Add(button6);
             panelDrag.Controls.Add(button5);
-
+            panelDrag.Dock = DockStyle.Top;
+            panelDrag.Location = new Point(0, 0);
+            panelDrag.Name = "panelDrag";
+            panelDrag.Size = new Size(1030, 28);
+            panelDrag.TabIndex = 4;
+            // 
+            // btnHamburger
+            // 
             btnHamburger.BackColor = Color.Transparent;
-            btnHamburger.FlatStyle = FlatStyle.Flat;
             btnHamburger.FlatAppearance.BorderSize = 0;
+            btnHamburger.FlatStyle = FlatStyle.Flat;
+            btnHamburger.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
             btnHamburger.ForeColor = Color.FromArgb(188, 143, 143);
-            btnHamburger.Font      = new Font("Segoe UI", 12F, FontStyle.Bold);
-            btnHamburger.Text      = "\u2630";
-            btnHamburger.Size      = new Size(36, 28);
-            btnHamburger.Location  = new Point(4, 0);
-            btnHamburger.TabStop   = false;
-
+            btnHamburger.Location = new Point(4, 0);
+            btnHamburger.Name = "btnHamburger";
+            btnHamburger.Size = new Size(36, 28);
+            btnHamburger.TabIndex = 0;
+            btnHamburger.TabStop = false;
+            btnHamburger.Text = "☰";
+            btnHamburger.UseVisualStyleBackColor = false;
+            btnHamburger.Click += btnHamburger_Click;
+            // 
+            // button7
+            // 
             button7.BackColor = Color.LimeGreen;
-            button7.FlatStyle = FlatStyle.Flat;
             button7.FlatAppearance.BorderColor = Color.DimGray;
-            button7.FlatAppearance.BorderSize  = 1;
-            button7.Size     = new Size(14, 14);
+            button7.FlatStyle = FlatStyle.Flat;
             button7.Location = new Point(969, 7);
-            button7.TabStop  = false;
-
+            button7.Name = "button7";
+            button7.Size = new Size(14, 14);
+            button7.TabIndex = 1;
+            button7.TabStop = false;
+            button7.UseVisualStyleBackColor = false;
+            button7.Click += button7_Click;
+            // 
+            // button6
+            // 
             button6.BackColor = Color.Khaki;
-            button6.FlatStyle = FlatStyle.Flat;
             button6.FlatAppearance.BorderColor = Color.DimGray;
-            button6.FlatAppearance.BorderSize  = 1;
-            button6.Size     = new Size(14, 14);
+            button6.FlatStyle = FlatStyle.Flat;
             button6.Location = new Point(986, 7);
-            button6.TabStop  = false;
-
+            button6.Name = "button6";
+            button6.Size = new Size(14, 14);
+            button6.TabIndex = 2;
+            button6.TabStop = false;
+            button6.UseVisualStyleBackColor = false;
+            button6.Click += button6_Click;
+            // 
+            // button5
+            // 
             button5.BackColor = Color.IndianRed;
-            button5.FlatStyle = FlatStyle.Flat;
             button5.FlatAppearance.BorderColor = Color.DimGray;
-            button5.FlatAppearance.BorderSize  = 1;
-            button5.Size     = new Size(14, 14);
+            button5.FlatStyle = FlatStyle.Flat;
             button5.Location = new Point(1003, 7);
-            button5.TabStop  = false;
-
-            // ────────── panelSidebar (DockLeft, starts width=0) ──────────
-            panelSidebar.BackColor     = Color.FromArgb(15, 15, 15);
-            panelSidebar.Dock          = DockStyle.Left;
-            panelSidebar.Width         = 0;
-            panelSidebar.Name          = "panelSidebar";
-
-            lblSidebarTitle.Text      = "MAGICOGK";
-            lblSidebarTitle.ForeColor = Color.FromArgb(139, 58, 58);
-            lblSidebarTitle.Font      = new Font("Syne", 9F, FontStyle.Bold);
-            lblSidebarTitle.Location  = new Point(14, 14);
-            lblSidebarTitle.AutoSize  = true;
-
-            StyleSidebarBtn(btnSidebarOpenProject,   "  Open Project",   55);
-            StyleSidebarBtn(btnSidebarSaveProjectAs, "  Save Project As", 105);
-            StyleSidebarBtn(btnSidebarOpenOIV,       "  Open OIV",        155);
-            StyleSidebarBtn(btnSidebarBuildOIV,      "  Build OIV",       205);
-            StyleSidebarBtn(btnSidebarFeedback,      "  Feedback",        530);
-
+            button5.Name = "button5";
+            button5.Size = new Size(14, 14);
+            button5.TabIndex = 3;
+            button5.TabStop = false;
+            button5.UseVisualStyleBackColor = false;
+            button5.Click += button5_Click;
+            // 
+            // panelLeft
+            // 
+            panelLeft.BackColor = Color.FromArgb(18, 18, 18);
+            panelLeft.Dock = DockStyle.Left;
+            panelLeft.Location = new Point(0, 28);
+            panelLeft.Name = "panelLeft";
+            panelLeft.Size = new Size(360, 632);
+            panelLeft.TabIndex = 2;
+            // 
+            // panelEditorRight
+            // 
+            panelEditorRight.BackColor = Color.FromArgb(22, 22, 22);
+            panelEditorRight.Dock = DockStyle.Right;
+            panelEditorRight.Location = new Point(1030, 28);
+            panelEditorRight.Name = "panelEditorRight";
+            panelEditorRight.Size = new Size(0, 632);
+            panelEditorRight.TabIndex = 1;
+            // 
+            // panelRight
+            // 
+            panelRight.BackColor = Color.FromArgb(13, 13, 13);
+            panelRight.Dock = DockStyle.Fill;
+            panelRight.Location = new Point(360, 28);
+            panelRight.Name = "panelRight";
+            panelRight.Size = new Size(670, 632);
+            panelRight.TabIndex = 0;
+            // 
+            // panelSidebar
+            // 
+            panelSidebar.BackColor = Color.FromArgb(15, 15, 15);
             panelSidebar.Controls.Add(lblSidebarTitle);
             panelSidebar.Controls.Add(btnSidebarOpenProject);
             panelSidebar.Controls.Add(btnSidebarSaveProjectAs);
             panelSidebar.Controls.Add(btnSidebarOpenOIV);
             panelSidebar.Controls.Add(btnSidebarBuildOIV);
             panelSidebar.Controls.Add(btnSidebarFeedback);
-
-            // ────────── panelLeft (DockLeft) ──────────
-            panelLeft.BackColor  = Color.FromArgb(18, 18, 18);
-            panelLeft.Dock       = DockStyle.Left;
-            panelLeft.Width      = 360;
-            panelLeft.AutoScroll = false;
-
-            SetupLeftPanelControls();
-
-            // ────────── panelEditorRight (DockRight, starts width=0) ──────────
-            panelEditorRight.BackColor = Color.FromArgb(22, 22, 22);
-            panelEditorRight.Dock      = DockStyle.Right;
-            panelEditorRight.Width     = 0;
-            panelEditorRight.AutoScroll = true;
-
-            // ────────── panelRight (DockFill) ──────────
-            panelRight.BackColor = Color.FromArgb(13, 13, 13);
-            panelRight.Dock      = DockStyle.Fill;
-
-            SetupRightPanelControls();
-
-            // ────────── Add to form in correct dock order ──────────
-            // DockTop first, then Left panels left-to-right, then Right, then Fill
-            Controls.Add(panelRight);        // Fill
-            Controls.Add(panelEditorRight);  // Right
-            Controls.Add(panelLeft);         // Left (inner)
-            Controls.Add(panelSidebar);      // Left (outer, over panelLeft)
-            Controls.Add(panelDrag);         // Top
-
-            // wire window button events
-            button5.Click += button5_Click;
-            button6.Click += button6_Click;
-            button7.Click += button7_Click;
-            btnHamburger.Click += btnHamburger_Click;
-
+            panelSidebar.Dock = DockStyle.Left;
+            panelSidebar.Location = new Point(0, 28);
+            panelSidebar.Name = "panelSidebar";
+            panelSidebar.Size = new Size(0, 632);
+            panelSidebar.TabIndex = 3;
+            // 
+            // lblSidebarTitle
+            // 
+            lblSidebarTitle.AutoSize = true;
+            lblSidebarTitle.Font = new Font("Syne", 9F, FontStyle.Bold);
+            lblSidebarTitle.ForeColor = Color.FromArgb(139, 58, 58);
+            lblSidebarTitle.Location = new Point(14, 14);
+            lblSidebarTitle.Name = "lblSidebarTitle";
+            lblSidebarTitle.Size = new Size(88, 17);
+            lblSidebarTitle.TabIndex = 0;
+            lblSidebarTitle.Text = "MAGICOGK";
+            // 
+            // btnSidebarOpenProject
+            // 
+            btnSidebarOpenProject.Location = new Point(0, 0);
+            btnSidebarOpenProject.Name = "btnSidebarOpenProject";
+            btnSidebarOpenProject.Size = new Size(75, 23);
+            btnSidebarOpenProject.TabIndex = 1;
+            // 
+            // btnSidebarSaveProjectAs
+            // 
+            btnSidebarSaveProjectAs.Location = new Point(0, 0);
+            btnSidebarSaveProjectAs.Name = "btnSidebarSaveProjectAs";
+            btnSidebarSaveProjectAs.Size = new Size(75, 23);
+            btnSidebarSaveProjectAs.TabIndex = 2;
+            // 
+            // btnSidebarOpenOIV
+            // 
+            btnSidebarOpenOIV.Location = new Point(0, 0);
+            btnSidebarOpenOIV.Name = "btnSidebarOpenOIV";
+            btnSidebarOpenOIV.Size = new Size(75, 23);
+            btnSidebarOpenOIV.TabIndex = 3;
+            // 
+            // btnSidebarBuildOIV
+            // 
+            btnSidebarBuildOIV.Location = new Point(0, 0);
+            btnSidebarBuildOIV.Name = "btnSidebarBuildOIV";
+            btnSidebarBuildOIV.Size = new Size(75, 23);
+            btnSidebarBuildOIV.TabIndex = 4;
+            // 
+            // btnSidebarFeedback
+            // 
+            btnSidebarFeedback.Location = new Point(0, 0);
+            btnSidebarFeedback.Name = "btnSidebarFeedback";
+            btnSidebarFeedback.Size = new Size(75, 23);
+            btnSidebarFeedback.TabIndex = 5;
+            // 
+            // panelDropZone
+            // 
+            panelDropZone.Location = new Point(0, 0);
+            panelDropZone.Name = "panelDropZone";
+            panelDropZone.Size = new Size(200, 100);
+            panelDropZone.TabIndex = 0;
+            // 
+            // panelPhotoPreview
+            // 
+            panelPhotoPreview.Location = new Point(0, 0);
+            panelPhotoPreview.Name = "panelPhotoPreview";
+            panelPhotoPreview.Size = new Size(200, 100);
+            panelPhotoPreview.TabIndex = 0;
+            // 
+            // panelColorPicker
+            // 
+            panelColorPicker.Location = new Point(0, 0);
+            panelColorPicker.Name = "panelColorPicker";
+            panelColorPicker.Size = new Size(200, 100);
+            panelColorPicker.TabIndex = 0;
+            // 
+            // lblAuthor
+            // 
+            lblAuthor.Location = new Point(0, 0);
+            lblAuthor.Name = "lblAuthor";
+            lblAuthor.Size = new Size(100, 23);
+            lblAuthor.TabIndex = 0;
+            // 
+            // lblModName
+            // 
+            lblModName.Location = new Point(0, 0);
+            lblModName.Name = "lblModName";
+            lblModName.Size = new Size(100, 23);
+            lblModName.TabIndex = 0;
+            // 
+            // lblVersionTag
+            // 
+            lblVersionTag.Location = new Point(0, 0);
+            lblVersionTag.Name = "lblVersionTag";
+            lblVersionTag.Size = new Size(100, 23);
+            lblVersionTag.TabIndex = 0;
+            // 
+            // lblVersion
+            // 
+            lblVersion.Location = new Point(0, 0);
+            lblVersion.Name = "lblVersion";
+            lblVersion.Size = new Size(100, 23);
+            lblVersion.TabIndex = 0;
+            // 
+            // lblDescription
+            // 
+            lblDescription.Location = new Point(0, 0);
+            lblDescription.Name = "lblDescription";
+            lblDescription.Size = new Size(100, 23);
+            lblDescription.TabIndex = 0;
+            // 
+            // lblPhotoLabel
+            // 
+            lblPhotoLabel.Location = new Point(0, 0);
+            lblPhotoLabel.Name = "lblPhotoLabel";
+            lblPhotoLabel.Size = new Size(100, 23);
+            lblPhotoLabel.TabIndex = 0;
+            // 
+            // lblColorLabel
+            // 
+            lblColorLabel.Location = new Point(0, 0);
+            lblColorLabel.Name = "lblColorLabel";
+            lblColorLabel.Size = new Size(100, 23);
+            lblColorLabel.TabIndex = 0;
+            // 
+            // lblPackageFiles
+            // 
+            lblPackageFiles.Location = new Point(0, 0);
+            lblPackageFiles.Name = "lblPackageFiles";
+            lblPackageFiles.Size = new Size(100, 23);
+            lblPackageFiles.TabIndex = 0;
+            // 
+            // lblAddFilesHint
+            // 
+            lblAddFilesHint.Location = new Point(0, 0);
+            lblAddFilesHint.Name = "lblAddFilesHint";
+            lblAddFilesHint.Size = new Size(100, 23);
+            lblAddFilesHint.TabIndex = 0;
+            // 
+            // lblNoFiles
+            // 
+            lblNoFiles.Location = new Point(0, 0);
+            lblNoFiles.Name = "lblNoFiles";
+            lblNoFiles.Size = new Size(100, 23);
+            lblNoFiles.TabIndex = 0;
+            // 
+            // txtAuthor
+            // 
+            txtAuthor.Location = new Point(0, 0);
+            txtAuthor.Name = "txtAuthor";
+            txtAuthor.Size = new Size(100, 23);
+            txtAuthor.TabIndex = 0;
+            // 
+            // txtModName
+            // 
+            txtModName.Location = new Point(0, 0);
+            txtModName.Name = "txtModName";
+            txtModName.Size = new Size(100, 23);
+            txtModName.TabIndex = 0;
+            // 
+            // txtVersion
+            // 
+            txtVersion.Location = new Point(0, 0);
+            txtVersion.Name = "txtVersion";
+            txtVersion.Size = new Size(100, 23);
+            txtVersion.TabIndex = 0;
+            // 
+            // txtDescription
+            // 
+            txtDescription.Location = new Point(0, 0);
+            txtDescription.Name = "txtDescription";
+            txtDescription.Size = new Size(100, 23);
+            txtDescription.TabIndex = 0;
+            // 
+            // dropdownVersionTag
+            // 
+            dropdownVersionTag.Location = new Point(0, 0);
+            dropdownVersionTag.Name = "dropdownVersionTag";
+            dropdownVersionTag.Size = new Size(121, 23);
+            dropdownVersionTag.TabIndex = 0;
+            // 
+            // btnAddPhoto
+            // 
+            btnAddPhoto.Location = new Point(0, 0);
+            btnAddPhoto.Name = "btnAddPhoto";
+            btnAddPhoto.Size = new Size(75, 23);
+            btnAddPhoto.TabIndex = 0;
+            // 
+            // btnOpenEditor
+            // 
+            btnOpenEditor.Location = new Point(0, 0);
+            btnOpenEditor.Name = "btnOpenEditor";
+            btnOpenEditor.Size = new Size(75, 23);
+            btnOpenEditor.TabIndex = 0;
+            // 
+            // btnBuildOIV
+            // 
+            btnBuildOIV.Location = new Point(0, 0);
+            btnBuildOIV.Name = "btnBuildOIV";
+            btnBuildOIV.Size = new Size(75, 23);
+            btnBuildOIV.TabIndex = 0;
+            // 
+            // btnAddFiles
+            // 
+            btnAddFiles.Location = new Point(0, 0);
+            btnAddFiles.Name = "btnAddFiles";
+            btnAddFiles.Size = new Size(75, 23);
+            btnAddFiles.TabIndex = 0;
+            // 
+            // webViewFileList
+            // 
+            webViewFileList.AllowExternalDrop = true;
+            webViewFileList.CreationProperties = null;
+            webViewFileList.DefaultBackgroundColor = Color.White;
+            webViewFileList.Location = new Point(0, 0);
+            webViewFileList.Name = "webViewFileList";
+            webViewFileList.Size = new Size(0, 0);
+            webViewFileList.TabIndex = 0;
+            webViewFileList.ZoomFactor = 1D;
+            // 
+            // main
+            // 
+            AutoScaleDimensions = new SizeF(7F, 17F);
+            AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(13, 13, 13);
+            ClientSize = new Size(1030, 660);
+            ControlBox = false;
+            Controls.Add(panelRight);
+            Controls.Add(panelEditorRight);
+            Controls.Add(panelLeft);
+            Controls.Add(panelSidebar);
+            Controls.Add(panelDrag);
+            Font = new Font("Syne", 9F);
+            FormBorderStyle = FormBorderStyle.None;
+            Name = "main";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "MagicOGK OIV Builder";
+            panelDrag.ResumeLayout(false);
+            panelSidebar.ResumeLayout(false);
+            panelSidebar.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)webViewFileList).EndInit();
             ResumeLayout(false);
         }

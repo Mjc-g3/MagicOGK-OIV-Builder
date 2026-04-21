@@ -19,17 +19,44 @@ namespace MagicOGK_OIV_Builder
         private bool editorExpanded = false;
         private string? selectedPhotoPath = null;
         private bool webViewReady = false;
+        private bool isDirty = false;
+        private bool isLoadingProject = false;
 
         public main()
         {
             InitializeComponent();
+
+            SetupLeftPanelControls();
+            SetupRightPanelControls();
+
+            StyleSidebarBtn(btnSidebarOpenProject, "Open Project", 60);
+            StyleSidebarBtn(btnSidebarSaveProjectAs, "Save Project As", 118);
+            StyleSidebarBtn(btnSidebarOpenOIV, "Open OIV", 176);
+            StyleSidebarBtn(btnSidebarBuildOIV, "Build OIV", 234);
+            StyleSidebarBtn(btnSidebarFeedback, "Feedback", 580);
+
             this.Load += Form1_Load;
+            this.FormClosing += Main_FormClosing;
+            this.Resize += (s, e) => UpdateWindowButtonsLayout();
+            this.Opacity = 0;
+            this.ShowInTaskbar = false;
         }
 
         // ─────────────────── INIT ───────────────────
 
         private async void Form1_Load(object sender, EventArgs e)
         {
+
+            using (var splash = new SplashForm())
+            {
+                splash.ShowDialog(this);
+            }
+
+            this.WindowState = FormWindowState.Normal;
+            this.ShowInTaskbar = true;
+            this.Opacity = 1;
+            this.Activate();
+
             // Drag
             panelDrag.MouseDown += PanelDrag_MouseDown;
             panelDrag.MouseMove += PanelDrag_MouseMove;
@@ -76,6 +103,14 @@ namespace MagicOGK_OIV_Builder
             webViewFileList.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
             webViewReady = true;
             RenderFileList();
+
+            txtModName.TextChanged += Metadata_Changed;
+            txtAuthor.TextChanged += Metadata_Changed;
+            txtVersion.TextChanged += Metadata_Changed;
+            txtDescription.TextChanged += Metadata_Changed;
+            dropdownVersionTag.SelectedIndexChanged += Metadata_Changed;
+
+            UpdateWindowButtonsLayout();
         }
 
         // ─────────────────── WINDOW CONTROLS ───────────────────
@@ -125,9 +160,12 @@ namespace MagicOGK_OIV_Builder
 
         private void btnSidebarOpenProject_Click(object sender, EventArgs e)
         {
+            if (!ConfirmDiscardOrSaveChanges())
+                return;
+
             using var dlg = new OpenFileDialog
             {
-                Title  = "Open MagicOGK Project",
+                Title = "Open MagicOGK Project",
                 Filter = "MagicOGK Project (*.mogk)|*.mogk|All Files (*.*)|*.*"
             };
             if (dlg.ShowDialog() != DialogResult.OK) return;
@@ -139,7 +177,7 @@ namespace MagicOGK_OIV_Builder
                     currentProject     = proj;
                     currentProjectPath = dlg.FileName;
                     LoadProjectIntoUI();
-                    RenderFileList();
+                    MarkClean();
                 }
             }
             catch (Exception ex)
@@ -164,6 +202,7 @@ namespace MagicOGK_OIV_Builder
                     System.Text.Json.JsonSerializer.Serialize(currentProject,
                         new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
                 currentProjectPath = dlg.FileName;
+                MarkClean();
                 MessageBox.Show("Project saved.", "Saved", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
@@ -224,118 +263,201 @@ namespace MagicOGK_OIV_Builder
         private void BuildEditorPanel()
         {
             panelEditorRight.Controls.Clear();
-            editorTree      = null;
+            editorTree = null;
             editorPropPanel = null;
+
 
             // ── Header ────────────────────────────────────────────────────────
             var header = new Panel
             {
-                Dock      = DockStyle.Top,
-                Height    = 44,
+                Dock = DockStyle.Top,
+                Height = 44,
                 BackColor = Color.FromArgb(24, 24, 24)
             };
+
             header.Controls.Add(new Label
             {
-                Text      = "FILE EDITOR",
+                Text = "FILE EDITOR",
                 ForeColor = Color.FromArgb(188, 143, 143),
-                Font      = new Font("Syne", 10F, FontStyle.Bold),
-                AutoSize  = true,
-                Location  = new Point(14, 13)
+                Font = new Font("Syne", 10F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(14, 13)
             });
+
             var btnClose = new Button
             {
-                Text      = "\u2715",
+                Text = "\u2715",
                 ForeColor = Color.FromArgb(180, 80, 80),
                 BackColor = Color.Transparent,
                 FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 10F),
-                Size      = new Size(32, 32),
-                Location  = new Point(344, 6),
-                TabStop   = false
+                Font = new Font("Segoe UI", 10F),
+                Size = new Size(32, 32),
+                Location = new Point(344, 6),
+                TabStop = false
             };
             btnClose.FlatAppearance.BorderSize = 0;
             btnClose.Click += (s, ev) => { editorExpanded = false; editorTimer.Start(); };
             header.Controls.Add(btnClose);
-            panelEditorRight.Controls.Add(header);
 
-            // ── Tree toolbar ──────────────────────────────────────────────────
+            // ── Toolbar ───────────────────────────────────────────────────────
             var toolbar = new Panel
             {
-                Dock      = DockStyle.Top,
-                Height    = 36,
+                Dock = DockStyle.Top,
+                Height = 36,
                 BackColor = Color.FromArgb(18, 18, 18)
             };
 
-            // Toolbar icon buttons: new folder | new RPF | add file | rename | delete
             (string text, string tip, Action act)[] toolActions = {
-                ("\uD83D\uDCC1", "New Folder",     () => TreeCmd_NewFolder()),
-                ("\uD83D\uDDC4",  "New RPF Archive",() => TreeCmd_NewRpf()),
-                ("\uD83D\uDCC4", "Add File Here",  () => TreeCmd_AddFile()),
-                ("\u270F",       "Rename",          () => TreeCmd_Rename()),
-                ("\uD83D\uDDD1", "Delete",          () => TreeCmd_Delete()),
-            };
+        ("\uD83D\uDCC1", "New Folder",      () => TreeCmd_NewFolder()),
+        ("\uD83D\uDDC4", "New RPF Archive", () => TreeCmd_NewRpf()),
+        ("\uD83D\uDCC4", "Add File Here",   () => TreeCmd_AddFile()),
+        ("\u270F",       "Rename",          () => TreeCmd_Rename()),
+        ("\uD83D\uDDD1", "Delete",          () => TreeCmd_Delete()),
+    };
+
             int tbx = 6;
             foreach (var (text, tip, act) in toolActions)
             {
                 var a = act;
                 var btn = new Button
                 {
-                    Text      = text,
+                    Text = text,
                     BackColor = Color.Transparent,
                     ForeColor = Color.FromArgb(170, 120, 120),
                     FlatStyle = FlatStyle.Flat,
-                    Size      = new Size(32, 28),
-                    Location  = new Point(tbx, 4),
-                    Font      = new Font("Segoe UI Emoji", 11F),
-                    TabStop   = false
+                    Size = new Size(32, 28),
+                    Location = new Point(tbx, 4),
+                    Font = new Font("Segoe UI Emoji", 11F),
+                    TabStop = false
                 };
                 btn.FlatAppearance.BorderSize = 0;
                 btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 30, 30);
+
                 var tooltip = new ToolTip();
                 tooltip.SetToolTip(btn, tip);
+
                 btn.Click += (s, ev) => a();
                 toolbar.Controls.Add(btn);
                 tbx += 34;
             }
-            panelEditorRight.Controls.Add(toolbar);
 
-            // ── Properties panel (docked bottom, shown when node selected) ────
+            // ── Properties panel ──────────────────────────────────────────────
             editorPropPanel = new Panel
             {
-                Dock      = DockStyle.Bottom,
-                Height    = 0,
+                Dock = DockStyle.Bottom,
+                Height = 0,
                 BackColor = Color.FromArgb(20, 10, 10)
             };
-            panelEditorRight.Controls.Add(editorPropPanel);
 
             // ── TreeView ──────────────────────────────────────────────────────
             editorTree = new TreeView
             {
-                Dock            = DockStyle.Fill,
-                BackColor       = Color.FromArgb(15, 15, 15),
-                ForeColor       = Color.FromArgb(210, 180, 180),
-                BorderStyle     = BorderStyle.None,
-                Font            = new Font("Segoe UI", 9.5F),
-                ItemHeight      = 22,
-                ShowLines       = true,
-                ShowPlusMinus   = true,
-                ShowRootLines   = true,
-                FullRowSelect   = true,
-                HideSelection   = false,
-                LineColor       = Color.FromArgb(70, 50, 50),
-                DrawMode        = TreeViewDrawMode.OwnerDrawAll,
-                Indent          = 18
+                Dock = DockStyle.Fill,
+                BackColor = Color.FromArgb(15, 15, 15),
+                ForeColor = Color.FromArgb(210, 180, 180),
+                BorderStyle = BorderStyle.None,
+                Font = new Font("Segoe UI", 9.5F),
+                ItemHeight = 24,
+                ShowLines = false,
+                ShowPlusMinus = false,
+                ShowRootLines = false,
+                FullRowSelect = true,
+                HideSelection = false,
+                DrawMode = TreeViewDrawMode.OwnerDrawAll,
+                Indent = 24
             };
-            editorTree.DrawNode          += EditorTree_DrawNode;
-            editorTree.AfterSelect       += EditorTree_AfterSelect;
-            editorTree.KeyDown           += EditorTree_KeyDown;
-            editorTree.MouseDoubleClick  += EditorTree_MouseDoubleClick;
-            editorTree.DragEnter         += (s, ev) => ev.Effect = DragDropEffects.Copy;
-            editorTree.DragDrop          += EditorTree_DragDrop;
-            editorTree.AllowDrop          = true;
+
+            editorTree.DrawNode += EditorTree_DrawNode;
+            editorTree.AfterSelect += EditorTree_AfterSelect;
+            editorTree.KeyDown += EditorTree_KeyDown;
+            editorTree.MouseDoubleClick += EditorTree_MouseDoubleClick;
+            editorTree.NodeMouseClick += EditorTree_NodeMouseClick; // <-- HERE
+            editorTree.DragEnter += (s, ev) => ev.Effect = DragDropEffects.Copy;
+            editorTree.DragDrop += EditorTree_DragDrop;
+
+            // IMPORTANT: add in this order
             panelEditorRight.Controls.Add(editorTree);
+            panelEditorRight.Controls.Add(editorPropPanel);
+            panelEditorRight.Controls.Add(toolbar);
+            panelEditorRight.Controls.Add(header);
 
             RebuildTree();
+        }
+
+        // ─── REBUILD TREE HELPER ───────────────────────────────────────────────────
+        private string GetNodeKey(TreeNode node)
+        {
+            if (node.Tag is OIVFolder folder)
+                return $"folder:{folder.Id}";
+
+            if (node.Tag is OIVFileEntry file)
+                return $"file:{file.Id}";
+
+            return "root";
+        }
+
+        private HashSet<string> GetExpandedNodeKeys()
+        {
+            var expanded = new HashSet<string>();
+
+            if (editorTree == null)
+                return expanded;
+
+            foreach (TreeNode node in editorTree.Nodes)
+                CollectExpandedNodeKeys(node, expanded);
+
+            return expanded;
+        }
+
+        private void CollectExpandedNodeKeys(TreeNode node, HashSet<string> expanded)
+        {
+            if (node.IsExpanded)
+                expanded.Add(GetNodeKey(node));
+
+            foreach (TreeNode child in node.Nodes)
+                CollectExpandedNodeKeys(child, expanded);
+        }
+
+        private void RestoreExpandedNodeKeys(TreeNodeCollection nodes, HashSet<string> expanded)
+        {
+            foreach (TreeNode node in nodes)
+            {
+                if (expanded.Contains(GetNodeKey(node)))
+                    node.Expand();
+
+                RestoreExpandedNodeKeys(node.Nodes, expanded);
+            }
+        }
+
+        private void SelectTreeNodeByFolderId(int folderId)
+        {
+            if (editorTree == null) return;
+
+            foreach (TreeNode node in editorTree.Nodes)
+            {
+                var found = FindFolderNode(node, folderId);
+                if (found != null)
+                {
+                    editorTree.SelectedNode = found;
+                    found.EnsureVisible();
+                    return;
+                }
+            }
+        }
+
+        private TreeNode? FindFolderNode(TreeNode node, int folderId)
+        {
+            if (node.Tag is OIVFolder folder && folder.Id == folderId)
+                return node;
+
+            foreach (TreeNode child in node.Nodes)
+            {
+                var found = FindFolderNode(child, folderId);
+                if (found != null)
+                    return found;
+            }
+
+            return null;
         }
 
         // ─── Tree building ────────────────────────────────────────────────────
@@ -343,11 +465,16 @@ namespace MagicOGK_OIV_Builder
         private void RebuildTree()
         {
             if (editorTree == null) return;
+
+            // Save which nodes are currently expanded
+            var expandedNodes = GetExpandedNodeKeys();
+
             editorTree.BeginUpdate();
             editorTree.Nodes.Clear();
 
             var root = new TreeNode("Root") { Tag = "root" };
-            root.ForeColor = Color.FromArgb(220, 170, 170);
+            root.ForeColor = Color.FromArgb(190, 150, 150);
+            root.NodeFont = new Font("Segoe UI", 9.5F, FontStyle.Bold);
 
             // Recursively add folder nodes and their files
             AddFolderNodes(root, parentId: null);
@@ -357,7 +484,13 @@ namespace MagicOGK_OIV_Builder
                 root.Nodes.Add(MakeFileNode(file));
 
             editorTree.Nodes.Add(root);
+
+            // Keep root open
             root.Expand();
+
+            // Restore previously expanded folders
+            RestoreExpandedNodeKeys(editorTree.Nodes, expandedNodes);
+
             editorTree.EndUpdate();
         }
 
@@ -377,22 +510,20 @@ namespace MagicOGK_OIV_Builder
 
         private TreeNode MakeFolderNode(OIVFolder folder)
         {
-            string icon = folder.IsRpf ? "\uD83D\uDDC4 " : "\uD83D\uDCC1 ";
-            var node = new TreeNode(icon + folder.Name)
+            return new TreeNode(folder.Name)
             {
-                Tag       = folder,
+                Tag = folder,
                 ForeColor = folder.IsRpf
                     ? Color.FromArgb(150, 200, 255)
                     : Color.FromArgb(220, 160, 160)
             };
-            return node;
         }
 
         private TreeNode MakeFileNode(OIVFileEntry file)
         {
-            return new TreeNode("\uD83D\uDCC4 " + file.FileName)
+            return new TreeNode(file.FileName)
             {
-                Tag       = file,
+                Tag = file,
                 ForeColor = Color.FromArgb(180, 180, 180)
             };
         }
@@ -401,21 +532,102 @@ namespace MagicOGK_OIV_Builder
 
         private void EditorTree_DrawNode(object sender, DrawTreeNodeEventArgs e)
         {
+            if (editorTree == null || e.Node == null) return;
+
+            Graphics g = e.Graphics;
+            Rectangle row = new Rectangle(0, e.Bounds.Y, editorTree.Width, e.Bounds.Height);
             bool selected = (e.State & TreeNodeStates.Selected) != 0;
-            var bounds    = e.Bounds;
-            if (bounds.Width == 0 && bounds.Height == 0) { e.DrawDefault = true; return; }
+            bool hasChildren = e.Node.Nodes.Count > 0;
 
-            // Background
-            e.Graphics.FillRectangle(
-                new SolidBrush(selected ? Color.FromArgb(70, 30, 30) : Color.FromArgb(15, 15, 15)),
-                new Rectangle(0, bounds.Y, editorTree!.Width, bounds.Height));
+            g.SmoothingMode = SmoothingMode.AntiAlias;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-            // Indent lines — drawn by WinForms when ShowLines=true, we just handle colours
-            // Text
-            var textBrush = new SolidBrush(e.Node?.ForeColor ?? Color.FromArgb(200, 200, 200));
-            if (e.Node != null)
-                e.Graphics.DrawString(e.Node.Text, e.Node.NodeFont ?? editorTree.Font,
-                    textBrush, bounds.X + 2, bounds.Y + 2);
+            // Row background
+            using (var bg = new SolidBrush(selected
+                ? Color.FromArgb(85, 35, 35)
+                : Color.FromArgb(15, 15, 15)))
+            {
+                g.FillRectangle(bg, row);
+            }
+
+            // Optional subtle guide line for nested items
+            if (e.Node.Level > 0)
+            {
+                int guideX = 12 + ((e.Node.Level - 1) * editorTree.Indent) + 8;
+                using var guidePen = new Pen(Color.FromArgb(38, 55, 55, 55));
+                g.DrawLine(guidePen, guideX, row.Top, guideX, row.Bottom);
+            }
+
+            int baseX = 12 + (e.Node.Level * editorTree.Indent);
+            int centerY = row.Top + row.Height / 2;
+
+            // Expand/collapse arrow
+            if (hasChildren)
+            {
+                Point[] arrow;
+
+                if (e.Node.IsExpanded)
+                {
+                    // Down arrow
+                    arrow = new[]
+                    {
+                new Point(baseX,     centerY - 3),
+                new Point(baseX + 8, centerY - 3),
+                new Point(baseX + 4, centerY + 2)
+            };
+                }
+                else
+                {
+                    // Right arrow
+                    arrow = new[]
+                    {
+                new Point(baseX + 1, centerY - 4),
+                new Point(baseX + 1, centerY + 4),
+                new Point(baseX + 6, centerY)
+            };
+                }
+
+                using var arrowBrush = new SolidBrush(Color.FromArgb(150, 120, 120));
+                g.FillPolygon(arrowBrush, arrow);
+            }
+
+            int iconX = baseX + (hasChildren ? 14 : 4);
+
+            // Icon
+            string iconText;
+            Color iconColor;
+
+            if (e.Node.Tag is OIVFolder folder)
+            {
+                iconText = folder.IsRpf ? "🗄" : "📁";
+                iconColor = folder.IsRpf
+                    ? Color.FromArgb(150, 200, 255)
+                    : Color.FromArgb(220, 170, 120);
+            }
+            else
+            {
+                iconText = "📄";
+                iconColor = Color.FromArgb(170, 170, 170);
+            }
+
+            using (var iconBrush = new SolidBrush(iconColor))
+            {
+                g.DrawString(iconText, editorTree.Font, iconBrush, iconX, row.Top + 2);
+            }
+
+            int textX = iconX + 20;
+
+            using (var textBrush = new SolidBrush(
+                selected
+                    ? Color.FromArgb(255, 220, 220)
+                    : e.Node.ForeColor))
+            {
+                g.DrawString(e.Node.Text, e.Node.NodeFont ?? editorTree.Font, textBrush, textX, row.Top + 3);
+            }
+
+            // Thin separator for a cleaner list feel
+            using var sepPen = new Pen(Color.FromArgb(18, 255, 255, 255));
+            g.DrawLine(sepPen, 0, row.Bottom - 1, editorTree.Width, row.Bottom - 1);
         }
 
         // ─── Tree selection → properties panel ───────────────────────────────
@@ -465,6 +677,7 @@ namespace MagicOGK_OIV_Builder
                 txtName.TextChanged += (s, ev) =>
                 {
                     folder.Name = txtName.Text;
+                    MarkDirty();
                     RebuildTree();
                     RenderFileList();
                 };
@@ -567,15 +780,26 @@ namespace MagicOGK_OIV_Builder
         // Resolve the full install path for a file by walking up the folder tree
         private string ResolveFilePath(OIVFileEntry file)
         {
-            var parts = new List<string> { file.FileName };
+            var parts = new List<string>();
+
             int? cur = file.FolderId;
             while (cur.HasValue)
             {
                 var folder = currentProject.Folders.Find(f => f.Id == cur.Value);
                 if (folder == null) break;
+
                 parts.Insert(0, folder.Name);
                 cur = folder.ParentId;
             }
+
+            if (!string.IsNullOrWhiteSpace(file.SubPath))
+            {
+                foreach (var part in file.SubPath.Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries))
+                    parts.Add(part);
+            }
+
+            parts.Add(file.FileName);
+
             return string.Join("\\", parts);
         }
 
@@ -598,15 +822,20 @@ namespace MagicOGK_OIV_Builder
             string name = PromptName($"New {kind} name:", isRpf ? "myarchive.rpf" : "MyFolder");
             if (string.IsNullOrWhiteSpace(name)) return;
 
-            currentProject.Folders.Add(new OIVFolder
+            var newFolder = new OIVFolder
             {
-                Id       = currentProject.NextId++,
-                Name     = name,
+                Id = currentProject.NextId++,
+                Name = name,
                 ParentId = SelectedFolderId(),
-                IsRpf    = isRpf
-            });
+                IsRpf = isRpf
+            };
+            
+            currentProject.Folders.Add(newFolder);
+            MarkDirty();
             RebuildTree();
+            SelectTreeNodeByFolderId(newFolder.Id);
             RenderFileList();
+            
         }
 
         private void TreeCmd_AddFile()
@@ -633,6 +862,7 @@ namespace MagicOGK_OIV_Builder
                     FolderId   = parentFolderId
                 });
             }
+            MarkDirty();
             RebuildTree();
             RenderFileList();
         }
@@ -648,6 +878,7 @@ namespace MagicOGK_OIV_Builder
                 if (!string.IsNullOrWhiteSpace(name))
                 {
                     folder.Name = name;
+                    MarkDirty();
                     RebuildTree();
                     RenderFileList();
                 }
@@ -685,6 +916,7 @@ namespace MagicOGK_OIV_Builder
                 currentProject.Files.RemoveAll(f => f.Id == fid);
             }
 
+            MarkDirty();
             RebuildTree();
             RenderFileList();
         }
@@ -733,6 +965,7 @@ namespace MagicOGK_OIV_Builder
                     FolderId   = parentFolderId
                 });
             }
+            MarkDirty();
             RebuildTree();
             RenderFileList();
         }
@@ -796,22 +1029,17 @@ namespace MagicOGK_OIV_Builder
             if (rawMsg.StartsWith("remove:") && int.TryParse(rawMsg.Substring(7), out int removeId))
             {
                 currentProject.Files.RemoveAll(f => f.Id == removeId);
+
+                MarkDirty();
+
                 if (editorExpanded) BuildEditorPanel();
                 RenderFileList();
             }
             else if (rawMsg.StartsWith("path:"))
             {
-                try
-                {
-                    var d = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(rawMsg.Substring(5));
-                    if (d != null && d.ContainsKey("id") && d.ContainsKey("val")
-                        && int.TryParse(d["id"], out int pid))
-                    {
-                        var f = currentProject.Files.Find(x => x.Id == pid);
-                        if (f != null) f.TargetPath = d["val"];
-                    }
-                }
-                catch { }
+                // Path editing from the file list is disabled.
+                // The file editor tree is now the source of truth.
+                return;
             }
         }
 
@@ -834,7 +1062,8 @@ tbody tr:hover{background:#141414}
 td{padding:7px 12px;vertical-align:middle}
 .fn{color:#e0e0e0;font-weight:600;font-size:12px;max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tp input{background:#0a0a0a;border:1px solid #222;color:#bbb;padding:4px 7px;width:100%;font-family:Consolas,monospace;font-size:11px;border-radius:2px}
-.tp input:focus{outline:none;border-color:#7a2a2a;color:#eee}
+.tp input[readonly]{background:#0f0f0f;color:#d8d8d8;cursor:default}
+.tp input[readonly]:focus{outline:none;border-color:#333;color:#eee}
 .rm button{background:#3a0000;border:1px solid #5a1a1a;color:#c08080;padding:3px 9px;cursor:pointer;font-size:10px;border-radius:2px}
 .rm button:hover{background:#5a0000;color:#f0c0c0}
 .empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;color:#444;gap:10px;padding:40px}
@@ -855,16 +1084,17 @@ td{padding:7px 12px;vertical-align:middle}
             else
             {
                 sb.Append($"<div class='toolbar'><span class='file-count'>{currentProject.Files.Count} file(s) added</span></div>");
-                sb.Append("<div class='table-wrap'><table><thead><tr><th>File Name</th><th>Target Path in GTA 5</th><th style='width:70px'>Remove</th></tr></thead><tbody>");
+                sb.Append("<div class='table-wrap'><table><thead><tr><th>File Name</th><th>RESOLVED INSTALL PATH</th><th style='width:70px'>Remove</th></tr></thead><tbody>");
 
                 foreach (var file in currentProject.Files)
                 {
                     string name  = System.Net.WebUtility.HtmlEncode(file.FileName);
                     string src   = System.Net.WebUtility.HtmlEncode(file.SourcePath);
-                    string path  = System.Net.WebUtility.HtmlEncode(file.TargetPath).Replace("'", "&#39;");
+                    string resolvedPath = ResolveFilePath(file);
+                    string path = System.Net.WebUtility.HtmlEncode(resolvedPath).Replace("'", "&#39;");
                     sb.Append($@"<tr>
 <td class='fn' title='{System.Net.WebUtility.HtmlEncode(file.SourcePath)}'>{name}</td>
-<td class='tp'><input type='text' value='{path}' placeholder='e.g. x64/models/cdimages/' onchange='sendPath({file.Id},this.value)'/></td>
+<td class='tp'><input type='text' value='{path}' readonly title='{path}' /></td>
 <td class='rm'><button onclick='sendRemove({file.Id})'>Remove</button></td>
 </tr>");
                 }
@@ -925,6 +1155,7 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
                 TargetPath = "",
                 Type       = "content"
             });
+            MarkDirty();
         }
 
         // ─────────────────── PHOTO PREVIEW ───────────────────
@@ -942,6 +1173,9 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
                 selectedPhotoPath = dlg.FileName;
                 btnAddPhoto.Text  = "CHANGE";
                 panelPhotoPreview.Invalidate();
+
+                SyncUIToProject();
+                MarkDirty();
             }
             catch (Exception ex)
             {
@@ -976,7 +1210,11 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
         {
             using var dlg = new ColorDialog { Color = panelColorPicker.BackColor };
             if (dlg.ShowDialog() == DialogResult.OK)
+            {
                 panelColorPicker.BackColor = dlg.Color;
+                SyncUIToProject();
+                MarkDirty();
+            }
         }
 
         // ─────────────────── BUILD OIV ───────────────────
@@ -1009,6 +1247,7 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             try
             {
                 OIVBuilder.Build(currentProject, dlg.FileName);
+                MarkClean();
                 MessageBox.Show($"OIV package built successfully!\n\n{dlg.FileName}",
                     "Build Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -1040,43 +1279,82 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
 
         private void LoadProjectIntoUI()
         {
-            txtModName.Text     = currentProject.ModName;
-            txtAuthor.Text      = currentProject.Author;
-            txtVersion.Text     = currentProject.Version;
-            txtDescription.Text = currentProject.Description;
+            isLoadingProject = true;
 
-            for (int i = 0; i < dropdownVersionTag.Items.Count; i++)
+            try
             {
-                if (dropdownVersionTag.Items[i]?.ToString() == currentProject.VersionTag)
-                {
-                    dropdownVersionTag.SelectedIndex = i;
-                    break;
-                }
-            }
+                // Reset all UI first so old values do not leak into the newly opened project
+                txtModName.Text = string.Empty;
+                txtAuthor.Text = string.Empty;
+                txtVersion.Text = string.Empty;
+                txtDescription.Text = string.Empty;
 
-            // Restore banner color
-            if (!string.IsNullOrWhiteSpace(currentProject.BannerColor))
-            {
-                try
+                dropdownVersionTag.SelectedIndex = -1;
+
+                panelColorPicker.BackColor = Color.FromArgb(35, 54, 106); // default banner color
+                selectedPhotoPath = null;
+                btnAddPhoto.Text = "ADD";
+                panelPhotoPreview.Invalidate();
+
+                // Optional: clear editor selection state if editor is open
+                if (editorTree != null)
+                    editorTree.SelectedNode = null;
+
+                // Now load current project values
+                txtModName.Text = currentProject.ModName ?? string.Empty;
+                txtAuthor.Text = currentProject.Author ?? string.Empty;
+                txtVersion.Text = currentProject.Version ?? string.Empty;
+                txtDescription.Text = currentProject.Description ?? string.Empty;
+
+                bool tagMatched = false;
+                for (int i = 0; i < dropdownVersionTag.Items.Count; i++)
                 {
-                    string hex = currentProject.BannerColor.TrimStart('#');
-                    if (hex.Length == 6)
+                    if (dropdownVersionTag.Items[i]?.ToString() == currentProject.VersionTag)
                     {
-                        int r = Convert.ToInt32(hex.Substring(0, 2), 16);
-                        int g = Convert.ToInt32(hex.Substring(2, 2), 16);
-                        int b = Convert.ToInt32(hex.Substring(4, 2), 16);
-                        panelColorPicker.BackColor = Color.FromArgb(r, g, b);
+                        dropdownVersionTag.SelectedIndex = i;
+                        tagMatched = true;
+                        break;
                     }
                 }
-                catch { }
-            }
 
-            // Restore photo
-            if (!string.IsNullOrWhiteSpace(currentProject.PhotoPath) && File.Exists(currentProject.PhotoPath))
-            {
-                selectedPhotoPath = currentProject.PhotoPath;
-                btnAddPhoto.Text  = "CHANGE";
+                // Fallback if no tag matched
+                if (!tagMatched && dropdownVersionTag.Items.Count > 0)
+                    dropdownVersionTag.SelectedIndex = 0;
+
+                // Restore banner color
+                if (!string.IsNullOrWhiteSpace(currentProject.BannerColor))
+                {
+                    try
+                    {
+                        string hex = currentProject.BannerColor.TrimStart('#');
+                        if (hex.Length == 6)
+                        {
+                            int r = Convert.ToInt32(hex.Substring(0, 2), 16);
+                            int g = Convert.ToInt32(hex.Substring(2, 2), 16);
+                            int b = Convert.ToInt32(hex.Substring(4, 2), 16);
+                            panelColorPicker.BackColor = Color.FromArgb(r, g, b);
+                        }
+                    }
+                    catch { }
+                }
+
+                // Restore photo
+                if (!string.IsNullOrWhiteSpace(currentProject.PhotoPath) && File.Exists(currentProject.PhotoPath))
+                {
+                    selectedPhotoPath = currentProject.PhotoPath;
+                    btnAddPhoto.Text = "CHANGE";
+                }
+
                 panelPhotoPreview.Invalidate();
+
+                if (editorExpanded)
+                    BuildEditorPanel();
+
+                RenderFileList();
+            }
+            finally
+            {
+                isLoadingProject = false;
             }
         }
 
@@ -1094,6 +1372,156 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
         {
             if (path.Length <= maxLen) return path;
             return "..." + path.Substring(path.Length - maxLen + 3);
+        }
+
+        // -- CLICK HANDLING ARROWS FILE EDITOR -- 
+        private void EditorTree_NodeMouseClick(object? sender, TreeNodeMouseClickEventArgs e)
+        {
+            if (editorTree == null || e.Node == null) return;
+
+            bool hasChildren = e.Node.Nodes.Count > 0;
+            if (!hasChildren) return;
+
+            int baseX = 12 + (e.Node.Level * editorTree.Indent);
+            Rectangle arrowHitBox = new Rectangle(baseX - 2, e.Node.Bounds.Top, 14, e.Node.Bounds.Height);
+
+            if (arrowHitBox.Contains(e.Location))
+            {
+                if (e.Node.IsExpanded)
+                    e.Node.Collapse();
+                else
+                    e.Node.Expand();
+            }
+        }
+
+        // -- CLOSING APPLICATION WITHOUT SAVING ALERT --
+        private void MarkDirty()
+        {
+            isDirty = true;
+            UpdateWindowTitle();
+        }
+
+        private void MarkClean()
+        {
+            isDirty = false;
+            UpdateWindowTitle();
+        }
+
+        private void UpdateWindowTitle()
+        {
+            string name = string.IsNullOrWhiteSpace(currentProject?.ModName)
+                ? "Untitled Project"
+                : currentProject.ModName;
+
+            this.Text = isDirty ? $"* {name} - OIV Builder" : $"{name} - OIV Builder";
+        }
+        // -- FORM CLOSING ALERT METHOD --
+        private void Main_FormClosing(object? sender, FormClosingEventArgs e)
+        {
+            if (!isDirty)
+                return;
+
+            var result = MessageBox.Show(
+                "You have unsaved changes.\n\nDo you want to save before exiting?",
+                "Unsaved Changes",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Warning
+            );
+
+            if (result == DialogResult.Cancel)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            if (result == DialogResult.Yes)
+            {
+                bool saved = TrySaveProject();
+                if (!saved)
+                    e.Cancel = true;
+            }
+        }
+
+        private bool ConfirmDiscardOrSaveChanges()
+        {
+            if (!isDirty)
+                return true;
+
+            var result = MessageBox.Show(
+                "You have unsaved changes.\n\nDo you want to save before continuing?",
+                "Unsaved Changes",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Warning
+            );
+
+            if (result == DialogResult.Cancel)
+                return false;
+
+            if (result == DialogResult.Yes)
+                return TrySaveProject();
+
+            // No = continue without saving
+            return true;
+        }
+        private bool TrySaveProject()
+        {
+            try
+            {
+                SyncUIToProject();
+
+                string savePath = currentProjectPath;
+
+                if (string.IsNullOrWhiteSpace(savePath))
+                {
+                    using var dlg = new SaveFileDialog
+                    {
+                        Title = "Save MagicOGK Project",
+                        Filter = "MagicOGK Project (*.mogk)|*.mogk|All Files (*.*)|*.*",
+                        FileName = string.IsNullOrWhiteSpace(currentProject.ModName) ? "MyMod" : currentProject.ModName
+                    };
+
+                    if (dlg.ShowDialog() != DialogResult.OK)
+                        return false;
+
+                    savePath = dlg.FileName;
+                }
+
+                File.WriteAllText(
+                    savePath,
+                    System.Text.Json.JsonSerializer.Serialize(
+                        currentProject,
+                        new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
+
+                currentProjectPath = savePath;
+                MarkClean();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Save failed: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+        }
+
+        private void Metadata_Changed(object? sender, EventArgs e)
+        {
+            if (isLoadingProject)
+               return;
+
+            SyncUIToProject();
+            MarkDirty();
+        }
+
+        //window buttons fix scaling
+        private void UpdateWindowButtonsLayout()
+        {
+            int topMargin = 7;
+            int rightMargin = 13;
+            int spacing = 3;
+
+            button5.Location = new Point(panelDrag.ClientSize.Width - button5.Width - rightMargin, topMargin);
+            button6.Location = new Point(button5.Left - button6.Width - spacing, topMargin);
+            button7.Location = new Point(button6.Left - button7.Width - spacing, topMargin);
         }
     }
 }

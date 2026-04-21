@@ -198,14 +198,7 @@ namespace MagicOGK_OIV_Builder
             // Root-level folders (ParentId == null) that are RPF nodes become top-level <archive> elements.
             // Non-RPF root folders contribute their path prefix but don't produce their own <archive> node
             // (the children do).
-            WriteArchiveChildren(
-                doc,
-                content,
-                project,
-                project.Folders.Where(f => f.ParentId == null).ToList(),
-                resolved,
-                sourceToContentName,
-                null);
+            WriteArchiveChildren(doc, content, project, project.Folders.Where(f => f.ParentId == null).ToList(), resolved, sourceToContentName);
 
             // Step 4: Write loose files (no RPF in path)
             foreach (var file in looseFiles)
@@ -244,6 +237,67 @@ namespace MagicOGK_OIV_Builder
             }
         }
 
+        // Recursively writes <archive> nodes for the folder tree, then <add> for files inside them.
+        private static void WriteArchiveChildren(
+            XmlDocument doc,
+            XmlElement parent,
+            OIVProject project,
+            List<OIVFolder> folders,
+            Dictionary<OIVFileEntry, string> resolved,
+            Dictionary<string, string> sourceToContentName)
+        {
+            foreach (var folder in folders)
+            {
+                // Files directly assigned to this folder
+                var filesHere = project.Files.Where(f => f.FolderId == folder.Id).ToList();
+                // Child folders
+                var children  = project.Folders.Where(f => f.ParentId == folder.Id).ToList();
+
+                if (folder.IsRpf)
+                {
+                    // This folder is an RPF archive — emit <archive path="...">
+                    string rpfPath = BuildFolderInstallPath(folder, project);
+
+                    var arc = AppendElem(doc, parent, "archive");
+                    arc.SetAttribute("path",             rpfPath);
+                    arc.SetAttribute("createIfNotExist", "True");
+                    arc.SetAttribute("type",             "RPF7");
+
+                    // Files inside this RPF: their install path is relative to the RPF root
+                    foreach (var file in filesHere)
+                    {
+                        string contentName = sourceToContentName[file.SourcePath];
+                        string fullPath    = resolved[file];
+                        // Strip the RPF path prefix — what remains is the path inside the RPF
+                        string insideRpf   = StripPrefix(fullPath, rpfPath);
+
+                        var add = AppendElem(doc, arc, "add");
+                        add.SetAttribute("source", contentName);
+                        // Inner text = path inside RPF (just the filename if at RPF root)
+                        add.InnerText = string.IsNullOrEmpty(insideRpf) ? file.FileName : insideRpf;
+                    }
+
+                    // Recurse child folders inside this RPF
+                    WriteArchiveChildren(doc, arc, project, children, resolved, sourceToContentName);
+                }
+                else
+                {
+                    // Non-RPF folder: its children either go into the parent archive node
+                    // or further down. Files here are loose relative to the parent context.
+                    foreach (var file in filesHere)
+                    {
+                        string contentName = sourceToContentName[file.SourcePath];
+                        string fullPath    = resolved[file];
+                        var add = AppendElem(doc, parent, "add");
+                        add.SetAttribute("source", contentName);
+                        add.InnerText = fullPath;
+                    }
+                    // Recurse into children under the same parent node
+                    WriteArchiveChildren(doc, parent, project, children, resolved, sourceToContentName);
+                }
+            }
+        }
+
         // ── Path resolution ───────────────────────────────────────────────────
 
         // Resolves the full install path for a file by walking up the folder tree.
@@ -254,9 +308,8 @@ namespace MagicOGK_OIV_Builder
         // and the <archive path="..."> = "update\x64\dlcpacks\mod1\dlc.rpf"
         private static string ResolveInstallPath(OIVFileEntry file, OIVProject project)
         {
-            var parts = new List<string>();
-
-            int? cur = file.FolderId;
+            var parts = new List<string> { file.FileName };
+            int? cur  = file.FolderId;
             while (cur.HasValue)
             {
                 var folder = project.Folders.Find(f => f.Id == cur.Value);
@@ -264,21 +317,23 @@ namespace MagicOGK_OIV_Builder
                 parts.Insert(0, folder.Name);
                 cur = folder.ParentId;
             }
-
-            if (!string.IsNullOrWhiteSpace(file.SubPath))
-            {
-                foreach (var part in file.SubPath
-                             .Split(new[] { '\\', '/' }, StringSplitOptions.RemoveEmptyEntries))
-                {
-                    parts.Add(part);
-                }
-            }
-
-            parts.Add(file.FileName);
             return string.Join("\\", parts);
         }
 
-
+        // Builds the install path for a folder node itself (used as archive path).
+        private static string BuildFolderInstallPath(OIVFolder target, OIVProject project)
+        {
+            var parts = new List<string> { target.Name };
+            int? cur  = target.ParentId;
+            while (cur.HasValue)
+            {
+                var folder = project.Folders.Find(f => f.Id == cur.Value);
+                if (folder == null) break;
+                parts.Insert(0, folder.Name);
+                cur = folder.ParentId;
+            }
+            return string.Join("\\", parts);
+        }
 
         // Returns the path of the outermost .rpf segment.
         // "update\update.rpf\common\data\water.xml" → "update\update.rpf"
@@ -296,6 +351,15 @@ namespace MagicOGK_OIV_Builder
             }
             return string.Empty;
         }
+
+        // Strips a prefix from a path (case-insensitive), leaving the remainder without leading backslash.
+        private static string StripPrefix(string path, string prefix)
+        {
+            if (path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                return path.Substring(prefix.Length).TrimStart('\\');
+            return path;
+        }
+
         // ── Icon ──────────────────────────────────────────────────────────────
 
         private static void CreateIcon128(string sourcePath, string destPng)
@@ -386,124 +450,6 @@ namespace MagicOGK_OIV_Builder
             private readonly StringBuilder _sb;
             public StringWriterUtf8(StringBuilder sb) : base(sb) { _sb = sb; }
             public override Encoding Encoding => new UTF8Encoding(false);
-        }
-
-        // Writes folders/files recursively.
-        // currentArchiveGamePath:
-        //   null  = we are not currently inside an <archive>
-        //   value = full game path of the archive we are currently inside
-        private static void WriteArchiveChildren(
-            XmlDocument doc,
-            XmlElement parent,
-            OIVProject project,
-            List<OIVFolder> folders,
-            Dictionary<OIVFileEntry, string> resolved,
-            Dictionary<string, string> sourceToContentName,
-            string? currentArchiveGamePath = null)
-        {
-            foreach (var folder in folders)
-            {
-                var filesHere = project.Files.Where(f => f.FolderId == folder.Id).ToList();
-                var children = project.Folders.Where(f => f.ParentId == folder.Id).ToList();
-
-                if (folder.IsRpf)
-                {
-                    string fullArchivePath = BuildFullFolderPath(folder, project);
-
-                    // If this is a top-level archive, use full path.
-                    // If this archive is inside another archive, use relative path.
-                    string archivePathForXml = currentArchiveGamePath == null
-                        ? fullArchivePath
-                        : MakeRelativePathInsideArchive(fullArchivePath, currentArchiveGamePath);
-
-                    var arc = AppendElem(doc, parent, "archive");
-                    arc.SetAttribute("path", archivePathForXml);
-                    arc.SetAttribute("createIfNotExist", "True");
-                    arc.SetAttribute("type", "RPF7");
-
-                    // Files directly inside this archive (or subfolders under it) must be relative to THIS archive
-                    foreach (var file in filesHere)
-                    {
-                        string contentName = sourceToContentName[file.SourcePath];
-                        string fullPath = resolved[file];
-                        string insideThisArchive = MakeRelativePathInsideArchive(fullPath, fullArchivePath);
-
-                        var add = AppendElem(doc, arc, "add");
-                        add.SetAttribute("source", contentName);
-                        add.InnerText = insideThisArchive;
-                    }
-
-                    // Recurse into child folders, now inside this archive
-                    WriteArchiveChildren(
-                        doc,
-                        arc,
-                        project,
-                        children,
-                        resolved,
-                        sourceToContentName,
-                        fullArchivePath);
-                }
-                else
-                {
-                    // Non-RPF folder:
-                    // - if we're not inside an archive, files use full install path
-                    // - if we ARE inside an archive, files use path relative to the current archive
-                    foreach (var file in filesHere)
-                    {
-                        string contentName = sourceToContentName[file.SourcePath];
-                        string fullPath = resolved[file];
-
-                        string xmlPath = currentArchiveGamePath == null
-                            ? fullPath
-                            : MakeRelativePathInsideArchive(fullPath, currentArchiveGamePath);
-
-                        var add = AppendElem(doc, parent, "add");
-                        add.SetAttribute("source", contentName);
-                        add.InnerText = xmlPath;
-                    }
-
-                    // Child folders stay in same archive context
-                    WriteArchiveChildren(
-                        doc,
-                        parent,
-                        project,
-                        children,
-                        resolved,
-                        sourceToContentName,
-                        currentArchiveGamePath);
-                }
-            }
-        }
-
-        // Full folder path from root of target game
-        private static string BuildFullFolderPath(OIVFolder target, OIVProject project)
-        {
-            var parts = new List<string> { target.Name };
-            int? cur = target.ParentId;
-
-            while (cur.HasValue)
-            {
-                var folder = project.Folders.Find(f => f.Id == cur.Value);
-                if (folder == null) break;
-                parts.Insert(0, folder.Name);
-                cur = folder.ParentId;
-            }
-
-            return string.Join("\\", parts);
-        }
-
-        // Converts a full game path to a path relative to an archive root.
-        // Example:
-        //   fullPath     = update\update.rpf\common\data\dlclist.xml
-        //   archivePath  = update\update.rpf
-        //   result       = common\data\dlclist.xml
-        private static string MakeRelativePathInsideArchive(string fullPath, string archivePath)
-        {
-            if (!fullPath.StartsWith(archivePath, StringComparison.OrdinalIgnoreCase))
-                return fullPath;
-
-            string relative = fullPath.Substring(archivePath.Length).TrimStart('\\');
-            return relative;
         }
     }
 }

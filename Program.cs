@@ -6,14 +6,7 @@ namespace MagicOGK_OIV_Builder
         static void Main()
         {
             ApplicationConfiguration.Initialize();
-
-            using (SplashForm splash = new SplashForm())
-            {
-                splash.ShowDialog();
-            }
-
-            main app = new main();
-            Application.Run(app);
+            Application.Run(new main());
         }
     }
 }
