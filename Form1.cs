@@ -119,24 +119,37 @@ namespace MagicOGK_OIV_Builder
         // "Build. Replace. Package." scrolls across the top drag bar.
         // The panel clips the text; gradient rectangles on each side fade it in/out.
 
-        private float _marqueeX     = 0f;
-        private float _marqueeSpeed = 0.8f;
-        private string _marqueeText = "Build.   Replace.   Package.   ";
+        // Single instance of "Build. Replace. Package." travels left→right.
+        // Starts fully off the left edge, fades in as it enters, fades out as it exits right.
+        private float _marqueeX = 0f;
+        private const float MarqueeSpeed = 0.9f;
+        private const string MarqueeText = "Build.  Replace.  Package.";
         private System.Windows.Forms.Timer? _marqueeTimer;
+        private float _marqueeTextWidth = 0f; // measured once on first tick
 
         private void SetupMarquee()
         {
             panelMarquee.Paint += MarqueePaint;
 
             _marqueeTimer          = new System.Windows.Forms.Timer();
-            _marqueeTimer.Interval = 16; // ~60 fps
+            _marqueeTimer.Interval = 16;
             _marqueeTimer.Tick    += (s, e) =>
             {
-                _marqueeX -= _marqueeSpeed;
-                using var g     = Graphics.FromHwnd(panelMarquee.Handle);
-                using var font  = new Font("Syne", 9.5F, FontStyle.Bold);
-                float textWidth = g.MeasureString(_marqueeText, font).Width;
-                if (_marqueeX < -textWidth) _marqueeX = panelMarquee.Width;
+                if (_marqueeTextWidth <= 0)
+                {
+                    using var g2   = Graphics.FromHwnd(panelMarquee.Handle);
+                    using var mf   = new Font("Syne", 9.5F, FontStyle.Bold);
+                    _marqueeTextWidth = g2.MeasureString(MarqueeText, mf).Width;
+                    // Start fully off the left edge
+                    _marqueeX = -_marqueeTextWidth;
+                }
+
+                _marqueeX += MarqueeSpeed;
+
+                // Once the text has fully exited the right edge, restart from left
+                if (_marqueeX > panelMarquee.Width)
+                    _marqueeX = -_marqueeTextWidth;
+
                 panelMarquee.Invalidate();
             };
             _marqueeTimer.Start();
@@ -146,39 +159,46 @@ namespace MagicOGK_OIV_Builder
         {
             var g    = e.Graphics;
             var rect = panelMarquee.ClientRectangle;
-            g.SmoothingMode   = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.SmoothingMode     = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
-            using var font  = new Font("Syne", 9.5F, FontStyle.Bold);
-            var color = Color.FromArgb(180, 100, 100);
+            g.Clear(Color.FromArgb(10, 10, 10));
 
-            // Draw the text at current scroll position, repeated so there is no gap
-            using var brush = new SolidBrush(color);
-            float textWidth = g.MeasureString(_marqueeText, font).Width;
-            float x = _marqueeX;
-            // Draw enough copies to fill the panel
-            while (x < rect.Width + textWidth)
+            if (_marqueeTextWidth <= 0) return;
+
+            using var font = new Font("Syne", 9.5F, FontStyle.Bold);
+            float y = (rect.Height - font.Height) / 2f - 1;
+
+            // Determine per-pixel alpha by how far the text is into the panel:
+            // fade zone width on each edge
+            int fadeW = 80;
+
+            // Text left edge and right edge in panel coords
+            float textLeft  = _marqueeX;
+            float textRight = _marqueeX + _marqueeTextWidth;
+
+            // Alpha based on position: 0 when fully outside, 255 in the middle
+            // Left fade: text enters from the left — fade in as textLeft goes from -textWidth to fadeW
+            // Right fade: text exits right — fade out as textRight goes from (panelW-fadeW) to panelW+textWidth
+            float alpha = 1f;
+
+            if (textLeft < fadeW)
             {
-                g.DrawString(_marqueeText, font, brush, x, (rect.Height - font.Height) / 2f - 1);
-                x += textWidth;
+                // How far the leading edge has entered the fade zone
+                float progress = (textLeft + _marqueeTextWidth) / (_marqueeTextWidth + fadeW);
+                alpha = Math.Min(alpha, Math.Max(0f, progress));
+            }
+            if (textRight > rect.Width - fadeW)
+            {
+                float progress = (rect.Width - textLeft) / (_marqueeTextWidth + fadeW);
+                alpha = Math.Min(alpha, Math.Max(0f, progress));
             }
 
-            // Gradient fade — left edge
-            int fadeW = 60;
-            using var leftFade = new System.Drawing.Drawing2D.LinearGradientBrush(
-                new Rectangle(0, 0, fadeW, rect.Height),
-                Color.FromArgb(255, 10, 10, 10),
-                Color.FromArgb(0, 10, 10, 10),
-                System.Drawing.Drawing2D.LinearGradientMode.Horizontal);
-            g.FillRectangle(leftFade, 0, 0, fadeW, rect.Height);
+            int a = (int)(alpha * 200);
+            if (a < 3) return;
 
-            // Gradient fade — right edge
-            using var rightFade = new System.Drawing.Drawing2D.LinearGradientBrush(
-                new Rectangle(rect.Width - fadeW, 0, fadeW, rect.Height),
-                Color.FromArgb(0, 10, 10, 10),
-                Color.FromArgb(255, 10, 10, 10),
-                System.Drawing.Drawing2D.LinearGradientMode.Horizontal);
-            g.FillRectangle(rightFade, rect.Width - fadeW, 0, fadeW, rect.Height);
+            using var brush = new SolidBrush(Color.FromArgb(a, 180, 60, 60));
+            g.DrawString(MarqueeText, font, brush, _marqueeX, y);
         }
 
         // ─────────────────── MATRIX RAIN ANIMATION ───────────────────
