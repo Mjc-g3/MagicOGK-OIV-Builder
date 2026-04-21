@@ -29,10 +29,10 @@ namespace MagicOGK_OIV_Builder
             SetupLeftPanelControls();
             SetupRightPanelControls();
 
-            StyleSidebarBtn(btnSidebarOpenProject, "Open Project", 60);
-            StyleSidebarBtn(btnSidebarSaveProjectAs, "Save Project As", 118);
-            StyleSidebarBtn(btnSidebarOpenOIV, "Open OIV", 176);
-            StyleSidebarBtn(btnSidebarBuildOIV, "Build OIV", 234);
+            StyleSidebarBtn(btnSidebarOpenProject, "Open Project", 120);
+            StyleSidebarBtn(btnSidebarSaveProjectAs, "Save Project As", 178);
+            StyleSidebarBtn(btnSidebarOpenOIV, "Open OIV", 236);
+            StyleSidebarBtn(btnSidebarBuildOIV, "Build OIV", 294);
             StyleSidebarBtn(btnSidebarFeedback, "Feedback", 580);
 
             this.Load += Form1_Load;
@@ -111,6 +111,193 @@ namespace MagicOGK_OIV_Builder
             dropdownVersionTag.SelectedIndexChanged += Metadata_Changed;
 
             UpdateWindowButtonsLayout();
+            SetupMarquee();
+            SetupMatrixRain();
+        }
+
+        // ─────────────────── MARQUEE ANIMATION ───────────────────
+        // "Build. Replace. Package." scrolls across the top drag bar.
+        // The panel clips the text; gradient rectangles on each side fade it in/out.
+
+        private float _marqueeX     = 0f;
+        private float _marqueeSpeed = 0.8f;
+        private string _marqueeText = "Build.   Replace.   Package.   ";
+        private System.Windows.Forms.Timer? _marqueeTimer;
+
+        private void SetupMarquee()
+        {
+            panelMarquee.Paint += MarqueePaint;
+
+            _marqueeTimer          = new System.Windows.Forms.Timer();
+            _marqueeTimer.Interval = 16; // ~60 fps
+            _marqueeTimer.Tick    += (s, e) =>
+            {
+                _marqueeX -= _marqueeSpeed;
+                using var g     = Graphics.FromHwnd(panelMarquee.Handle);
+                using var font  = new Font("Syne", 9.5F, FontStyle.Bold);
+                float textWidth = g.MeasureString(_marqueeText, font).Width;
+                if (_marqueeX < -textWidth) _marqueeX = panelMarquee.Width;
+                panelMarquee.Invalidate();
+            };
+            _marqueeTimer.Start();
+        }
+
+        private void MarqueePaint(object? sender, PaintEventArgs e)
+        {
+            var g    = e.Graphics;
+            var rect = panelMarquee.ClientRectangle;
+            g.SmoothingMode   = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+
+            using var font  = new Font("Syne", 9.5F, FontStyle.Bold);
+            var color = Color.FromArgb(180, 100, 100);
+
+            // Draw the text at current scroll position, repeated so there is no gap
+            using var brush = new SolidBrush(color);
+            float textWidth = g.MeasureString(_marqueeText, font).Width;
+            float x = _marqueeX;
+            // Draw enough copies to fill the panel
+            while (x < rect.Width + textWidth)
+            {
+                g.DrawString(_marqueeText, font, brush, x, (rect.Height - font.Height) / 2f - 1);
+                x += textWidth;
+            }
+
+            // Gradient fade — left edge
+            int fadeW = 60;
+            using var leftFade = new System.Drawing.Drawing2D.LinearGradientBrush(
+                new Rectangle(0, 0, fadeW, rect.Height),
+                Color.FromArgb(255, 10, 10, 10),
+                Color.FromArgb(0, 10, 10, 10),
+                System.Drawing.Drawing2D.LinearGradientMode.Horizontal);
+            g.FillRectangle(leftFade, 0, 0, fadeW, rect.Height);
+
+            // Gradient fade — right edge
+            using var rightFade = new System.Drawing.Drawing2D.LinearGradientBrush(
+                new Rectangle(rect.Width - fadeW, 0, fadeW, rect.Height),
+                Color.FromArgb(0, 10, 10, 10),
+                Color.FromArgb(255, 10, 10, 10),
+                System.Drawing.Drawing2D.LinearGradientMode.Horizontal);
+            g.FillRectangle(rightFade, rect.Width - fadeW, 0, fadeW, rect.Height);
+        }
+
+        // ─────────────────── MATRIX RAIN ANIMATION ───────────────────
+        // Columns of falling characters in the sidebar title area.
+        // Each column has a head (bright) and a tail that fades to black.
+
+        private System.Windows.Forms.Timer? _matrixTimer;
+        private int[]   _matrixY    = Array.Empty<int>();
+        private int[]   _matrixSpeed = Array.Empty<int>();
+        private char[]  _matrixHeadChar = Array.Empty<char>();
+        private int     _matrixColW = 12;
+        private int     _matrixCols = 0;
+
+        private static readonly char[] MatrixChars =
+            "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>[]{}|\\/-_=+*#@!?".ToCharArray();
+        private static readonly Random MatrixRnd = new Random();
+
+        private void SetupMatrixRain()
+        {
+            int w = panelMatrixTitle.Width;
+            int h = panelMatrixTitle.Height;
+            _matrixCols  = w / _matrixColW;
+            _matrixY     = new int[_matrixCols];
+            _matrixSpeed  = new int[_matrixCols];
+            _matrixHeadChar = new char[_matrixCols];
+
+            for (int i = 0; i < _matrixCols; i++)
+            {
+                _matrixY[i]        = MatrixRnd.Next(-h, 0);
+                _matrixSpeed[i]    = MatrixRnd.Next(1, 4);
+                _matrixHeadChar[i] = MatrixChars[MatrixRnd.Next(MatrixChars.Length)];
+            }
+
+            panelMatrixTitle.Paint += MatrixTitlePaint;
+
+            _matrixTimer           = new System.Windows.Forms.Timer();
+            _matrixTimer.Interval  = 45;
+            _matrixTimer.Tick     += (s, e) =>
+            {
+                int h2 = panelMatrixTitle.Height;
+                for (int i = 0; i < _matrixCols; i++)
+                {
+                    _matrixY[i] += _matrixSpeed[i] * _matrixColW;
+                    if (_matrixY[i] > h2 + _matrixColW * 8)
+                    {
+                        _matrixY[i]        = MatrixRnd.Next(-h2, -_matrixColW);
+                        _matrixSpeed[i]    = MatrixRnd.Next(1, 4);
+                    }
+                    // Randomise head char occasionally
+                    if (MatrixRnd.Next(4) == 0)
+                        _matrixHeadChar[i] = MatrixChars[MatrixRnd.Next(MatrixChars.Length)];
+                }
+                panelMatrixTitle.Invalidate();
+            };
+            _matrixTimer.Start();
+        }
+
+        private void MatrixTitlePaint(object? sender, PaintEventArgs e)
+        {
+            var g    = e.Graphics;
+            int w    = panelMatrixTitle.Width;
+            int h    = panelMatrixTitle.Height;
+            int cw   = _matrixColW;
+            int tailLen = 7; // how many chars trail behind the head
+
+            g.Clear(Color.FromArgb(15, 15, 15));
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
+
+            using var font = new Font("Consolas", 7.5F, FontStyle.Bold);
+
+            for (int i = 0; i < _matrixCols; i++)
+            {
+                int headY = _matrixY[i];
+
+                // Draw tail — chars above the head, fading from dim red to black
+                for (int t = 1; t <= tailLen; t++)
+                {
+                    int cy = headY - t * cw;
+                    if (cy < -cw || cy > h) continue;
+
+                    float alpha = 1f - (float)t / tailLen;
+                    int   a     = (int)(alpha * alpha * 200); // quadratic falloff
+                    if (a <= 5) continue;
+
+                    // Pick a deterministic-ish char for the tail slot
+                    char c = MatrixChars[(i * 7 + t * 13) % MatrixChars.Length];
+                    using var tailBrush = new SolidBrush(Color.FromArgb(a, 100, 20, 20));
+                    g.DrawString(c.ToString(), font, tailBrush, i * cw, cy);
+                }
+
+                // Draw head — bright reddish-white
+                if (headY >= 0 && headY < h)
+                {
+                    using var headBrush = new SolidBrush(Color.FromArgb(240, 210, 160, 160));
+                    g.DrawString(_matrixHeadChar[i].ToString(), font, headBrush, i * cw, headY);
+                }
+            }
+
+            // "MAGICOGK" label drawn over the rain, centred
+            using var titleFont  = new Font("Syne", 11F, FontStyle.Bold);
+            string    title      = "MAGICOGK";
+            var       titleSize  = g.MeasureString(title, titleFont);
+            float     tx         = (w - titleSize.Width)  / 2f;
+            float     ty         = (h - titleSize.Height) / 2f;
+
+            // Subtle dark shadow for legibility
+            using var shadow = new SolidBrush(Color.FromArgb(180, 0, 0, 0));
+            g.DrawString(title, titleFont, shadow, tx + 1, ty + 1);
+
+            using var titleBrush = new SolidBrush(Color.FromArgb(220, 188, 100, 100));
+            g.DrawString(title, titleFont, titleBrush, tx, ty);
+
+            // Bottom fade — blend the rain into the panel background
+            using var bottomFade = new System.Drawing.Drawing2D.LinearGradientBrush(
+                new Rectangle(0, h - 30, w, 30),
+                Color.FromArgb(0, 15, 15, 15),
+                Color.FromArgb(255, 15, 15, 15),
+                System.Drawing.Drawing2D.LinearGradientMode.Vertical);
+            g.FillRectangle(bottomFade, 0, h - 30, w, 30);
         }
 
         // ─────────────────── WINDOW CONTROLS ───────────────────
