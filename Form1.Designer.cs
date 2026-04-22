@@ -17,10 +17,12 @@ namespace MagicOGK_OIV_Builder
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(main));
             sidebarTimer = new System.Windows.Forms.Timer(components);
             editorTimer = new System.Windows.Forms.Timer(components);
             panelDrag = new Panel();
             btnHamburger = new Button();
+            panelMarquee = new BufferedPanel();
             button7 = new Button();
             button6 = new Button();
             button5 = new Button();
@@ -28,6 +30,7 @@ namespace MagicOGK_OIV_Builder
             panelEditorRight = new Panel();
             panelRight = new Panel();
             panelSidebar = new Panel();
+            panelMatrixTitle = new BufferedPanel();
             btnSidebarOpenProject = new Button();
             btnSidebarSaveProjectAs = new Button();
             btnSidebarOpenOIV = new Button();
@@ -63,9 +66,6 @@ namespace MagicOGK_OIV_Builder
             // 
             // panelDrag
             // 
-            panelMarquee = new Panel();
-            panelMatrixTitle = new Panel();
-
             panelDrag.BackColor = Color.FromArgb(10, 10, 10);
             panelDrag.Controls.Add(btnHamburger);
             panelDrag.Controls.Add(panelMarquee);
@@ -93,14 +93,15 @@ namespace MagicOGK_OIV_Builder
             btnHamburger.Text = "☰";
             btnHamburger.UseVisualStyleBackColor = false;
             btnHamburger.Click += btnHamburger_Click;
-            //
+            // 
             // panelMarquee
-            //
+            // 
             panelMarquee.BackColor = Color.Transparent;
-            panelMarquee.Location  = new Point(46, 0);
-            panelMarquee.Size      = new Size(900, 28);
-            panelMarquee.Name      = "panelMarquee";
-            //
+            panelMarquee.Location = new Point(46, 0);
+            panelMarquee.Name = "panelMarquee";
+            panelMarquee.Size = new Size(900, 28);
+            panelMarquee.TabIndex = 1;
+            // 
             // button7
             // 
             button7.BackColor = Color.LimeGreen;
@@ -181,13 +182,14 @@ namespace MagicOGK_OIV_Builder
             panelSidebar.Name = "panelSidebar";
             panelSidebar.Size = new Size(0, 632);
             panelSidebar.TabIndex = 3;
-            //
+            // 
             // panelMatrixTitle
-            //
+            // 
             panelMatrixTitle.BackColor = Color.FromArgb(15, 15, 15);
-            panelMatrixTitle.Location  = new Point(0, 0);
-            panelMatrixTitle.Size      = new Size(200, 110);
-            panelMatrixTitle.Name      = "panelMatrixTitle";
+            panelMatrixTitle.Location = new Point(0, 0);
+            panelMatrixTitle.Name = "panelMatrixTitle";
+            panelMatrixTitle.Size = new Size(200, 110);
+            panelMatrixTitle.TabIndex = 0;
             // 
             // btnSidebarOpenProject
             // 
@@ -403,12 +405,12 @@ namespace MagicOGK_OIV_Builder
             Controls.Add(panelDrag);
             Font = new Font("Syne", 9F);
             FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "main";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "MagicOGK OIV Builder";
             panelDrag.ResumeLayout(false);
             panelSidebar.ResumeLayout(false);
-            panelSidebar.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)webViewFileList).EndInit();
             ResumeLayout(false);
         }
@@ -645,8 +647,8 @@ namespace MagicOGK_OIV_Builder
         }
 
         // ── Field declarations ──────────────────────────────────────────────
-        private Panel       panelMarquee;
-        private Panel       panelMatrixTitle;
+        private BufferedPanel panelMarquee;
+        private BufferedPanel panelMatrixTitle;
         private Panel       panelDrag;
         private Panel       panelLeft;
         private Panel       panelRight;
@@ -666,7 +668,7 @@ namespace MagicOGK_OIV_Builder
         private Label       lblPackageFiles;
         private Label       lblAddFilesHint;
         private Label       lblNoFiles;
-        // lblSidebarTitle removed – replaced by panelMatrixTitle
+        // lblSidebarTitle removed  –  replaced by panelMatrixTitle
 
         private TextBox     txtAuthor;
         private TextBox     txtModName;

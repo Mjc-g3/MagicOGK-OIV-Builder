@@ -29,6 +29,7 @@ namespace MagicOGK_OIV_Builder
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SplashForm));
             webViewBackground = new Microsoft.Web.WebView2.WinForms.WebView2();
             timer1 = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)webViewBackground).BeginInit();
@@ -54,9 +55,11 @@ namespace MagicOGK_OIV_Builder
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.FromArgb(22, 22, 22);
             ClientSize = new Size(1030, 660);
             Controls.Add(webViewBackground);
             FormBorderStyle = FormBorderStyle.None;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "SplashForm";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "SplashForm";

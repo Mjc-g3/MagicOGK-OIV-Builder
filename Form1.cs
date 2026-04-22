@@ -5,6 +5,7 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Microsoft.VisualBasic.Logging;
 using Microsoft.Web.WebView2.Core;
 
 namespace MagicOGK_OIV_Builder
@@ -40,6 +41,8 @@ namespace MagicOGK_OIV_Builder
             this.Resize += (s, e) => UpdateWindowButtonsLayout();
             this.Opacity = 0;
             this.ShowInTaskbar = false;
+
+            SetupLogo();
         }
 
         // ─────────────────── INIT ───────────────────
@@ -122,7 +125,7 @@ namespace MagicOGK_OIV_Builder
         // Single instance of "Build. Replace. Package." travels left→right.
         // Starts fully off the left edge, fades in as it enters, fades out as it exits right.
         private float _marqueeX = 0f;
-        private const float MarqueeSpeed = 0.9f;
+        private const float MarqueeSpeed = 1.5f;
         private const string MarqueeText = "Build.  Replace.  Package.";
         private System.Windows.Forms.Timer? _marqueeTimer;
         private float _marqueeTextWidth = 0f; // measured once on first tick
@@ -160,7 +163,7 @@ namespace MagicOGK_OIV_Builder
             var g    = e.Graphics;
             var rect = panelMarquee.ClientRectangle;
             g.SmoothingMode     = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
+            g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
             g.Clear(Color.FromArgb(10, 10, 10));
 
@@ -197,7 +200,7 @@ namespace MagicOGK_OIV_Builder
             int a = (int)(alpha * 200);
             if (a < 3) return;
 
-            using var brush = new SolidBrush(Color.FromArgb(a, 180, 60, 60));
+            using var brush = new SolidBrush(Color.FromArgb(a, 255, 255, 255));
             g.DrawString(MarqueeText, font, brush, _marqueeX, y);
         }
 
@@ -298,6 +301,7 @@ namespace MagicOGK_OIV_Builder
             }
 
             // "MAGICOGK" label drawn over the rain, centred
+            /*
             using var titleFont  = new Font("Syne", 11F, FontStyle.Bold);
             string    title      = "MAGICOGK";
             var       titleSize  = g.MeasureString(title, titleFont);
@@ -318,6 +322,7 @@ namespace MagicOGK_OIV_Builder
                 Color.FromArgb(255, 15, 15, 15),
                 System.Drawing.Drawing2D.LinearGradientMode.Vertical);
             g.FillRectangle(bottomFade, 0, h - 30, w, 30);
+            */
         }
 
         // ─────────────────── WINDOW CONTROLS ───────────────────
@@ -1729,6 +1734,31 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             button5.Location = new Point(panelDrag.ClientSize.Width - button5.Width - rightMargin, topMargin);
             button6.Location = new Point(button5.Left - button6.Width - spacing, topMargin);
             button7.Location = new Point(button6.Left - button7.Width - spacing, topMargin);
+        }
+
+        // -- sidebar logo
+        private void SetupLogo()
+        {
+            PictureBox logo = new PictureBox();
+            logo.Image = Properties.Resources.Magic_GTA5;
+            logo.SizeMode = PictureBoxSizeMode.Zoom;
+            logo.BackColor = Color.Transparent;
+            logo.Size = new Size(370, 170);
+
+            logo.Location = new Point(
+                (panelMatrixTitle.Width - logo.Width) / 2,
+                (panelMatrixTitle.Height - logo.Height) / 2
+            );
+
+            panelMatrixTitle.Resize += (s, e) =>
+            {
+                logo.Location = new Point(
+                    (panelMatrixTitle.Width - logo.Width) / 2,
+                    (panelMatrixTitle.Height - logo.Height) / 2
+                );
+            };
+
+            panelMatrixTitle.Controls.Add(logo);
         }
     }
 }
