@@ -89,10 +89,12 @@ namespace MagicOGK_OIV_Builder
 
     .cursor {
     display: inline-block;
-    margin-left: 3px;
-    opacity: 1;
+    width: 7px;
+    height: 24px;
+    background: rgba(180,220,255,0.95);
+    margin-left: 5px;
     animation: blink 0.85s step-end infinite;
-    color: rgba(180,220,255,0.95);
+    vertical-align: -3px;
 }
 
     @keyframes blink {
@@ -180,7 +182,7 @@ namespace MagicOGK_OIV_Builder
 <img class='logo' src='https://appassets/LogoSplash.png' />
 
 <div class='typing-container'>
-    <span id='typedText'></span><span class='cursor'>_</span>
+    <span id='typedText'></span><span class='cursor'></span>
 </div>
 
 <div class='progress-wrapper'>

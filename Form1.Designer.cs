@@ -425,7 +425,7 @@ namespace MagicOGK_OIV_Builder
             btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 0, 0);
             btn.TextAlign = ContentAlignment.MiddleLeft;
             btn.Font      = new Font("Syne", 9F);
-            btn.Size      = new Size(200, 40);
+            btn.Size      = new Size(200, 50);
             btn.Location  = new Point(0, y);
             btn.TabStop   = false;
         }

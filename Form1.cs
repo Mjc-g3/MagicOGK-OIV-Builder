@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Microsoft.VisualBasic.Logging;
 using Microsoft.Web.WebView2.Core;
@@ -12,6 +13,16 @@ namespace MagicOGK_OIV_Builder
 {
     public partial class main : Form
     {
+
+        [DllImport("user32.dll")]
+        public static extern bool ReleaseCapture();
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+
+        const int WM_NCLBUTTONDOWN = 0xA1;
+        const int HTCAPTION = 0x2;
+
         private bool isDragging = false;
         private Point dragStart;
         private string currentProjectPath = string.Empty;
@@ -30,11 +41,11 @@ namespace MagicOGK_OIV_Builder
             SetupLeftPanelControls();
             SetupRightPanelControls();
 
-            StyleSidebarBtn(btnSidebarOpenProject, "Open Project", 120);
-            StyleSidebarBtn(btnSidebarSaveProjectAs, "Save Project As", 178);
-            StyleSidebarBtn(btnSidebarOpenOIV, "Open OIV", 236);
-            StyleSidebarBtn(btnSidebarBuildOIV, "Build OIV", 294);
-            StyleSidebarBtn(btnSidebarFeedback, "Feedback", 580);
+            StyleSidebarBtn(btnSidebarOpenProject, "    📦    Open Project", 120);
+            StyleSidebarBtn(btnSidebarSaveProjectAs, "    📁    Save Project As", 178);
+            StyleSidebarBtn(btnSidebarOpenOIV, "    🔎    Open OIV", 236);
+            StyleSidebarBtn(btnSidebarBuildOIV, "    ⚒️    Build OIV", 294);
+            StyleSidebarBtn(btnSidebarFeedback, "        Feedback", 580);
 
             this.Load += Form1_Load;
             this.FormClosing += Main_FormClosing;
@@ -42,7 +53,73 @@ namespace MagicOGK_OIV_Builder
             this.Opacity = 0;
             this.ShowInTaskbar = false;
 
+            panelMarquee.MouseDown += DragWindow;
+            ApplyTextboxTheme();
+
+            dropdownVersionTag.DrawMode = DrawMode.OwnerDrawFixed;
+            dropdownVersionTag.DropDownStyle = ComboBoxStyle.DropDownList;
+            dropdownVersionTag.FlatStyle = FlatStyle.Flat;
+
+            dropdownVersionTag.DrawItem += DropdownVersionTag_DrawItem;
+
+            SetupMatrixRain();
             SetupLogo();
+
+            panelMatrixTitle.Height = 520;
+            panelMatrixTitle.SendToBack();
+
+            btnSidebarOpenProject.BringToFront();
+            btnSidebarSaveProjectAs.BringToFront();
+            btnSidebarOpenOIV.BringToFront();
+            btnSidebarBuildOIV.BringToFront();
+            btnSidebarFeedback.BringToFront();
+        }
+
+        private void ApplyTextboxTheme()
+        {
+            StyleTextbox(txtAuthor);
+            StyleTextbox(txtModName);
+            StyleTextbox(txtVersion);
+            StyleTextbox(txtDescription);
+        }
+
+        private void StyleTextbox(TextBox tb)
+        {
+            tb.BackColor = Color.FromArgb(35, 35, 35);
+            tb.ForeColor = Color.FromArgb(220, 180, 180);
+            tb.BorderStyle = BorderStyle.FixedSingle;
+        }
+
+        private void DropdownVersionTag_DrawItem(object sender, DrawItemEventArgs e)
+        {
+            if (e.Index < 0) return;
+
+            ComboBox cb = sender as ComboBox;
+
+            bool selected = (e.State & DrawItemState.Selected) == DrawItemState.Selected;
+
+            Color bgColor = selected
+                ? Color.FromArgb(60, 20, 20)   // hover/selected
+                : Color.FromArgb(35, 35, 35);    // normal
+
+            Color textColor = Color.FromArgb(220, 180, 180);
+
+            using (SolidBrush bg = new SolidBrush(bgColor))
+                e.Graphics.FillRectangle(bg, e.Bounds);
+
+            using (SolidBrush fg = new SolidBrush(textColor))
+                e.Graphics.DrawString(cb.Items[e.Index].ToString(), e.Font, fg, e.Bounds);
+
+            e.DrawFocusRectangle();
+        }
+
+        private void DragWindow(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                ReleaseCapture();
+                SendMessage(this.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+            }
         }
 
         // ─────────────────── INIT ───────────────────
@@ -267,7 +344,8 @@ namespace MagicOGK_OIV_Builder
             int cw   = _matrixColW;
             int tailLen = 7; // how many chars trail behind the head
 
-            g.Clear(Color.FromArgb(15, 15, 15));
+            panelMatrixTitle.BackColor = Color.FromArgb(15, 15, 15);
+            //g.Clear(panelMatrixTitle.BackColor);
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.SingleBitPerPixelGridFit;
 
             using var font = new Font("Consolas", 7.5F, FontStyle.Bold);
@@ -299,30 +377,6 @@ namespace MagicOGK_OIV_Builder
                     g.DrawString(_matrixHeadChar[i].ToString(), font, headBrush, i * cw, headY);
                 }
             }
-
-            // "MAGICOGK" label drawn over the rain, centred
-            /*
-            using var titleFont  = new Font("Syne", 11F, FontStyle.Bold);
-            string    title      = "MAGICOGK";
-            var       titleSize  = g.MeasureString(title, titleFont);
-            float     tx         = (w - titleSize.Width)  / 2f;
-            float     ty         = (h - titleSize.Height) / 2f;
-
-            // Subtle dark shadow for legibility
-            using var shadow = new SolidBrush(Color.FromArgb(180, 0, 0, 0));
-            g.DrawString(title, titleFont, shadow, tx + 1, ty + 1);
-
-            using var titleBrush = new SolidBrush(Color.FromArgb(220, 188, 100, 100));
-            g.DrawString(title, titleFont, titleBrush, tx, ty);
-
-            // Bottom fade — blend the rain into the panel background
-            using var bottomFade = new System.Drawing.Drawing2D.LinearGradientBrush(
-                new Rectangle(0, h - 30, w, 30),
-                Color.FromArgb(0, 15, 15, 15),
-                Color.FromArgb(255, 15, 15, 15),
-                System.Drawing.Drawing2D.LinearGradientMode.Vertical);
-            g.FillRectangle(bottomFade, 0, h - 30, w, 30);
-            */
         }
 
         // ─────────────────── WINDOW CONTROLS ───────────────────
@@ -551,8 +605,10 @@ namespace MagicOGK_OIV_Builder
                 btn.Click += (s, ev) => a();
                 toolbar.Controls.Add(btn);
                 tbx += 34;
+                
             }
-
+            // ── Preset paths ─────────────────────────────────────────────
+            var presetPanel = BuildPresetPathPanel();
             // ── Properties panel ──────────────────────────────────────────────
             editorPropPanel = new Panel
             {
@@ -590,10 +646,103 @@ namespace MagicOGK_OIV_Builder
             // IMPORTANT: add in this order
             panelEditorRight.Controls.Add(editorTree);
             panelEditorRight.Controls.Add(editorPropPanel);
+            panelEditorRight.Controls.Add(presetPanel);
             panelEditorRight.Controls.Add(toolbar);
             panelEditorRight.Controls.Add(header);
 
             RebuildTree();
+        }
+
+        private Panel BuildPresetPathPanel()
+        {
+            var panel = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 74,
+                BackColor = Color.FromArgb(16, 16, 16)
+            };
+
+            var lbl = new Label
+            {
+                Text = "PRESET PATHS",
+                ForeColor = Color.FromArgb(120, 80, 80),
+                Font = new Font("Syne", 7F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(10, 8)
+            };
+
+            panel.Controls.Add(lbl);
+
+            AddPresetButton(panel, "dlcpacks", "update/x64/dlcpacks", 10, 30);
+            AddPresetButton(panel, "levels/gta5", "x64/levels/gta5", 104, 30);
+            AddPresetButton(panel, "common/data", "common/data", 198, 30);
+            AddPresetButton(panel, "scaleform", "update/update.rpf/x64/patch/data/cdimages/scaleform_generic.rpf", 292, 30);
+
+            return panel;
+        }
+
+        private void AddPresetButton(Panel parent, string text, string path, int x, int y)
+        {
+            var btn = new Button
+            {
+                Text = text,
+                Tag = path,
+                Size = new Size(86, 26),
+                Location = new Point(x, y),
+                BackColor = Color.FromArgb(35, 10, 10),
+                ForeColor = Color.FromArgb(190, 135, 135),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 7F, FontStyle.Bold),
+                TabStop = false
+            };
+
+            btn.FlatAppearance.BorderColor = Color.FromArgb(80, 30, 30);
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(55, 15, 15);
+
+            btn.Click += (s, e) =>
+            {
+                AddPresetPath(path);
+            };
+
+            parent.Controls.Add(btn);
+        }
+
+        private void AddPresetPath(string path)
+        {
+            int? parentId = null;
+            OIVFolder? lastFolder = null;
+
+            string[] parts = path.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string part in parts)
+            {
+                var existing = currentProject.Folders.FirstOrDefault(f =>
+                    f.ParentId == parentId &&
+                    string.Equals(f.Name, part, StringComparison.OrdinalIgnoreCase));
+
+                if (existing == null)
+                {
+                    existing = new OIVFolder
+                    {
+                        Id = currentProject.NextId++,
+                        Name = part,
+                        ParentId = parentId,
+                        IsRpf = part.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase)
+                    };
+
+                    currentProject.Folders.Add(existing);
+                }
+
+                lastFolder = existing;
+                parentId = existing.Id;
+            }
+
+            MarkDirty();
+            RebuildTree();
+            RenderFileList();
+
+            if (lastFolder != null)
+                SelectTreeNodeByFolderId(lastFolder.Id);
         }
 
         // ─── REBUILD TREE HELPER ───────────────────────────────────────────────────
@@ -1743,22 +1892,30 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             logo.Image = Properties.Resources.Magic_GTA5;
             logo.SizeMode = PictureBoxSizeMode.Zoom;
             logo.BackColor = Color.Transparent;
+            logo.Parent = panelSidebar;
             logo.Size = new Size(370, 170);
 
+            int topZoneHeight = 120; // adjust this
+
             logo.Location = new Point(
-                (panelMatrixTitle.Width - logo.Width) / 2,
-                (panelMatrixTitle.Height - logo.Height) / 2
+                (panelSidebar.Width - logo.Width) / 2,
+                (topZoneHeight - logo.Height) / 2
             );
 
-            panelMatrixTitle.Resize += (s, e) =>
+            panelSidebar.Resize += (s, e) =>
             {
+                int topZoneHeight = 120;
+
                 logo.Location = new Point(
-                    (panelMatrixTitle.Width - logo.Width) / 2,
-                    (panelMatrixTitle.Height - logo.Height) / 2
+                    (panelSidebar.Width - logo.Width) / 2,
+                    (topZoneHeight - logo.Height) / 2
                 );
             };
 
-            panelMatrixTitle.Controls.Add(logo);
+            panelSidebar.Controls.Add(logo);
+            logo.BringToFront();
         }
+
     }
+
 }

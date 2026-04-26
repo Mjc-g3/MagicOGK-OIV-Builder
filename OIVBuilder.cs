@@ -235,7 +235,7 @@ namespace MagicOGK_OIV_Builder
 
                 foreach (var folder in dlcFolders)
                 {
-                    string dlcEntry = $@"dlcpacks:\{folder.Name}\";
+                    string dlcEntry = $"dlcpacks:/{folder.Name}/";
                     var addNode = AppendElem(doc, xmlNode, "add");
                     addNode.SetAttribute("append", "Last");
                     addNode.SetAttribute("xpath",  "/SMandatoryPacksData/Paths");
