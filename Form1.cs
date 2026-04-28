@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using System.Windows.Forms.Design;
 using Microsoft.VisualBasic.Logging;
 using Microsoft.Web.WebView2.Core;
+
+using System.Runtime.InteropServices;
 
 namespace MagicOGK_OIV_Builder
 {
@@ -494,7 +498,13 @@ namespace MagicOGK_OIV_Builder
 
         private void btnSidebarFeedback_Click(object sender, EventArgs e)
         {
-            MessageBox.Show("Feedback form coming soon!", "Feedback", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            var url = "https://forms.gle/tsbxGZUkxro11qYa6";
+
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                FileName = url,
+                UseShellExecute = true
+            });
         }
 
         // ─────────────────── RIGHT EDITOR PANEL ───────────────────
@@ -574,12 +584,13 @@ namespace MagicOGK_OIV_Builder
             };
 
             (string text, string tip, Action act)[] toolActions = {
-        ("\uD83D\uDCC1", "New Folder",      () => TreeCmd_NewFolder()),
-        ("\uD83D\uDDC4", "New RPF Archive", () => TreeCmd_NewRpf()),
-        ("\uD83D\uDCC4", "Add File Here",   () => TreeCmd_AddFile()),
-        ("\u270F",       "Rename",          () => TreeCmd_Rename()),
-        ("\uD83D\uDDD1", "Delete",          () => TreeCmd_Delete()),
-    };
+    ("📁", "New Folder",       () => TreeCmd_NewFolder()),
+    ("🗄", "New RPF Archive",  () => TreeCmd_NewRpf()),
+    ("📂", "Import Folder",    () => TreeCmd_ImportFolder()),
+    ("📄", "Add File Here",    () => TreeCmd_AddFile()),
+    ("✏",  "Rename",          () => TreeCmd_Rename()),
+    ("🗑", "Delete",          () => TreeCmd_Delete()),
+};
 
             int tbx = 6;
             foreach (var (text, tip, act) in toolActions)
@@ -631,6 +642,7 @@ namespace MagicOGK_OIV_Builder
                 ShowRootLines = false,
                 FullRowSelect = true,
                 HideSelection = false,
+                AllowDrop = true,
                 DrawMode = TreeViewDrawMode.OwnerDrawAll,
                 Indent = 24
             };
@@ -640,7 +652,9 @@ namespace MagicOGK_OIV_Builder
             editorTree.KeyDown += EditorTree_KeyDown;
             editorTree.MouseDoubleClick += EditorTree_MouseDoubleClick;
             editorTree.NodeMouseClick += EditorTree_NodeMouseClick; // <-- HERE
-            editorTree.DragEnter += (s, ev) => ev.Effect = DragDropEffects.Copy;
+            editorTree.ItemDrag += EditorTree_ItemDrag;
+            editorTree.DragEnter += EditorTree_DragEnter;
+            editorTree.DragOver += EditorTree_DragOver;
             editorTree.DragDrop += EditorTree_DragDrop;
 
             // IMPORTANT: add in this order
@@ -744,6 +758,9 @@ namespace MagicOGK_OIV_Builder
             if (lastFolder != null)
                 SelectTreeNodeByFolderId(lastFolder.Id);
         }
+
+        // -- EDITOR PANEL LOGIC --
+
 
         // ─── REBUILD TREE HELPER ───────────────────────────────────────────────────
         private string GetNodeKey(TreeNode node)
@@ -1054,7 +1071,12 @@ namespace MagicOGK_OIV_Builder
                     AutoSize  = true,
                     Location  = new Point(10, 50)
                 };
-                chkDlc.CheckedChanged += (s, ev) => folder.AddToDlcList = chkDlc.Checked;
+                chkDlc.CheckedChanged += (s, ev) =>
+                {
+                    folder.AddToDlcList = chkDlc.Checked;
+                    MarkDirty();
+                    RenderFileList();
+                };
                 editorPropPanel.Controls.Add(chkDlc);
 
                 var chkRpf = new CheckBox
@@ -1174,6 +1196,48 @@ namespace MagicOGK_OIV_Builder
             return null; // root or nothing selected
         }
 
+        private string ResolveFolderPath(OIVFolder folder)
+        {
+            var parts = new List<string>();
+
+            OIVFolder? current = folder;
+
+            while (current != null)
+            {
+                parts.Insert(0, current.Name);
+
+                if (!current.ParentId.HasValue)
+                    break;
+
+                current = currentProject.Folders.FirstOrDefault(f => f.Id == current.ParentId.Value);
+            }
+
+            return string.Join("/", parts);
+        }
+
+        private bool IsDirectChildOfDlcpacks(OIVFolder folder)
+        {
+            string path = ResolveFolderPath(folder).Replace("\\", "/").Trim('/');
+
+            // Direct folders only:
+            // update/x64/dlcpacks/mycar
+            // NOT update/x64/dlcpacks/mycar/something
+            string prefix = "update/x64/dlcpacks/";
+
+            if (!path.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            string remaining = path.Substring(prefix.Length);
+
+            return !remaining.Contains("/");
+        }
+
+        private bool IsDlcpacksFolder(OIVFolder folder)
+        {
+            string path = ResolveFolderPath(folder).Replace("\\", "/").Trim('/');
+            return string.Equals(path, "update/x64/dlcpacks", StringComparison.OrdinalIgnoreCase);
+        }
+
         private void TreeCmd_NewFolder() => TreeCmd_NewNode(isRpf: false);
         private void TreeCmd_NewRpf()    => TreeCmd_NewNode(isRpf: true);
 
@@ -1183,20 +1247,32 @@ namespace MagicOGK_OIV_Builder
             string name = PromptName($"New {kind} name:", isRpf ? "myarchive.rpf" : "MyFolder");
             if (string.IsNullOrWhiteSpace(name)) return;
 
+            int? parentId = SelectedFolderId();
+
             var newFolder = new OIVFolder
             {
                 Id = currentProject.NextId++,
                 Name = name,
-                ParentId = SelectedFolderId(),
+                ParentId = parentId,
                 IsRpf = isRpf
             };
-            
+
             currentProject.Folders.Add(newFolder);
+
+            // Auto-toggle only if it is directly inside update/x64/dlcpacks
+            newFolder.AddToDlcList = !isRpf && IsDirectChildOfDlcpacks(newFolder);
+
             MarkDirty();
             RebuildTree();
-            SelectTreeNodeByFolderId(newFolder.Id);
+
+            // If creating inside dlcpacks, keep dlcpacks selected.
+            // This prevents the next folder from being created inside the new folder.
+            if (parentId.HasValue)
+                SelectTreeNodeByFolderId(parentId.Value);
+            else
+                SelectTreeNodeByFolderId(newFolder.Id);
+
             RenderFileList();
-            
         }
 
         private void TreeCmd_AddFile()
@@ -1226,6 +1302,63 @@ namespace MagicOGK_OIV_Builder
             MarkDirty();
             RebuildTree();
             RenderFileList();
+        }
+
+        private void TreeCmd_ImportFolder()
+        {
+            int? parentFolderId = SelectedFolderId();
+
+            string[] folders = MultiFolderPicker.PickFolders();
+
+            if (folders.Length == 0)
+                return;
+
+            foreach (string folderPath in folders)
+            {
+                if (Directory.Exists(folderPath))
+                    ImportFolderRecursive(folderPath, parentFolderId);
+            }
+
+            MarkDirty();
+            RebuildTree();
+
+            if (parentFolderId.HasValue)
+                SelectTreeNodeByFolderId(parentFolderId.Value);
+
+            RenderFileList();
+        }
+
+        private void ImportFolderRecursive(string sourceFolderPath, int? parentFolderId)
+        {
+            var newFolder = new OIVFolder
+            {
+                Id = currentProject.NextId++,
+                Name = Path.GetFileName(sourceFolderPath.TrimEnd('\\', '/')),
+                ParentId = parentFolderId,
+                IsRpf = sourceFolderPath.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase)
+            };
+
+            currentProject.Folders.Add(newFolder);
+
+            newFolder.AddToDlcList = !newFolder.IsRpf && IsDirectChildOfDlcpacks(newFolder);
+
+            foreach (string filePath in Directory.GetFiles(sourceFolderPath))
+            {
+                currentProject.Files.Add(new OIVFileEntry
+                {
+                    Id = currentProject.NextId++,
+                    SourcePath = filePath,
+                    FileName = Path.GetFileName(filePath),
+                    SubPath = string.Empty,
+                    Type = "content",
+                    FolderId = newFolder.Id
+                });
+            }
+
+            foreach (string childFolder in Directory.GetDirectories(sourceFolderPath))
+            {
+                ImportFolderRecursive(childFolder, newFolder.Id);
+            }
         }
 
         private void TreeCmd_Rename()
@@ -1305,29 +1438,139 @@ namespace MagicOGK_OIV_Builder
                 System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{file.SourcePath}\"");
             }
         }
+        private void EditorTree_ItemDrag(object? sender, ItemDragEventArgs e)
+        {
+            if (e.Item is TreeNode node && node.Tag is not string)
+            {
+                DoDragDrop(node, DragDropEffects.Move);
+            }
+        }
 
+        private void EditorTree_DragEnter(object? sender, DragEventArgs e)
+        {
+            if (e.Data == null)
+                return;
+
+            if (e.Data.GetDataPresent(typeof(TreeNode)))
+                e.Effect = DragDropEffects.Move;
+            else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Copy;
+            else
+                e.Effect = DragDropEffects.None;
+        }
+
+        private void EditorTree_DragOver(object? sender, DragEventArgs e)
+        {
+            if (editorTree == null || e.Data == null)
+                return;
+
+            if (e.Data.GetDataPresent(typeof(TreeNode)))
+                e.Effect = DragDropEffects.Move;
+            else if (e.Data.GetDataPresent(DataFormats.FileDrop))
+                e.Effect = DragDropEffects.Copy;
+            else
+                e.Effect = DragDropEffects.None;
+
+            Point clientPoint = editorTree.PointToClient(new Point(e.X, e.Y));
+            TreeNode? node = editorTree.GetNodeAt(clientPoint);
+
+            if (node != null)
+                editorTree.SelectedNode = node;
+        }
+
+        private bool IsDescendantFolder(int possibleChildId, int parentId)
+        {
+            int? currentId = possibleChildId;
+
+            while (currentId.HasValue)
+            {
+                if (currentId.Value == parentId)
+                    return true;
+
+                var folder = currentProject.Folders.FirstOrDefault(f => f.Id == currentId.Value);
+                currentId = folder?.ParentId;
+            }
+
+            return false;
+        }
         private void EditorTree_DragDrop(object? sender, DragEventArgs e)
         {
-            if (e.Data == null) return;
-            string[]? paths = e.Data.GetData(DataFormats.FileDrop) as string[];
-            if (paths == null) return;
+            if (editorTree == null || e.Data == null)
+                return;
 
-            int? parentFolderId = SelectedFolderId();
+            Point clientPoint = editorTree.PointToClient(new Point(e.X, e.Y));
+            TreeNode? targetNode = editorTree.GetNodeAt(clientPoint);
+
+            int? targetFolderId = null;
+
+            if (targetNode?.Tag is OIVFolder targetFolder)
+                targetFolderId = targetFolder.Id;
+            else if (targetNode?.Tag is OIVFileEntry targetFile)
+                targetFolderId = targetFile.FolderId;
+
+            // Moving existing folder/file inside the editor
+            if (e.Data.GetDataPresent(typeof(TreeNode)))
+            {
+                TreeNode draggedNode = (TreeNode)e.Data.GetData(typeof(TreeNode))!;
+
+                if (draggedNode == targetNode)
+                    return;
+
+                if (draggedNode.Tag is OIVFolder draggedFolder)
+                {
+                    // Prevent moving a folder inside itself or its own children
+                    if (targetFolderId.HasValue && IsDescendantFolder(targetFolderId.Value, draggedFolder.Id))
+                        return;
+
+                    draggedFolder.ParentId = targetFolderId;
+                    draggedFolder.AddToDlcList = IsDirectChildOfDlcpacks(draggedFolder);
+                }
+                else if (draggedNode.Tag is OIVFileEntry draggedFile)
+                {
+                    draggedFile.FolderId = targetFolderId;
+                }
+
+                MarkDirty();
+                RebuildTree();
+
+                if (draggedNode.Tag is OIVFolder movedFolder)
+                    SelectTreeNodeByFolderId(movedFolder.Id);
+
+                RenderFileList();
+                return;
+            }
+
+            // Importing files/folders from Windows Explorer
+            string[]? paths = e.Data.GetData(DataFormats.FileDrop) as string[];
+            if (paths == null)
+                return;
+
             foreach (string path in paths)
             {
-                if (!File.Exists(path)) continue;
-                currentProject.Files.Add(new OIVFileEntry
+                if (Directory.Exists(path))
                 {
-                    Id         = currentProject.NextId++,
-                    SourcePath = path,
-                    FileName   = Path.GetFileName(path),
-                    SubPath    = string.Empty,
-                    Type       = "content",
-                    FolderId   = parentFolderId
-                });
+                    ImportFolderRecursive(path, targetFolderId);
+                }
+                else if (File.Exists(path))
+                {
+                    currentProject.Files.Add(new OIVFileEntry
+                    {
+                        Id = currentProject.NextId++,
+                        SourcePath = path,
+                        FileName = Path.GetFileName(path),
+                        SubPath = string.Empty,
+                        Type = "content",
+                        FolderId = targetFolderId
+                    });
+                }
             }
+
             MarkDirty();
             RebuildTree();
+
+            if (targetFolderId.HasValue)
+                SelectTreeNodeByFolderId(targetFolderId.Value);
+
             RenderFileList();
         }
 
@@ -1916,6 +2159,105 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             logo.BringToFront();
         }
 
-    }
 
+
+    }
+    public static class MultiFolderPicker
+    {
+        public static string[] PickFolders()
+        {
+            IFileOpenDialog dialog = (IFileOpenDialog)new FileOpenDialogRCW();
+
+            dialog.GetOptions(out uint options);
+
+            dialog.SetOptions(options
+                | 0x00000020  // FOS_PICKFOLDERS
+                | 0x00000200  // FOS_ALLOWMULTISELECT
+                | 0x00001000  // FOS_FORCEFILESYSTEM
+            );
+
+            int hr = dialog.Show(IntPtr.Zero);
+
+            if (hr != 0)
+                return Array.Empty<string>();
+
+            dialog.GetResults(out IShellItemArray results);
+            results.GetCount(out uint count);
+
+            string[] folders = new string[count];
+
+            for (uint i = 0; i < count; i++)
+            {
+                results.GetItemAt(i, out IShellItem item);
+                item.GetDisplayName(0x80058000, out IntPtr pathPtr);
+
+                folders[i] = Marshal.PtrToStringUni(pathPtr)!;
+                Marshal.FreeCoTaskMem(pathPtr);
+            }
+
+            return folders;
+        }
+
+        [ComImport]
+        [Guid("DC1C5A9C-E88A-4DDE-A5A1-60F82A20AEF7")]
+        private class FileOpenDialogRCW { }
+
+        [ComImport]
+        [Guid("D57C7288-D4AD-4768-BE02-9D969532D960")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IFileOpenDialog
+        {
+            [PreserveSig] int Show(IntPtr parent);
+            void SetFileTypes();
+            void SetFileTypeIndex();
+            void GetFileTypeIndex();
+            void Advise();
+            void Unadvise();
+            void SetOptions(uint fos);
+            void GetOptions(out uint fos);
+            void SetDefaultFolder();
+            void SetFolder();
+            void GetFolder();
+            void GetCurrentSelection();
+            void SetFileName();
+            void GetFileName();
+            void SetTitle([MarshalAs(UnmanagedType.LPWStr)] string title);
+            void SetOkButtonLabel();
+            void SetFileNameLabel();
+            void GetResult();
+            void AddPlace();
+            void SetDefaultExtension();
+            void Close(int hr);
+            void SetClientGuid();
+            void ClearClientData();
+            void SetFilter();
+            void GetResults(out IShellItemArray ppenum);
+        }
+
+        [ComImport]
+        [Guid("B63EA76D-1F85-456F-A19C-48159EFA858B")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IShellItemArray
+        {
+            void BindToHandler();
+            void GetPropertyStore();
+            void GetPropertyDescriptionList();
+            void GetAttributes();
+            void GetCount(out uint pdwNumItems);
+            void GetItemAt(uint dwIndex, out IShellItem ppsi);
+            void EnumItems();
+        }
+
+        [ComImport]
+        [Guid("43826D1E-E718-42EE-BC55-A1E261C37BFE")]
+        [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+        private interface IShellItem
+        {
+            void BindToHandler();
+            void GetParent();
+            void GetDisplayName(uint sigdnName, out IntPtr ppszName);
+            void GetAttributes();
+            void Compare();
+        }
+    }
 }

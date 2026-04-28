@@ -28,10 +28,8 @@ namespace MagicOGK_OIV_Builder
         /// </summary>
         private void InitializeComponent()
         {
-            components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SplashForm));
             webViewBackground = new Microsoft.Web.WebView2.WinForms.WebView2();
-            timer1 = new System.Windows.Forms.Timer(components);
             ((System.ComponentModel.ISupportInitialize)webViewBackground).BeginInit();
             SuspendLayout();
             // 
@@ -46,10 +44,6 @@ namespace MagicOGK_OIV_Builder
             webViewBackground.Size = new Size(1030, 660);
             webViewBackground.TabIndex = 21;
             webViewBackground.ZoomFactor = 1D;
-            // 
-            // timer1
-            // 
-            timer1.Interval = 25;
             // 
             // SplashForm
             // 
@@ -70,6 +64,5 @@ namespace MagicOGK_OIV_Builder
         #endregion
 
         private Microsoft.Web.WebView2.WinForms.WebView2 webViewBackground;
-        private System.Windows.Forms.Timer timer1;
     }
 }

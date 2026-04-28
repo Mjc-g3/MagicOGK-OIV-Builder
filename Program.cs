@@ -8,5 +8,6 @@ namespace MagicOGK_OIV_Builder
             ApplicationConfiguration.Initialize();
             Application.Run(new main());
         }
+
     }
 }

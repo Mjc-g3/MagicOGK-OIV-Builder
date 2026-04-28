@@ -3,6 +3,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.IO;
 using Microsoft.Web.WebView2.Core;
+using System.Runtime.InteropServices;
+using Microsoft.Win32;
 
 namespace MagicOGK_OIV_Builder
 {
