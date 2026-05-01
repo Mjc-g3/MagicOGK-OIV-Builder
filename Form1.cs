@@ -59,7 +59,11 @@ namespace MagicOGK_OIV_Builder
         private TextBox? txtVehicleSearch = null;
         private Button? btnVehiclePrev = null;
         private Button? btnVehicleNext = null;
-
+        /*
+        private int sidebarOpenX = 0;
+        private int sidebarClosedX => -panelSidebar.Width;
+        private int sidebarTargetX => sidebarExpanded ? sidebarOpenX : sidebarClosedX;
+        */
         public main()
         {
             InitializeComponent();
@@ -80,7 +84,8 @@ namespace MagicOGK_OIV_Builder
             this.Resize += (s, e) =>
             {
                 UpdateWindowButtonsLayout();
-                PositionEditorPanel();
+                PositionReplaceScreen();
+
             };
             this.Opacity = 0;
             this.ShowInTaskbar = false;
@@ -105,12 +110,34 @@ namespace MagicOGK_OIV_Builder
             btnSidebarOpenOIV.BringToFront();
             btnSidebarBuildOIV.BringToFront();
             btnSidebarFeedback.BringToFront();
+
+            panelSidebar.Dock = DockStyle.None;
+            panelSidebar.Width = SidebarWidth;
+            panelSidebar.Left = -SidebarWidth;
+            panelSidebar.Top = panelMarquee.Height;
+            panelSidebar.Height = ClientSize.Height - panelMarquee.Height;
         }
-        
+
 
 
         // ─────────────────── REPLACE MENU ───────────────────
+        private void PositionReplaceScreen()
+        {
+            if (replaceScreenPanel == null)
+                return;
 
+            int topBarHeight = panelMarquee.Height;
+
+            replaceScreenPanel.Location = new Point(0, topBarHeight);
+            replaceScreenPanel.Size = new Size(
+                ClientSize.Width,
+                ClientSize.Height - topBarHeight
+            );
+
+            replaceScreenPanel.BringToFront();
+            panelEditorRight.BringToFront();
+            btnHamburger.BringToFront();
+        }
         private void btnReplaceMods_Click(object sender, EventArgs e)
         {
             ShowReplaceModsScreen();
@@ -130,16 +157,17 @@ namespace MagicOGK_OIV_Builder
             replaceScreenPanel = new Panel
             {
                 BackColor = Color.FromArgb(16, 16, 16),
-                Location = new Point(panelSidebar.Width + 20, panelMarquee.Bottom + 10),
+                Location = new Point(0, panelMarquee.Height),
                 Size = new Size(
-                    this.ClientSize.Width - panelSidebar.Width - panelEditorRight.Width - 40,
-                    this.ClientSize.Height - panelMarquee.Height - 20
+                  this.ClientSize.Width,
+                   this.ClientSize.Height - panelMarquee.Height
                 ),
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
             };
 
             Controls.Add(replaceScreenPanel);
             replaceScreenPanel.BringToFront();
+            PositionReplaceScreen();
 
             var title = new Label
             {
@@ -611,7 +639,7 @@ namespace MagicOGK_OIV_Builder
                 return;
 
             int vehiclesRpfId = EnsureEditorPath(
-                "mods/update/x64/dlcpacks/patchday8ng/dlc.rpf/x64/levels/gta5/vehicles.rpf"
+                "update/x64/dlcpacks/patchday8ng/dlc.rpf/x64/levels/gta5/vehicles.rpf"
             );
 
             foreach (string file in dlg.FileNames)
@@ -976,25 +1004,40 @@ namespace MagicOGK_OIV_Builder
 
         // ─────────────────── SIDEBAR ───────────────────
 
+        private const int SidebarWidth = 220;
+
+        private int sidebarOpenX => 0;
+        private int sidebarClosedX => -SidebarWidth;
+        private int sidebarTargetX => sidebarExpanded ? sidebarOpenX : sidebarClosedX;
+
         private void btnHamburger_Click(object sender, EventArgs e)
         {
             sidebarExpanded = !sidebarExpanded;
+
+            panelSidebar.Dock = DockStyle.None;
+            panelSidebar.Width = SidebarWidth;
+            panelSidebar.Top = panelMarquee.Height;
+            panelSidebar.Height = ClientSize.Height - panelMarquee.Height;
+
             sidebarTimer.Start();
         }
 
-        private int sidebarTarget => sidebarExpanded ? 200 : 0;
         private void SidebarTimer_Tick(object sender, EventArgs e)
         {
-            int diff = sidebarTarget - panelSidebar.Width;
+            int diff = sidebarTargetX - panelSidebar.Left;
+
             if (Math.Abs(diff) <= 3)
             {
-                panelSidebar.Width = sidebarTarget;
+                panelSidebar.Left = sidebarTargetX;
                 sidebarTimer.Stop();
             }
             else
             {
-                panelSidebar.Width += diff / 3;
+                panelSidebar.Left += diff / 3;
             }
+
+            panelSidebar.BringToFront();
+            btnHamburger.BringToFront();
         }
 
         private void btnSidebarOpenProject_Click(object sender, EventArgs e)
