@@ -11,8 +11,6 @@ using System.Windows.Forms.Design;
 using Microsoft.VisualBasic.Logging;
 using Microsoft.Web.WebView2.Core;
 
-using System.Runtime.InteropServices;
-
 namespace MagicOGK_OIV_Builder
 {
     public partial class main : Form
@@ -38,6 +36,30 @@ namespace MagicOGK_OIV_Builder
         private bool isDirty = false;
         private bool isLoadingProject = false;
 
+        private TreeView? editorTree = null;
+        private Panel? editorPropPanel = null;
+
+        private bool isResizingEditorPanel = false;
+        private int editorResizeStartX;
+        private int editorResizeStartWidth;
+        private int editorCurrentWidth = 380;
+
+        private int editorTarget => editorExpanded ? editorCurrentWidth : 0;
+
+        private Panel? replaceScreenPanel = null;
+        private FlowLayoutPanel? replaceVehicleList = null;
+        private string? selectedReplaceVehicle = null;
+        private Label? lblSelectedReplaceVehicle = null;
+
+        private int vehiclePage = 0;
+        private const int vehiclesPerPage = 60;
+        private List<(string name, string spawn, string img)> allVehicles = new();
+
+        private string? hoveredVehicle = null;
+        private TextBox? txtVehicleSearch = null;
+        private Button? btnVehiclePrev = null;
+        private Button? btnVehicleNext = null;
+
         public main()
         {
             InitializeComponent();
@@ -51,9 +73,15 @@ namespace MagicOGK_OIV_Builder
             StyleSidebarBtn(btnSidebarBuildOIV, "    ⚒️    Build OIV", 294);
             StyleSidebarBtn(btnSidebarFeedback, "        Feedback", 580);
 
+            btnReplaceMods.Click += btnReplaceMods_Click;
+
             this.Load += Form1_Load;
             this.FormClosing += Main_FormClosing;
-            this.Resize += (s, e) => UpdateWindowButtonsLayout();
+            this.Resize += (s, e) =>
+            {
+                UpdateWindowButtonsLayout();
+                PositionEditorPanel();
+            };
             this.Opacity = 0;
             this.ShowInTaskbar = false;
 
@@ -78,7 +106,547 @@ namespace MagicOGK_OIV_Builder
             btnSidebarBuildOIV.BringToFront();
             btnSidebarFeedback.BringToFront();
         }
+        
 
+
+        // ─────────────────── REPLACE MENU ───────────────────
+
+        private void btnReplaceMods_Click(object sender, EventArgs e)
+        {
+            ShowReplaceModsScreen();
+        }
+
+        private void ShowReplaceModsScreen()
+        {
+            if (replaceScreenPanel != null)
+            {
+                replaceScreenPanel.Visible = true;
+                replaceScreenPanel.BringToFront();
+                panelSidebar.BringToFront();
+                panelEditorRight.BringToFront();
+                return;
+            }
+
+            replaceScreenPanel = new Panel
+            {
+                BackColor = Color.FromArgb(16, 16, 16),
+                Location = new Point(panelSidebar.Width + 20, panelMarquee.Bottom + 10),
+                Size = new Size(
+                    this.ClientSize.Width - panelSidebar.Width - panelEditorRight.Width - 40,
+                    this.ClientSize.Height - panelMarquee.Height - 20
+                ),
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+            };
+
+            Controls.Add(replaceScreenPanel);
+            replaceScreenPanel.BringToFront();
+
+            var title = new Label
+            {
+                Text = "REPLACE MENU",
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Syne", 16F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(24, 22)
+            };
+
+
+            btnVehiclePrev = CreateSecondaryButton("← Prev");
+            btnVehiclePrev.Location = new Point(300, 110);
+
+            btnVehicleNext = CreateSecondaryButton("Next →");
+            btnVehicleNext.Location = new Point(450, 110);
+
+            Button prev = btnVehiclePrev;
+            Button next = btnVehicleNext;
+
+            next.Click += (s, e) =>
+            {
+                if ((vehiclePage + 1) * vehiclesPerPage < GetFilteredVehicleCount())
+                {
+                    vehiclePage++;
+                    LoadVehiclePage();
+                    UpdateVehicleNavButtons();
+                }
+            };
+
+            prev.Click += (s, e) =>
+            {
+                if (vehiclePage > 0)
+                {
+                    vehiclePage--;
+                    LoadVehiclePage();
+                    UpdateVehicleNavButtons();
+                }
+            };
+
+
+
+            var back = new Button
+            {
+                Text = "← Back",
+                Size = new Size(100, 32),
+                Location = new Point(24, 62),
+                BackColor = Color.FromArgb(55, 0, 0),
+                ForeColor = Color.FromArgb(230, 170, 170),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 8F, FontStyle.Bold)
+            };
+            back.FlatAppearance.BorderColor = Color.FromArgb(120, 30, 30);
+            back.Click += (s, e) => replaceScreenPanel.Visible = false;
+
+            lblSelectedReplaceVehicle = new Label
+            {
+                Text = "Selected vehicle: none",
+                ForeColor = Color.FromArgb(150, 100, 100),
+                Font = new Font("Segoe UI", 9F),
+                AutoSize = true,
+                Location = new Point(140, 68)
+            };
+
+            var replaceBtn = new Button
+            {
+                Text = "Replace Selected Vehicle",
+                Size = new Size(220, 36),
+                Location = new Point(24, 110),
+                BackColor = Color.FromArgb(90, 0, 0),
+                ForeColor = Color.FromArgb(240, 180, 180),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 8F, FontStyle.Bold)
+            };
+            replaceBtn.FlatAppearance.BorderColor = Color.FromArgb(140, 40, 40);
+            replaceBtn.Click += (s, e) => ReplaceSelectedVehicle();
+
+            void UpdateNavButtons()
+            {
+                prev.Enabled = vehiclePage > 0;
+                next.Enabled = (vehiclePage + 1) * vehiclesPerPage < allVehicles.Count;
+
+                prev.ForeColor = prev.Enabled ? Color.FromArgb(200, 200, 200) : Color.FromArgb(90, 90, 90);
+                next.ForeColor = next.Enabled ? Color.FromArgb(200, 200, 200) : Color.FromArgb(90, 90, 90);
+            }
+
+            next.Click += (s, e) =>
+            {
+                if ((vehiclePage + 1) * vehiclesPerPage < allVehicles.Count)
+                {
+                    vehiclePage++;
+                    LoadVehiclePage();
+                    UpdateNavButtons();
+                }
+            };
+
+            prev.Click += (s, e) =>
+            {
+                if (vehiclePage > 0)
+                {
+                    vehiclePage--;
+                    LoadVehiclePage();
+                    UpdateNavButtons();
+                }
+            };
+
+            var searchLabel = new Label
+            {
+                Text = "SEARCH VEHICLE",
+                ForeColor = Color.FromArgb(188, 143, 143),
+                Font = new Font("Syne", 8F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(620, 82)
+            };
+
+            txtVehicleSearch = new TextBox
+            {
+                Size = new Size(300, 28),
+                Location = new Point(620, 105),
+                BackColor = Color.FromArgb(30, 30, 30),
+                ForeColor = Color.FromArgb(220, 220, 220),
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 9F)
+            };
+
+            txtVehicleSearch.TextChanged += (s, e) =>
+            {
+                vehiclePage = 0;
+                LoadVehiclePage();
+                UpdateVehicleNavButtons();
+            };
+
+            replaceScreenPanel.Controls.Add(searchLabel);
+            replaceScreenPanel.Controls.Add(txtVehicleSearch);
+
+            replaceVehicleList = new FlowLayoutPanel
+            {
+                Location = new Point(24, 165),
+                Size = new Size(replaceScreenPanel.Width - 48, replaceScreenPanel.Height - 190),
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
+                AutoScroll = true,
+                WrapContents = true,
+                BackColor = Color.FromArgb(12, 12, 12)
+            };
+
+            replaceScreenPanel.Controls.Add(title);
+            replaceScreenPanel.Controls.Add(back);
+            replaceScreenPanel.Controls.Add(lblSelectedReplaceVehicle);
+            replaceScreenPanel.Controls.Add(replaceBtn);
+            replaceScreenPanel.Controls.Add(replaceVehicleList);
+
+            LoadReplaceVehicleCards();
+
+            panelSidebar.BringToFront();
+            panelEditorRight.BringToFront();
+
+            replaceScreenPanel.Controls.Add(next);
+            replaceScreenPanel.Controls.Add(prev);
+            UpdateNavButtons();
+
+        }
+        private void UpdateVehicleNavButtons()
+        {
+            if (btnVehiclePrev == null || btnVehicleNext == null)
+                return;
+
+            int count = GetFilteredVehicleCount();
+            int maxPage = Math.Max(0, (int)Math.Ceiling(count / (double)vehiclesPerPage) - 1);
+
+            btnVehiclePrev.Enabled = vehiclePage > 0;
+            btnVehicleNext.Enabled = vehiclePage < maxPage;
+
+            btnVehiclePrev.ForeColor = btnVehiclePrev.Enabled
+                ? Color.FromArgb(200, 200, 200)
+                : Color.FromArgb(90, 90, 90);
+
+            btnVehicleNext.ForeColor = btnVehicleNext.Enabled
+                ? Color.FromArgb(200, 200, 200)
+                : Color.FromArgb(90, 90, 90);
+        }
+        private int GetFilteredVehicleCount()
+        {
+            string search = txtVehicleSearch?.Text.Trim() ?? "";
+
+            if (string.IsNullOrWhiteSpace(search))
+                return allVehicles.Count;
+
+            return allVehicles.Count(v =>
+                v.name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                v.spawn.Contains(search, StringComparison.OrdinalIgnoreCase)
+            );
+        }
+
+        private Button CreateSecondaryButton(string text)
+        {
+            var btn = new Button
+            {
+                Text = text,
+                Size = new Size(140, 36),
+                BackColor = Color.FromArgb(50, 50, 50),
+                ForeColor = Color.FromArgb(200, 200, 200),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 8F, FontStyle.Bold),
+                TabStop = false
+            };
+
+            btn.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
+            btn.FlatAppearance.BorderSize = 1;
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(65, 65, 65);
+            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(35, 35, 35);
+
+            return btn;
+        }
+        private void LoadReplaceVehicleCards()
+        {
+            if (replaceVehicleList == null)
+                return;
+
+            string csvPath = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "Assets",
+                "vehicles",
+                "vehicles.csv"
+            );
+
+            if (!File.Exists(csvPath))
+                return;
+
+            allVehicles.Clear();
+
+            foreach (string line in File.ReadAllLines(csvPath).Skip(1))
+            {
+                if (string.IsNullOrWhiteSpace(line))
+                    continue;
+
+                string[] parts = line.Split(',');
+
+                if (parts.Length < 3)
+                    continue;
+
+                allVehicles.Add((
+                    parts[0].Trim(),
+                    parts[1].Trim(),
+                    parts[2].Trim()
+                ));
+            }
+
+            vehiclePage = 0;
+            LoadVehiclePage();
+            UpdateVehicleNavButtons();
+        }
+        private void LoadVehiclePage()
+        {
+            if (replaceVehicleList == null)
+                return;
+
+            replaceVehicleList.Controls.Clear();
+
+            string search = txtVehicleSearch?.Text.Trim() ?? "";
+
+            var filtered = allVehicles.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                filtered = filtered.Where(v =>
+                    v.name.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    v.spawn.Contains(search, StringComparison.OrdinalIgnoreCase)
+                );
+            }
+
+            var filteredList = filtered.ToList();
+
+            var pageItems = filteredList
+                .Skip(vehiclePage * vehiclesPerPage)
+                .Take(vehiclesPerPage);
+
+            foreach (var v in pageItems)
+            {
+                replaceVehicleList.Controls.Add(
+                    CreateVehicleReplaceCard(
+                        v.name,
+                        v.spawn,
+                        GetVehicleImagePath(v.img)
+                    )
+                );
+            }
+        }
+
+        private string GetVehicleImagePath(string imageName)
+        {
+            string baseDir = AppDomain.CurrentDomain.BaseDirectory;
+
+            string[] extensions = { ".png", ".jpg", ".jpeg", ".webp" };
+
+            foreach (string ext in extensions)
+            {
+                string path = Path.Combine(baseDir, "Assets", "vehicles", imageName + ext);
+
+                if (File.Exists(path))
+                    return path;
+            }
+
+            return string.Empty;
+        }
+
+        private Panel CreateVehicleReplaceCard(string displayName, string spawnName, string imagePath)
+        {
+            var card = new Panel
+            {
+                Width = 160,
+                Height = 150,
+                Margin = new Padding(8),
+                BackColor = Color.FromArgb(20, 20, 20),
+                Cursor = Cursors.Hand,
+                Tag = spawnName
+            };
+
+            card.Paint += (s, e) =>
+            {
+                bool isSelected = selectedReplaceVehicle == spawnName;
+                bool isHovered = hoveredVehicle == spawnName;
+
+                Color borderColor =
+                    isSelected ? Color.FromArgb(220, 50, 50) :
+                    isHovered ? Color.FromArgb(140, 40, 40) :
+                                Color.FromArgb(50, 25, 25);
+
+                int thickness = isSelected ? 2 : 1;
+
+                using Pen pen = new Pen(borderColor, thickness);
+                e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
+
+                // subtle glow fill on hover
+                if (isHovered)
+                {
+                    using Brush glow = new SolidBrush(Color.FromArgb(20, 120, 30, 30));
+                    e.Graphics.FillRectangle(glow, 1, 1, card.Width - 2, card.Height - 2);
+                }
+            };
+
+            card.MouseEnter += (s, e) =>
+            {
+                hoveredVehicle = spawnName;
+                card.Invalidate();
+            };
+
+            card.MouseLeave += (s, e) =>
+            {
+                hoveredVehicle = null;
+                card.Invalidate();
+            };
+
+            void HookHover(Control c)
+            {
+                c.MouseEnter += (s, e) =>
+                {
+                    hoveredVehicle = spawnName;
+                    card.Invalidate();
+                };
+
+                c.MouseLeave += (s, e) =>
+                {
+                    hoveredVehicle = null;
+                    card.Invalidate();
+                };
+            }
+
+            var pic = new PictureBox
+            {
+                Size = new Size(140, 80),
+                Location = new Point(10, 10),
+                BackColor = Color.FromArgb(30, 30, 30),
+                SizeMode = PictureBoxSizeMode.Zoom
+            };
+
+            if (!string.IsNullOrWhiteSpace(imagePath) && File.Exists(imagePath))
+            {
+                pic.Image = Image.FromFile(imagePath);
+            }
+            else
+            {
+                pic.Paint += (s, e) =>
+                {
+                    using var brush = new SolidBrush(Color.FromArgb(100, 60, 60));
+                    using var font = new Font("Segoe UI", 8F, FontStyle.Bold);
+
+                    string text = "No image";
+                    SizeF size = e.Graphics.MeasureString(text, font);
+
+                    e.Graphics.DrawString(
+                        text,
+                        font,
+                        brush,
+                        (pic.Width - size.Width) / 2,
+                        (pic.Height - size.Height) / 2
+                    );
+                };
+            }
+
+            var name = new Label
+            {
+                Text = displayName,
+                ForeColor = Color.FromArgb(220, 170, 170),
+                Font = new Font("Syne", 8F, FontStyle.Bold),
+                AutoSize = false,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(5, 96),
+                Size = new Size(150, 22)
+            };
+
+            var spawn = new Label
+            {
+                Text = spawnName,
+                ForeColor = Color.FromArgb(120, 85, 85),
+                Font = new Font("Consolas", 8F),
+                AutoSize = false,
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(5, 120),
+                Size = new Size(150, 18)
+            };
+
+            void SelectCard()
+            {
+                selectedReplaceVehicle = spawnName;
+
+                if (lblSelectedReplaceVehicle != null)
+                    lblSelectedReplaceVehicle.Text = $"Selected vehicle: {displayName} ({spawnName})";
+
+                foreach (Control c in replaceVehicleList!.Controls)
+                    c.Invalidate();
+            }
+
+            card.Click += (s, e) => SelectCard();
+            pic.Click += (s, e) => SelectCard();
+            name.Click += (s, e) => SelectCard();
+            spawn.Click += (s, e) => SelectCard();
+
+            card.Controls.Add(pic);
+            card.Controls.Add(name);
+            card.Controls.Add(spawn);
+
+            HookHover(pic);
+            HookHover(name);
+            HookHover(spawn);
+
+            return card;
+        }
+        private void ReplaceSelectedVehicle()
+        {
+            if (string.IsNullOrWhiteSpace(selectedReplaceVehicle))
+            {
+                MessageBox.Show(
+                    "Select a vehicle first.",
+                    "No vehicle selected",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
+            using var dlg = new OpenFileDialog
+            {
+                Title = $"Select replacement files for {selectedReplaceVehicle}",
+                Multiselect = true,
+                Filter = "Vehicle files (*.yft;*.ytd)|*.yft;*.ytd|All files (*.*)|*.*"
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            int vehiclesRpfId = EnsureEditorPath(
+                "mods/update/x64/dlcpacks/patchday8ng/dlc.rpf/x64/levels/gta5/vehicles.rpf"
+            );
+
+            foreach (string file in dlg.FileNames)
+            {
+                currentProject.Files.Add(new OIVFileEntry
+                {
+                    Id = currentProject.NextId++,
+                    SourcePath = file,
+                    FileName = Path.GetFileName(file),
+                    SubPath = string.Empty,
+                    Type = "replace",
+                    FolderId = vehiclesRpfId
+                });
+            }
+
+            MarkDirty();
+
+            if (editorExpanded)
+            {
+                BuildEditorPanel();
+                SelectTreeNodeByFolderId(vehiclesRpfId);
+            }
+
+            RenderFileList();
+
+            MessageBox.Show(
+                $"Replacement files added for {selectedReplaceVehicle}.",
+                "Vehicle Replace Added",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
+
+
+        // ─────────────────── UI ETC ───────────────────
         private void ApplyTextboxTheme()
         {
             StyleTextbox(txtAuthor);
@@ -93,7 +661,7 @@ namespace MagicOGK_OIV_Builder
             tb.ForeColor = Color.FromArgb(220, 180, 180);
             tb.BorderStyle = BorderStyle.FixedSingle;
         }
-
+        // ─────────────────── DRAGGING LOGIC ───────────────────
         private void DropdownVersionTag_DrawItem(object sender, DrawItemEventArgs e)
         {
             if (e.Index < 0) return;
@@ -175,6 +743,7 @@ namespace MagicOGK_OIV_Builder
             AddButtonHover(btnBuildOIV);
             AddButtonHover(btnAddFiles);
             AddButtonHover(btnAddPhoto);
+            AddButtonHover(btnReplaceMods);
 
             // Photo preview paint
             panelPhotoPreview.Paint += PanelPhotoPreview_Paint;
@@ -319,7 +888,7 @@ namespace MagicOGK_OIV_Builder
             panelMatrixTitle.Paint += MatrixTitlePaint;
 
             _matrixTimer           = new System.Windows.Forms.Timer();
-            _matrixTimer.Interval  = 45;
+            _matrixTimer.Interval  = 75;
             _matrixTimer.Tick     += (s, e) =>
             {
                 int h2 = panelMatrixTitle.Height;
@@ -517,10 +1086,21 @@ namespace MagicOGK_OIV_Builder
             editorTimer.Start();
         }
 
-        private int editorTarget => editorExpanded ? 380 : 0;
+        private void PositionEditorPanel()
+        {
+            panelEditorRight.Height = this.ClientSize.Height - panelMarquee.Height;
+            panelEditorRight.Location = new Point(
+                this.ClientSize.Width - panelEditorRight.Width,
+                panelMarquee.Height
+            );
+
+            panelEditorRight.BringToFront();
+        }
+
         private void EditorTimer_Tick(object sender, EventArgs e)
         {
             int diff = editorTarget - panelEditorRight.Width;
+
             if (Math.Abs(diff) <= 3)
             {
                 panelEditorRight.Width = editorTarget;
@@ -530,11 +1110,11 @@ namespace MagicOGK_OIV_Builder
             {
                 panelEditorRight.Width += diff / 3;
             }
+
+            PositionEditorPanel();
         }
 
         // ── Tree view state ───────────────────────────────────────────────────
-        private TreeView?  editorTree      = null;
-        private Panel?     editorPropPanel = null;
 
         private void BuildEditorPanel()
         {
@@ -542,8 +1122,49 @@ namespace MagicOGK_OIV_Builder
             editorTree = null;
             editorPropPanel = null;
 
+            // ── RESIZE GRIP (ADD FIRST!) ───────────────────────────────
+            Panel resizeGrip = new Panel
+            {
+                Dock = DockStyle.Left,
+                Width = 6,
+                Cursor = Cursors.SizeWE,
+                BackColor = Color.FromArgb(90, 30, 30)
+            };
 
-            // ── Header ────────────────────────────────────────────────────────
+            resizeGrip.MouseDown += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    isResizingEditorPanel = true;
+                    editorResizeStartX = Cursor.Position.X;
+                    editorResizeStartWidth = panelEditorRight.Width;
+                }
+            };
+
+            resizeGrip.MouseMove += (s, e) =>
+            {
+                if (!isResizingEditorPanel)
+                    return;
+
+                int diff = editorResizeStartX - Cursor.Position.X;
+                int newWidth = editorResizeStartWidth + diff;
+
+                int maxWidth = Math.Max(900, this.ClientSize.Width - 260);
+                newWidth = Math.Max(320, Math.Min(maxWidth, newWidth));
+
+                editorCurrentWidth = newWidth;
+                panelEditorRight.Width = newWidth;
+                PositionEditorPanel();
+            };
+
+            resizeGrip.MouseUp += (s, e) =>
+            {
+                isResizingEditorPanel = false;
+            };
+
+            panelEditorRight.Controls.Add(resizeGrip);
+
+            // ── Header ────────────────────────────────────────────────
             var header = new Panel
             {
                 Dock = DockStyle.Top,
@@ -575,7 +1196,7 @@ namespace MagicOGK_OIV_Builder
             btnClose.Click += (s, ev) => { editorExpanded = false; editorTimer.Start(); };
             header.Controls.Add(btnClose);
 
-            // ── Toolbar ───────────────────────────────────────────────────────
+            // ── Toolbar ───────────────────────────────────────────────
             var toolbar = new Panel
             {
                 Dock = DockStyle.Top,
@@ -584,18 +1205,17 @@ namespace MagicOGK_OIV_Builder
             };
 
             (string text, string tip, Action act)[] toolActions = {
-    ("📁", "New Folder",       () => TreeCmd_NewFolder()),
-    ("🗄", "New RPF Archive",  () => TreeCmd_NewRpf()),
-    ("📂", "Import Folder",    () => TreeCmd_ImportFolder()),
-    ("📄", "Add File Here",    () => TreeCmd_AddFile()),
-    ("✏",  "Rename",          () => TreeCmd_Rename()),
-    ("🗑", "Delete",          () => TreeCmd_Delete()),
-};
+        ("📁", "New Folder",       () => TreeCmd_NewFolder()),
+        ("🗄", "New RPF Archive",  () => TreeCmd_NewRpf()),
+        ("📂", "Import Folder",    () => TreeCmd_ImportFolder()),
+        ("📄", "Add File Here",    () => TreeCmd_AddFile()),
+        ("✏",  "Rename",          () => TreeCmd_Rename()),
+        ("🗑", "Delete",           () => TreeCmd_Delete()),
+    };
 
             int tbx = 6;
             foreach (var (text, tip, act) in toolActions)
             {
-                var a = act;
                 var btn = new Button
                 {
                     Text = text,
@@ -607,20 +1227,21 @@ namespace MagicOGK_OIV_Builder
                     Font = new Font("Segoe UI Emoji", 11F),
                     TabStop = false
                 };
+
                 btn.FlatAppearance.BorderSize = 0;
                 btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 30, 30);
 
-                var tooltip = new ToolTip();
-                tooltip.SetToolTip(btn, tip);
+                new ToolTip().SetToolTip(btn, tip);
 
-                btn.Click += (s, ev) => a();
+                btn.Click += (s, ev) => act();
                 toolbar.Controls.Add(btn);
                 tbx += 34;
-                
             }
-            // ── Preset paths ─────────────────────────────────────────────
+
+            // ── Preset paths ─────────────────────────────────────────
             var presetPanel = BuildPresetPathPanel();
-            // ── Properties panel ──────────────────────────────────────────────
+
+            // ── Properties panel ─────────────────────────────────────
             editorPropPanel = new Panel
             {
                 Dock = DockStyle.Bottom,
@@ -628,7 +1249,7 @@ namespace MagicOGK_OIV_Builder
                 BackColor = Color.FromArgb(20, 10, 10)
             };
 
-            // ── TreeView ──────────────────────────────────────────────────────
+            // ── TreeView ─────────────────────────────────────────────
             editorTree = new TreeView
             {
                 Dock = DockStyle.Fill,
@@ -651,13 +1272,13 @@ namespace MagicOGK_OIV_Builder
             editorTree.AfterSelect += EditorTree_AfterSelect;
             editorTree.KeyDown += EditorTree_KeyDown;
             editorTree.MouseDoubleClick += EditorTree_MouseDoubleClick;
-            editorTree.NodeMouseClick += EditorTree_NodeMouseClick; // <-- HERE
+            editorTree.NodeMouseClick += EditorTree_NodeMouseClick;
             editorTree.ItemDrag += EditorTree_ItemDrag;
             editorTree.DragEnter += EditorTree_DragEnter;
             editorTree.DragOver += EditorTree_DragOver;
             editorTree.DragDrop += EditorTree_DragDrop;
 
-            // IMPORTANT: add in this order
+            // ── ADD ORDER (IMPORTANT) ────────────────────────────────
             panelEditorRight.Controls.Add(editorTree);
             panelEditorRight.Controls.Add(editorPropPanel);
             panelEditorRight.Controls.Add(presetPanel);
@@ -672,7 +1293,7 @@ namespace MagicOGK_OIV_Builder
             var panel = new Panel
             {
                 Dock = DockStyle.Top,
-                Height = 74,
+                Height = 104,
                 BackColor = Color.FromArgb(16, 16, 16)
             };
 
@@ -692,7 +1313,206 @@ namespace MagicOGK_OIV_Builder
             AddPresetButton(panel, "common/data", "common/data", 198, 30);
             AddPresetButton(panel, "scaleform", "update/update.rpf/x64/patch/data/cdimages/scaleform_generic.rpf", 292, 30);
 
+            AddReplacePresetButton(panel, 10, 66);
+
             return panel;
+        }
+
+
+
+        private void AddReplacePresetButton(Panel parent, int x, int y)
+        {
+            var btn = CreatePresetButton("replace", x, y, 130);
+            btn.Click += (s, e) => ShowReplacePresetWindow();
+            parent.Controls.Add(btn);
+        }
+        private void ShowReplacePresetWindow()
+        {
+            Form win = new Form
+            {
+                Size = new Size(360, 240),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.None,
+                BackColor = Color.FromArgb(18, 18, 18),
+                ShowInTaskbar = false,
+                Padding = new Padding(2)
+            };
+
+            var borderPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.FromArgb(120, 20, 20),
+                Padding = new Padding(1)
+            };
+
+            var innerPanel = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = Color.FromArgb(18, 18, 18)
+            };
+
+            var panel = new FlowLayoutPanel
+            {
+                Dock = DockStyle.Fill,
+                Padding = new Padding(18, 36, 18, 18),
+                FlowDirection = FlowDirection.TopDown,
+                WrapContents = false,
+                AutoScroll = true,
+                BackColor = Color.FromArgb(18, 18, 18)
+            };
+
+            void DragPopup(object? s, MouseEventArgs e)
+            {
+                if (e.Button == MouseButtons.Left)
+                {
+                    ReleaseCapture();
+                    SendMessage(win.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
+                }
+            }
+
+            win.MouseDown += DragPopup;
+            borderPanel.MouseDown += DragPopup;
+            innerPanel.MouseDown += DragPopup;
+            panel.MouseDown += DragPopup;
+
+            Button close = new Button
+            {
+                Text = "X",
+                Size = new Size(30, 24),
+                Location = new Point(win.Width - 38, 6),
+                BackColor = Color.FromArgb(18, 18, 18),
+                ForeColor = Color.FromArgb(220, 120, 120),
+                FlatStyle = FlatStyle.Flat,
+                TabStop = false
+            };
+
+            close.FlatAppearance.BorderSize = 0;
+            close.Click += (s, e) => win.Close();
+
+            Button weapon = CreateDialogButton("Weapons");
+            weapon.Click += (s, e) =>
+            {
+                win.Close();
+                CreateReplacePresetPath(
+                    "update/x64/dlcpacks/patchday8ng/dlc.rpf/x64/models/cdimages/weapons.rpf",
+                    "Weapon Replace Preset"
+                );
+            };
+
+            Button car = CreateDialogButton("Cars");
+            car.Click += (s, e) =>
+            {
+                win.Close();
+                CreateReplacePresetPath(
+                    "update/x64/dlcpacks/patchday8ng/dlc.rpf/x64/levels/gta5/vehicles.rpf",
+                    "Car Replace Preset"
+                );
+            };
+
+            Button clothes = CreateDialogButton("Clothes");
+            clothes.Click += (s, e) =>
+            {
+                panel.Controls.Clear();
+                AddClothesReplaceButtons(panel, win);
+            };
+
+            panel.Controls.Add(weapon);
+            panel.Controls.Add(car);
+            panel.Controls.Add(clothes);
+
+            innerPanel.Controls.Add(panel);
+            innerPanel.Controls.Add(close);
+            close.BringToFront();
+
+            borderPanel.Controls.Add(innerPanel);
+            win.Controls.Add(borderPanel);
+
+            win.ShowDialog(this);
+        }
+
+        private Button CreateDialogButton(string text)
+        {
+            var btn = new Button
+            {
+                Text = text,
+                Width = 300,
+                Height = 38,
+                Margin = new Padding(0, 0, 0, 10),
+                BackColor = Color.FromArgb(35, 10, 10),
+                ForeColor = Color.FromArgb(220, 170, 170),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold)
+            };
+
+            btn.FlatAppearance.BorderColor = Color.FromArgb(85, 30, 30);
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(55, 15, 15);
+
+            return btn;
+        }
+        private void AddClothesReplaceButtons(FlowLayoutPanel panel, Form win)
+        {
+            Button back = CreateDialogButton("← Back");
+            back.Click += (s, e) =>
+            {
+                win.Close();
+                ShowReplacePresetWindow();
+            };
+
+            Button franklin = CreateDialogButton("Franklin");
+            franklin.Click += (s, e) =>
+            {
+                win.Close();
+                CreateReplacePresetPath(
+                    "x64v.rpf/models/cdimages/streamedpeds_players.rpf/player_one",
+                    "Franklin Clothes Replace Preset"
+                );
+            };
+
+            Button michael = CreateDialogButton("Michael");
+            michael.Click += (s, e) =>
+            {
+                win.Close();
+                CreateReplacePresetPath(
+                    "x64v.rpf/models/cdimages/streamedpeds_players.rpf/player_zero",
+                    "Michael Clothes Replace Preset"
+                );
+            };
+
+            Button trevor = CreateDialogButton("Trevor");
+            trevor.Click += (s, e) =>
+            {
+                win.Close();
+                CreateReplacePresetPath(
+                    "x64v.rpf/models/cdimages/streamedpeds_players.rpf/player_two",
+                    "Trevor Clothes Replace Preset"
+                );
+            };
+
+            panel.Controls.Add(back);
+            panel.Controls.Add(franklin);
+            panel.Controls.Add(michael);
+            panel.Controls.Add(trevor);
+        }
+        private void CreateReplacePresetPath(string path, string title)
+        {
+            int folderId = EnsureEditorPath(path);
+
+            MarkDirty();
+            RebuildTree();
+            SelectTreeNodeByFolderId(folderId);
+            RenderFileList();
+
+            DialogResult result = MessageBox.Show(
+                "Replacement path created.\n\nDo you want to import replacement files now?",
+                title,
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (result == DialogResult.Yes)
+            {
+                TreeCmd_AddReplaceFilesToFolder(folderId);
+            }
         }
 
         private void AddPresetButton(Panel parent, string text, string path, int x, int y)
@@ -721,6 +1541,45 @@ namespace MagicOGK_OIV_Builder
             parent.Controls.Add(btn);
         }
 
+        private void AddWeaponReplacePresetButton(Panel parent, int x, int y)
+        {
+            var btn = CreatePresetButton("weapon replace", x, y, 130);
+            btn.Click += (s, e) => TreeCmd_WeaponReplacePreset();
+            parent.Controls.Add(btn);
+        }
+        private void AddCarReplacePresetButton(Panel parent, int x, int y)
+        {
+            var btn = CreatePresetButton("car replace", x, y, 130);
+            btn.Click += (s, e) => TreeCmd_CarReplacePreset();
+            parent.Controls.Add(btn);
+        }
+
+        private void AddClothesReplacePresetButton(Panel parent, int x, int y)
+        {
+            var btn = CreatePresetButton("clothes replace", x, y, 130);
+            btn.Click += (s, e) => TreeCmd_ClothesReplacePreset();
+            parent.Controls.Add(btn);
+        }
+
+        private Button CreatePresetButton(string text, int x, int y, int width)
+        {
+            var btn = new Button
+            {
+                Text = text,
+                Size = new Size(width, 26),
+                Location = new Point(x, y),
+                BackColor = Color.FromArgb(35, 10, 10),
+                ForeColor = Color.FromArgb(190, 135, 135),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 7F, FontStyle.Bold),
+                TabStop = false
+            };
+
+            btn.FlatAppearance.BorderColor = Color.FromArgb(80, 30, 30);
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(55, 15, 15);
+
+            return btn;
+        }
         private void AddPresetPath(string path)
         {
             int? parentId = null;
@@ -758,9 +1617,38 @@ namespace MagicOGK_OIV_Builder
             if (lastFolder != null)
                 SelectTreeNodeByFolderId(lastFolder.Id);
         }
+        private int EnsureEditorPath(string path)
+        {
+            int? parentId = null;
+            OIVFolder? lastFolder = null;
 
-        // -- EDITOR PANEL LOGIC --
+            string[] parts = path.Split(new[] { '/', '\\' }, StringSplitOptions.RemoveEmptyEntries);
 
+            foreach (string part in parts)
+            {
+                var existing = currentProject.Folders.FirstOrDefault(f =>
+                    f.ParentId == parentId &&
+                    string.Equals(f.Name, part, StringComparison.OrdinalIgnoreCase));
+
+                if (existing == null)
+                {
+                    existing = new OIVFolder
+                    {
+                        Id = currentProject.NextId++,
+                        Name = part,
+                        ParentId = parentId,
+                        IsRpf = part.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase)
+                    };
+
+                    currentProject.Folders.Add(existing);
+                }
+
+                lastFolder = existing;
+                parentId = existing.Id;
+            }
+
+            return lastFolder!.Id;
+        }
 
         // ─── REBUILD TREE HELPER ───────────────────────────────────────────────────
         private string GetNodeKey(TreeNode node)
@@ -1303,7 +2191,100 @@ namespace MagicOGK_OIV_Builder
             RebuildTree();
             RenderFileList();
         }
+        private void TreeCmd_AddReplaceFilesToFolder(int folderId)
+        {
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Select replacement file(s)",
+                Multiselect = true,
+                Filter = "All Files (*.*)|*.*"
+            };
 
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            foreach (string path in dlg.FileNames)
+            {
+                currentProject.Files.Add(new OIVFileEntry
+                {
+                    Id = currentProject.NextId++,
+                    SourcePath = path,
+                    FileName = Path.GetFileName(path),
+                    SubPath = string.Empty,
+                    Type = "replace",
+                    FolderId = folderId
+                });
+            }
+
+            MarkDirty();
+            RebuildTree();
+            SelectTreeNodeByFolderId(folderId);
+            RenderFileList();
+        }
+        private void TreeCmd_WeaponReplacePreset()
+        {
+            int weaponsRpfId = EnsureEditorPath(
+                "update/x64/dlcpacks/patchday8ng/dlc.rpf/x64/models/cdimages/weapons.rpf"
+            );
+
+            MarkDirty();
+            RebuildTree();
+            SelectTreeNodeByFolderId(weaponsRpfId);
+            RenderFileList();
+
+            DialogResult result = MessageBox.Show(
+                "Weapon replacement path created.\n\nDo you want to import replacement files now?",
+                "Weapon Replace Preset",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question
+            );
+
+            if (result == DialogResult.Yes)
+            {
+                TreeCmd_AddReplaceFilesToFolder(weaponsRpfId);
+            }
+        }
+        private void TreeCmd_CarReplacePreset()
+        {
+            int vehiclesRpfId = EnsureEditorPath(
+                "update/x64/dlcpacks/patchday8ng/dlc.rpf/x64/levels/gta5/vehicles.rpf"
+            );
+
+            MarkDirty();
+            RebuildTree();
+            SelectTreeNodeByFolderId(vehiclesRpfId);
+            RenderFileList();
+
+            if (MessageBox.Show(
+                "Car replacement path created.\n\nDo you want to import replacement files now?",
+                "Car Replace Preset",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                TreeCmd_AddReplaceFilesToFolder(vehiclesRpfId);
+            }
+        }
+
+        private void TreeCmd_ClothesReplacePreset()
+        {
+            int clothesRpfId = EnsureEditorPath(
+                "x64v.rpf/models/cdimages/streamedpeds_players.rpf/player_one"
+            );
+
+            MarkDirty();
+            RebuildTree();
+            SelectTreeNodeByFolderId(clothesRpfId);
+            RenderFileList();
+
+            if (MessageBox.Show(
+                "Clothes replacement path created.\n\nDo you want to import replacement files now?",
+                "Clothes Replace Preset",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question) == DialogResult.Yes)
+            {
+                TreeCmd_AddReplaceFilesToFolder(clothesRpfId);
+            }
+        }
         private void TreeCmd_ImportFolder()
         {
             int? parentFolderId = SelectedFolderId();

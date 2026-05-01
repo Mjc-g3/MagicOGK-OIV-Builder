@@ -59,7 +59,9 @@ namespace MagicOGK_OIV_Builder
             btnBuildOIV = new Button();
             btnAddFiles = new Button();
             webViewFileList = new Microsoft.Web.WebView2.WinForms.WebView2();
+            btnReplaceMods = new Button();
             panelDrag.SuspendLayout();
+            panelLeft.SuspendLayout();
             panelSidebar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)webViewFileList).BeginInit();
             SuspendLayout();
@@ -144,6 +146,7 @@ namespace MagicOGK_OIV_Builder
             // panelLeft
             // 
             panelLeft.BackColor = Color.FromArgb(18, 18, 18);
+            panelLeft.Controls.Add(btnReplaceMods);
             panelLeft.Dock = DockStyle.Left;
             panelLeft.Location = new Point(0, 28);
             panelLeft.Name = "panelLeft";
@@ -152,8 +155,8 @@ namespace MagicOGK_OIV_Builder
             // 
             // panelEditorRight
             // 
+            panelEditorRight.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right;
             panelEditorRight.BackColor = Color.FromArgb(22, 22, 22);
-            panelEditorRight.Dock = DockStyle.Right;
             panelEditorRight.Location = new Point(1030, 28);
             panelEditorRight.Name = "panelEditorRight";
             panelEditorRight.Size = new Size(0, 632);
@@ -391,6 +394,20 @@ namespace MagicOGK_OIV_Builder
             webViewFileList.TabIndex = 0;
             webViewFileList.ZoomFactor = 1D;
             // 
+            // btnReplaceMods
+            // 
+            btnReplaceMods.BackColor = Color.FromArgb(64, 0, 0);
+            btnReplaceMods.ForeColor = Color.FromArgb(200, 140, 140);
+            btnReplaceMods.FlatStyle = FlatStyle.Flat;
+            btnReplaceMods.FlatAppearance.BorderColor = Color.FromArgb(110, 40, 40);
+            btnReplaceMods.Location = new Point(185, 452);
+            btnReplaceMods.Name = "btnReplaceMods";
+            btnReplaceMods.Size = new Size(146, 28);
+            //btnReplaceMods.TabIndex = 5;
+            btnReplaceMods.Text = "Replace Menu";
+            //btnReplaceMods.UseVisualStyleBackColor = true;
+            btnReplaceMods.Font = new Font("Syne", 11F);
+            // 
             // main
             // 
             AutoScaleDimensions = new SizeF(7F, 17F);
@@ -410,6 +427,7 @@ namespace MagicOGK_OIV_Builder
             StartPosition = FormStartPosition.CenterScreen;
             Text = "MagicOGK OIV Builder";
             panelDrag.ResumeLayout(false);
+            panelLeft.ResumeLayout(false);
             panelSidebar.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)webViewFileList).EndInit();
             ResumeLayout(false);
@@ -694,5 +712,6 @@ namespace MagicOGK_OIV_Builder
 
         private System.Windows.Forms.Timer sidebarTimer;
         private System.Windows.Forms.Timer editorTimer;
+        private Button btnReplaceMods;
     }
 }
