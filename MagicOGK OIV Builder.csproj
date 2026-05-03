@@ -12,6 +12,447 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\weapons\gadget_parachute.png" />
+    <None Remove="Assets\weapons\weapon_acidpackage.png" />
+    <None Remove="Assets\weapons\weapon_advancedrifle.png" />
+    <None Remove="Assets\weapons\weapon_appistol.png" />
+    <None Remove="Assets\weapons\weapon_assaultrifle.png" />
+    <None Remove="Assets\weapons\weapon_assaultrifle_mk2.png" />
+    <None Remove="Assets\weapons\weapon_assaultshotgun.png" />
+    <None Remove="Assets\weapons\weapon_assaultsmg.png" />
+    <None Remove="Assets\weapons\weapon_autoshotgun.png" />
+    <None Remove="Assets\weapons\weapon_ball.png" />
+    <None Remove="Assets\weapons\weapon_bat.png" />
+    <None Remove="Assets\weapons\weapon_battleaxe.png" />
+    <None Remove="Assets\weapons\weapon_bottle.png" />
+    <None Remove="Assets\weapons\weapon_bullpuprifle.png" />
+    <None Remove="Assets\weapons\weapon_bullpuprifle_mk2.png" />
+    <None Remove="Assets\weapons\weapon_bullpupshotgun.png" />
+    <None Remove="Assets\weapons\weapon_bzgas.png" />
+    <None Remove="Assets\weapons\weapon_candycane.png" />
+    <None Remove="Assets\weapons\weapon_carbinerifle.png" />
+    <None Remove="Assets\weapons\weapon_carbinerifle_mk2.png" />
+    <None Remove="Assets\weapons\weapon_combatmg.png" />
+    <None Remove="Assets\weapons\weapon_combatmg_mk2.png" />
+    <None Remove="Assets\weapons\weapon_combatpdw.png" />
+    <None Remove="Assets\weapons\weapon_combatpistol.png" />
+    <None Remove="Assets\weapons\weapon_combatshotgun.png" />
+    <None Remove="Assets\weapons\weapon_compactlauncher.png" />
+    <None Remove="Assets\weapons\weapon_compactrifle.png" />
+    <None Remove="Assets\weapons\weapon_crowbar.png" />
+    <None Remove="Assets\weapons\weapon_dagger.png" />
+    <None Remove="Assets\weapons\weapon_dbshotgun.png" />
+    <None Remove="Assets\weapons\weapon_doubleaction.png" />
+    <None Remove="Assets\weapons\weapon_emplauncher.png" />
+    <None Remove="Assets\weapons\weapon_fertilizercan.png" />
+    <None Remove="Assets\weapons\weapon_fireextinguisher.png" />
+    <None Remove="Assets\weapons\weapon_firework.png" />
+    <None Remove="Assets\weapons\weapon_flare.png" />
+    <None Remove="Assets\weapons\weapon_flaregun.png" />
+    <None Remove="Assets\weapons\weapon_flashlight.png" />
+    <None Remove="Assets\weapons\weapon_gadgetpistol.png" />
+    <None Remove="Assets\weapons\weapon_golfclub.png" />
+    <None Remove="Assets\weapons\weapon_grenade.png" />
+    <None Remove="Assets\weapons\weapon_grenadelauncher.png" />
+    <None Remove="Assets\weapons\weapon_grenadelauncher_smoke.png" />
+    <None Remove="Assets\weapons\weapon_gusenberg.png" />
+    <None Remove="Assets\weapons\weapon_hammer.png" />
+    <None Remove="Assets\weapons\weapon_hatchet.png" />
+    <None Remove="Assets\weapons\weapon_hazardcan.png" />
+    <None Remove="Assets\weapons\weapon_heavypistol.png" />
+    <None Remove="Assets\weapons\weapon_heavyrifle.png" />
+    <None Remove="Assets\weapons\weapon_heavyshotgun.png" />
+    <None Remove="Assets\weapons\weapon_heavysniper.png" />
+    <None Remove="Assets\weapons\weapon_heavysniper_mk2.png" />
+    <None Remove="Assets\weapons\weapon_hominglauncher.png" />
+    <None Remove="Assets\weapons\weapon_knife.png" />
+    <None Remove="Assets\weapons\weapon_knuckle.png" />
+    <None Remove="Assets\weapons\weapon_machete.png" />
+    <None Remove="Assets\weapons\weapon_machinepistol.png" />
+    <None Remove="Assets\weapons\weapon_marksmanpistol.png" />
+    <None Remove="Assets\weapons\weapon_marksmanrifle.png" />
+    <None Remove="Assets\weapons\weapon_marksmanrifle_mk2.png" />
+    <None Remove="Assets\weapons\weapon_mg.png" />
+    <None Remove="Assets\weapons\weapon_microsmg.png" />
+    <None Remove="Assets\weapons\weapon_militaryrifle.png" />
+    <None Remove="Assets\weapons\weapon_minigun.png" />
+    <None Remove="Assets\weapons\weapon_minismg.png" />
+    <None Remove="Assets\weapons\weapon_molotov.png" />
+    <None Remove="Assets\weapons\weapon_musket.png" />
+    <None Remove="Assets\weapons\weapon_navyrevolver.png" />
+    <None Remove="Assets\weapons\weapon_nightstick.png" />
+    <None Remove="Assets\weapons\weapon_parachute.png" />
+    <None Remove="Assets\weapons\weapon_petrolcan.png" />
+    <None Remove="Assets\weapons\weapon_pipebomb.png" />
+    <None Remove="Assets\weapons\weapon_pistol.png" />
+    <None Remove="Assets\weapons\weapon_pistol50.png" />
+    <None Remove="Assets\weapons\weapon_pistolxm3.png" />
+    <None Remove="Assets\weapons\weapon_pistol_mk2.png" />
+    <None Remove="Assets\weapons\weapon_poolcue.png" />
+    <None Remove="Assets\weapons\weapon_precisionrifle.png" />
+    <None Remove="Assets\weapons\weapon_proxmine.png" />
+    <None Remove="Assets\weapons\weapon_pumpshotgun.png" />
+    <None Remove="Assets\weapons\weapon_pumpshotgun_mk2.png" />
+    <None Remove="Assets\weapons\weapon_railgun.png" />
+    <None Remove="Assets\weapons\weapon_railgunxm3.png" />
+    <None Remove="Assets\weapons\weapon_raycarbine.png" />
+    <None Remove="Assets\weapons\weapon_rayminigun.png" />
+    <None Remove="Assets\weapons\weapon_raypistol.png" />
+    <None Remove="Assets\weapons\weapon_revolver.png" />
+    <None Remove="Assets\weapons\weapon_revolver_mk2.png" />
+    <None Remove="Assets\weapons\weapon_rpg.png" />
+    <None Remove="Assets\weapons\weapon_sawnoffshotgun.png" />
+    <None Remove="Assets\weapons\weapon_smg.png" />
+    <None Remove="Assets\weapons\weapon_smg_mk2.png" />
+    <None Remove="Assets\weapons\weapon_smokegrenade.png" />
+    <None Remove="Assets\weapons\weapon_sniperrifle.png" />
+    <None Remove="Assets\weapons\weapon_snowball.png" />
+    <None Remove="Assets\weapons\weapon_snspistol.png" />
+    <None Remove="Assets\weapons\weapon_snspistol_mk2.png" />
+    <None Remove="Assets\weapons\weapon_specialcarbine.png" />
+    <None Remove="Assets\weapons\weapon_specialcarbine_mk2.png" />
+    <None Remove="Assets\weapons\weapon_stickybomb.png" />
+    <None Remove="Assets\weapons\weapon_stone_hatchet.png" />
+    <None Remove="Assets\weapons\weapon_stungun.png" />
+    <None Remove="Assets\weapons\weapon_stungun_mp.png" />
+    <None Remove="Assets\weapons\weapon_stunrod.png" />
+    <None Remove="Assets\weapons\weapon_switchblade.png" />
+    <None Remove="Assets\weapons\weapon_tacticalrifle.png" />
+    <None Remove="Assets\weapons\weapon_techpistol.png" />
+    <None Remove="Assets\weapons\weapon_tecpistol.png" />
+    <None Remove="Assets\weapons\weapon_unarmed.png" />
+    <None Remove="Assets\weapons\weapon_vintagepistol.png" />
+    <None Remove="Assets\weapons\weapon_wrench.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\weapons\gadget_parachute.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_acidpackage.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_advancedrifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_appistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_assaultrifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_assaultrifle_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_assaultshotgun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_assaultsmg.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_autoshotgun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_ball.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_bat.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_battleaxe.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_bottle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_bullpuprifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_bullpuprifle_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_bullpupshotgun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_bzgas.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_candycane.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_carbinerifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_carbinerifle_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_combatmg.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_combatmg_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_combatpdw.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_combatpistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_combatshotgun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_compactlauncher.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_compactrifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_crowbar.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_dagger.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_dbshotgun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_doubleaction.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_emplauncher.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_fertilizercan.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_fireextinguisher.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_firework.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_flare.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_flaregun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_flashlight.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_gadgetpistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_golfclub.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_grenade.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_grenadelauncher.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_grenadelauncher_smoke.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_gusenberg.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_hammer.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_hatchet.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_hazardcan.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_heavypistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_heavyrifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_heavyshotgun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_heavysniper.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_heavysniper_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_hominglauncher.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_knife.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_knuckle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_machete.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_machinepistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_marksmanpistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_marksmanrifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_marksmanrifle_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_mg.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_microsmg.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_militaryrifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_minigun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_minismg.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_molotov.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_musket.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_navyrevolver.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_nightstick.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_petrolcan.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_pipebomb.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_pistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_pistol50.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_pistolxm3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_pistol_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_poolcue.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_precisionrifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_proxmine.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_pumpshotgun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_pumpshotgun_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_railgun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_railgunxm3.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_raycarbine.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_rayminigun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_raypistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_revolver.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_revolver_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_rpg.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_sawnoffshotgun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_smg.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_smg_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_smokegrenade.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_sniperrifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_snowball.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_snspistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_snspistol_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_specialcarbine.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_specialcarbine_mk2.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_stickybomb.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_stone_hatchet.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_stungun.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_stungun_mp.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_stunrod.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_switchblade.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_tacticalrifle.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_tecpistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_unarmed.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_vintagepistol.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\weapons\weapon_wrench.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="icon.ico" />
   </ItemGroup>
 

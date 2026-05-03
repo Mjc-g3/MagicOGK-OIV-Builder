@@ -10,6 +10,9 @@ using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using Microsoft.VisualBasic.Logging;
 using Microsoft.Web.WebView2.Core;
+using System.IO.Compression;
+using System.Xml.Linq;
+using System.Threading.Tasks;
 
 namespace MagicOGK_OIV_Builder
 {
@@ -48,17 +51,39 @@ namespace MagicOGK_OIV_Builder
 
         private Panel? replaceScreenPanel = null;
         private FlowLayoutPanel? replaceVehicleList = null;
+        private Panel? replaceVehicleViewport = null;
+        private Panel? replaceVehicleScrollTrack = null;
+        private Panel? replaceVehicleScrollThumb = null;
+
+        private bool draggingReplaceScrollbar = false;
+        private int replaceScrollbarDragOffset = 0;
         private string? selectedReplaceVehicle = null;
         private Label? lblSelectedReplaceVehicle = null;
 
         private int vehiclePage = 0;
         private const int vehiclesPerPage = 60;
         private List<(string name, string spawn, string img)> allVehicles = new();
+        private VScrollBar replaceVehicleScrollBar;
 
         private string? hoveredVehicle = null;
         private TextBox? txtVehicleSearch = null;
         private Button? btnVehiclePrev = null;
         private Button? btnVehicleNext = null;
+
+        private ContextMenuStrip replaceMenu;
+        private ToolStripMenuItem replaceVehiclesItem;
+        private ToolStripMenuItem replaceClothesItem;
+        private ToolStripMenuItem replaceWeaponsItem;
+        private readonly Dictionary<string, Image> weaponImageCache = new();
+
+        private Panel? replaceWeaponViewport = null;
+        private FlowLayoutPanel? replaceWeaponList = null;
+        private Panel? replaceWeaponScrollTrack = null;
+        private Panel? replaceWeaponScrollThumb = null;
+
+        private bool draggingWeaponScrollbar = false;
+        private int weaponScrollbarDragOffset = 0;
+
         /*
         private int sidebarOpenX = 0;
         private int sidebarClosedX => -panelSidebar.Width;
@@ -70,6 +95,7 @@ namespace MagicOGK_OIV_Builder
 
             SetupLeftPanelControls();
             SetupRightPanelControls();
+            ApplyCleanLeftPanelLayout();
 
             StyleSidebarBtn(btnSidebarOpenProject, "    📦    Open Project", 120);
             StyleSidebarBtn(btnSidebarSaveProjectAs, "    📁    Save Project As", 178);
@@ -116,11 +142,242 @@ namespace MagicOGK_OIV_Builder
             panelSidebar.Left = -SidebarWidth;
             panelSidebar.Top = panelMarquee.Height;
             panelSidebar.Height = ClientSize.Height - panelMarquee.Height;
+
+            SetupReplaceMenu();
         }
 
+        // ─────────────────── UI UPDATE ETC ───────────────────
+        private void ApplyCleanLeftPanelLayout()
+        {
+            Control host = txtAuthor.Parent;
 
+            int x = 31;
+            int w = 300;
+
+            int smallBoxW = 140;
+            int smallBoxH = 76;
+            int gap = 15;
+
+            Font sectionFont = new Font("Segoe UI", 12, FontStyle.Bold);
+            Color sectionColor = Color.FromArgb(220, 150, 150);
+
+            // Remove old custom section labels
+            foreach (Control c in host.Controls.OfType<Label>()
+                         .Where(l => l.Text == "PROJECT SETUP" || l.Text == "ACTIONS")
+                         .ToList())
+            {
+                host.Controls.Remove(c);
+                c.Dispose();
+            }
+
+            // PROJECT SETUP title - lined up with PACKAGE FILES
+            Label lblProjectSetup = new Label
+            {
+                Text = "PROJECT SETUP",
+                AutoSize = true,
+                BackColor = Color.Transparent,
+                ForeColor = sectionColor,
+                Font = new Font("Syne", 11F, FontStyle.Bold),
+                Location = new Point(x, 20)
+            };
+
+            host.Controls.Add(lblProjectSetup);
+            lblProjectSetup.BringToFront();
+
+            // ---------- PROJECT SETUP CONTROLS ----------
+
+            MoveLabelByText("AUTHOR", new Point(34, 42));
+            txtAuthor.Location = new Point(x, 62);
+            txtAuthor.Size = new Size(w, 22);
+
+            MoveLabelByText("MOD NAME", new Point(34, 96));
+            txtModName.Location = new Point(x, 116);
+            txtModName.Size = new Size(w, 22);
+
+            MoveLabelByText("VERSION TAG", new Point(34, 150));
+            MoveLabelByText("VERSION", new Point(188, 150));
+
+            dropdownVersionTag.Location = new Point(x, 170);
+            dropdownVersionTag.Size = new Size(140, 24);
+
+            txtVersion.Location = new Point(186, 170);
+            txtVersion.Size = new Size(145, 22);
+
+            MoveLabelByText("DESCRIPTION", new Point(34, 202));
+            txtDescription.Location = new Point(x, 222);
+            txtDescription.Size = new Size(w, 60);
+
+            // ---------- PHOTO / COLOR SECTION MOVED UP ----------
+
+            int baseY = txtDescription.Bottom + 12;
+
+            MoveLabelByText("PHOTO PREVIEW", new Point(36, baseY));
+            MoveLabelByText("BANNER COLOR", new Point(188, baseY));
+
+            panelPhotoPreview.Location = new Point(x, baseY + 18);
+            panelPhotoPreview.Size = new Size(smallBoxW, smallBoxH);
+
+            panelColorPicker.Location = new Point(x + smallBoxW + gap, baseY + 18);
+            panelColorPicker.Size = new Size(145, smallBoxH);
+
+            // ---------- COLOR PICKER HINT LABEL ----------
+            foreach (Control c in panelColorPicker.Controls.OfType<Label>().ToList())
+            {
+                panelColorPicker.Controls.Remove(c);
+                c.Dispose();
+            }
+
+            Label lblColorHint = new Label
+            {
+                Text = "Click to change color",
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleCenter,
+                ForeColor = Color.White,
+                BackColor = Color.Transparent,
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+
+            panelColorPicker.Controls.Add(lblColorHint);
+            lblColorHint.BringToFront();
+
+            panelColorPicker.Cursor = Cursors.Hand;
+
+            panelColorPicker.Click -= PanelColorPicker_Click;
+            panelColorPicker.Click += PanelColorPicker_Click;
+
+            lblColorHint.Click -= PanelColorPicker_Click;
+            lblColorHint.Click += PanelColorPicker_Click;
+
+            btnAddPhoto.Location = new Point(x, baseY + 98);
+            btnAddPhoto.Size = new Size(w, 25);
+            btnAddPhoto.Text = "ADD PHOTO";
+
+            // ---------- ACTIONS TITLE ----------
+
+            int actionsTitleY = btnAddPhoto.Bottom + 18;
+
+            Label lblActions = new Label
+            {
+                Text = "ACTIONS",
+                AutoSize = true,
+                BackColor = Color.Transparent,
+                ForeColor = sectionColor,
+                Font = new Font("Syne", 11F, FontStyle.Bold),
+                Location = new Point(x, actionsTitleY)
+            };
+
+            host.Controls.Add(lblActions);
+            lblActions.BringToFront();
+
+            // ---------- ACTION BUTTONS ----------
+
+            int buttonH = 39;
+            int buttonGap = 8;
+            int actionY = lblActions.Bottom + 12;
+
+            btnOpenEditor.Location = new Point(x, actionY);
+            btnOpenEditor.Size = new Size(w, buttonH);
+            btnOpenEditor.Text = "Open File Editor";
+
+            btnReplaceMods.Location = new Point(x, actionY + buttonH + buttonGap);
+            btnReplaceMods.Size = new Size(w, buttonH);
+            btnReplaceMods.Text = "Replace Install Menu";
+
+            btnBuildOIV.Location = new Point(x, actionY + (buttonH + buttonGap) * 2);
+            btnBuildOIV.Size = new Size(w, buttonH);
+            btnBuildOIV.Text = "Build OIV Package";
+
+            // Z-ORDER
+            lblProjectSetup.BringToFront();
+            lblActions.BringToFront();
+
+            txtAuthor.BringToFront();
+            txtModName.BringToFront();
+            dropdownVersionTag.BringToFront();
+            txtVersion.BringToFront();
+            txtDescription.BringToFront();
+
+            panelPhotoPreview.BringToFront();
+            panelColorPicker.BringToFront();
+            lblColorHint.BringToFront();
+
+            btnAddPhoto.BringToFront();
+
+            btnOpenEditor.BringToFront();
+            btnReplaceMods.BringToFront();
+            btnBuildOIV.BringToFront();
+        }
+        private void PanelColorPicker_Click(object sender, EventArgs e)
+        {
+            using ColorDialog dlg = new ColorDialog();
+
+            dlg.Color = panelColorPicker.BackColor;
+            dlg.FullOpen = true;
+
+            if (dlg.ShowDialog() == DialogResult.OK)
+            {
+                panelColorPicker.BackColor = dlg.Color;
+
+                foreach (Control c in panelColorPicker.Controls)
+                {
+                    if (c is Label lbl)
+                        lbl.Visible = false;
+                }
+
+                //currentProject.BannerColor = dlg.Color;
+
+                MarkDirty();
+            }
+        }
+
+        private void MoveLabelByText(string text, Point location)
+        {
+            Label? label = FindLabelByText(this, text);
+
+            if (label != null)
+            {
+                label.Location = location;
+                label.BringToFront();
+            }
+        }
+
+        private Label? FindLabelByText(Control parent, string text)
+        {
+            foreach (Control control in parent.Controls)
+            {
+                if (control is Label lbl &&
+                    string.Equals(lbl.Text, text, StringComparison.OrdinalIgnoreCase))
+                {
+                    return lbl;
+                }
+
+                Label? childResult = FindLabelByText(control, text);
+                if (childResult != null)
+                    return childResult;
+            }
+
+            return null;
+        }
 
         // ─────────────────── REPLACE MENU ───────────────────
+        private void SetupReplaceMenu()
+        {
+            replaceMenu = new ContextMenuStrip();
+
+            replaceVehiclesItem = new ToolStripMenuItem("Replace Vehicles");
+            replaceClothesItem = new ToolStripMenuItem("Replace Clothes");
+            replaceWeaponsItem = new ToolStripMenuItem("Replace Weapons");
+
+            replaceVehiclesItem.Click += (s, e) => OpenReplaceVehiclesMenu();
+            replaceClothesItem.Click += (s, e) => OpenReplaceClothesMenu();
+            replaceWeaponsItem.Click += (s, e) => OpenReplaceWeaponsMenu();
+
+            replaceMenu.Items.Add(replaceVehiclesItem);
+            replaceMenu.Items.Add(replaceClothesItem);
+            replaceMenu.Items.Add(replaceWeaponsItem);
+        }
+
         private void PositionReplaceScreen()
         {
             if (replaceScreenPanel == null)
@@ -135,37 +392,45 @@ namespace MagicOGK_OIV_Builder
             );
 
             replaceScreenPanel.BringToFront();
-            panelEditorRight.BringToFront();
             btnHamburger.BringToFront();
         }
         private void btnReplaceMods_Click(object sender, EventArgs e)
         {
-            ShowReplaceModsScreen();
+            ReplaceMenuForm menu = new ReplaceMenuForm();
+
+            // CENTER OVER MAIN FORM
+            menu.Location = new Point(
+                this.Left + (this.Width - menu.Width) / 2,
+                this.Top + (this.Height - menu.Height) / 2
+            );
+
+            menu.OnVehicles = () => OpenReplaceVehiclesMenu();
+            menu.OnClothes = () => OpenReplaceClothesMenu();
+            menu.OnWeapons = () => OpenReplaceWeaponsMenu();
+
+            menu.Show(this);
         }
 
-        private void ShowReplaceModsScreen()
+        private void OpenReplaceVehiclesMenu()
         {
-            if (replaceScreenPanel != null)
+            if (replaceScreenPanel == null)
             {
-                replaceScreenPanel.Visible = true;
-                replaceScreenPanel.BringToFront();
-                panelSidebar.BringToFront();
-                panelEditorRight.BringToFront();
-                return;
+                replaceScreenPanel = new Panel
+                {
+                    BackColor = Color.FromArgb(16, 16, 16),
+                    Location = new Point(0, panelMarquee.Height),
+                    Size = new Size(
+                        this.ClientSize.Width,
+                        this.ClientSize.Height - panelMarquee.Height
+                    ),
+                    Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+                };
+
+                Controls.Add(replaceScreenPanel);
             }
 
-            replaceScreenPanel = new Panel
-            {
-                BackColor = Color.FromArgb(16, 16, 16),
-                Location = new Point(0, panelMarquee.Height),
-                Size = new Size(
-                  this.ClientSize.Width,
-                   this.ClientSize.Height - panelMarquee.Height
-                ),
-                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
-            };
-
-            Controls.Add(replaceScreenPanel);
+            replaceScreenPanel.Controls.Clear();
+            replaceScreenPanel.Visible = true;
             replaceScreenPanel.BringToFront();
             PositionReplaceScreen();
 
@@ -173,7 +438,7 @@ namespace MagicOGK_OIV_Builder
             {
                 Text = "REPLACE MENU",
                 ForeColor = Color.FromArgb(220, 150, 150),
-                Font = new Font("Syne", 16F, FontStyle.Bold),
+                Font = new Font("Syne", 11F, FontStyle.Bold),
                 AutoSize = true,
                 Location = new Point(24, 22)
             };
@@ -208,7 +473,7 @@ namespace MagicOGK_OIV_Builder
                 }
             };
 
-
+            
 
             var back = new Button
             {
@@ -221,7 +486,12 @@ namespace MagicOGK_OIV_Builder
                 Font = new Font("Syne", 8F, FontStyle.Bold)
             };
             back.FlatAppearance.BorderColor = Color.FromArgb(120, 30, 30);
-            back.Click += (s, e) => replaceScreenPanel.Visible = false;
+            back.Click += (s, e) =>
+            {
+                replaceScreenPanel.Visible = false;
+                panelMarquee.BringToFront();
+                btnHamburger.BringToFront();
+            };
 
             lblSelectedReplaceVehicle = new Label
             {
@@ -303,21 +573,63 @@ namespace MagicOGK_OIV_Builder
             replaceScreenPanel.Controls.Add(searchLabel);
             replaceScreenPanel.Controls.Add(txtVehicleSearch);
 
-            replaceVehicleList = new FlowLayoutPanel
+            replaceVehicleViewport = new Panel
             {
                 Location = new Point(24, 165),
-                Size = new Size(replaceScreenPanel.Width - 48, replaceScreenPanel.Height - 190),
+                Size = new Size(replaceScreenPanel.Width - 58, replaceScreenPanel.Height - 190),
                 Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
-                AutoScroll = true,
-                WrapContents = true,
-                BackColor = Color.FromArgb(12, 12, 12)
+                BackColor = Color.FromArgb(16, 16, 16)
             };
+
+            replaceVehicleList = new FlowLayoutPanel
+            {
+                Location = new Point(0, 0),
+                Size = new Size(replaceVehicleViewport.Width, replaceVehicleViewport.Height),
+                AutoSize = false,
+                AutoScroll = false,
+                WrapContents = true,
+                Padding = new Padding(34, 0, 0, 0),
+                BackColor = Color.FromArgb(16, 16, 16)
+            };
+
+            replaceVehicleViewport.Controls.Add(replaceVehicleList);
+
+            // CUSTOM SCROLLBAR TRACK
+            replaceVehicleScrollTrack = new Panel
+            {
+                Location = new Point(replaceVehicleViewport.Right + 8, replaceVehicleViewport.Top),
+                Size = new Size(10, replaceVehicleViewport.Height),
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right,
+                BackColor = Color.FromArgb(24, 24, 24),
+                Cursor = Cursors.Hand
+            };
+
+            // CUSTOM SCROLLBAR THUMB
+            replaceVehicleScrollThumb = new Panel
+            {
+                Location = new Point(1, 0),
+                Size = new Size(8, 60),
+                BackColor = Color.FromArgb(180, 70, 70),
+                Cursor = Cursors.Hand
+            };
+
+            replaceVehicleScrollTrack.Controls.Add(replaceVehicleScrollThumb);
+
+            replaceVehicleScrollThumb.MouseDown += ReplaceVehicleScrollThumb_MouseDown;
+            replaceVehicleScrollThumb.MouseMove += ReplaceVehicleScrollThumb_MouseMove;
+            replaceVehicleScrollThumb.MouseUp += ReplaceVehicleScrollThumb_MouseUp;
+
+            replaceVehicleScrollTrack.MouseDown += ReplaceVehicleScrollTrack_MouseDown;
+
+            replaceVehicleViewport.MouseWheel += ReplaceVehicleViewport_MouseWheel;
+            replaceVehicleList.MouseWheel += ReplaceVehicleViewport_MouseWheel;
 
             replaceScreenPanel.Controls.Add(title);
             replaceScreenPanel.Controls.Add(back);
             replaceScreenPanel.Controls.Add(lblSelectedReplaceVehicle);
             replaceScreenPanel.Controls.Add(replaceBtn);
-            replaceScreenPanel.Controls.Add(replaceVehicleList);
+            replaceScreenPanel.Controls.Add(replaceVehicleViewport);
+            replaceScreenPanel.Controls.Add(replaceVehicleScrollTrack);
 
             LoadReplaceVehicleCards();
 
@@ -328,6 +640,127 @@ namespace MagicOGK_OIV_Builder
             replaceScreenPanel.Controls.Add(prev);
             UpdateNavButtons();
 
+        }
+        private void UpdateCustomReplaceScrollbar()
+        {
+            if (replaceVehicleViewport == null ||
+                replaceVehicleList == null ||
+                replaceVehicleScrollTrack == null ||
+                replaceVehicleScrollThumb == null)
+                return;
+
+            replaceVehicleList.Width = replaceVehicleViewport.ClientSize.Width;
+
+            int contentHeight = replaceVehicleList.Controls
+                .Cast<Control>()
+                .Select(c => c.Bottom + c.Margin.Bottom)
+                .DefaultIfEmpty(0)
+                .Max();
+
+            int visibleHeight = replaceVehicleViewport.ClientSize.Height;
+
+            replaceVehicleList.Height = Math.Max(contentHeight, visibleHeight);
+
+            if (contentHeight <= visibleHeight)
+            {
+                replaceVehicleScrollTrack.Visible = false;
+                replaceVehicleList.Top = 0;
+                return;
+            }
+
+            replaceVehicleScrollTrack.Visible = true;
+
+            int thumbHeight = Math.Max(
+                35,
+                (int)((float)visibleHeight / contentHeight * replaceVehicleScrollTrack.Height)
+            );
+
+            replaceVehicleScrollThumb.Height = thumbHeight;
+
+            SetReplaceVehicleScroll(-replaceVehicleList.Top);
+        }
+
+        private void SetReplaceVehicleScroll(int scrollY)
+        {
+            if (replaceVehicleViewport == null ||
+                replaceVehicleList == null ||
+                replaceVehicleScrollTrack == null ||
+                replaceVehicleScrollThumb == null)
+                return;
+
+            int maxScroll = Math.Max(0, replaceVehicleList.Height - replaceVehicleViewport.ClientSize.Height);
+
+            scrollY = Math.Max(0, Math.Min(scrollY, maxScroll));
+
+            replaceVehicleList.Top = -scrollY;
+
+            if (maxScroll <= 0)
+            {
+                replaceVehicleScrollThumb.Top = 0;
+                return;
+            }
+
+            int maxThumbTop = replaceVehicleScrollTrack.Height - replaceVehicleScrollThumb.Height;
+
+            replaceVehicleScrollThumb.Top = (int)((float)scrollY / maxScroll * maxThumbTop);
+        }
+
+        private void ReplaceVehicleViewport_MouseWheel(object? sender, MouseEventArgs e)
+        {
+            if (replaceVehicleList == null)
+                return;
+
+            int currentScroll = -replaceVehicleList.Top;
+            int scrollAmount = e.Delta > 0 ? -45 : 45;
+
+            SetReplaceVehicleScroll(currentScroll + scrollAmount);
+        }
+
+        private void ReplaceVehicleScrollThumb_MouseDown(object? sender, MouseEventArgs e)
+        {
+            draggingReplaceScrollbar = true;
+            replaceScrollbarDragOffset = e.Y;
+        }
+
+        private void ReplaceVehicleScrollThumb_MouseMove(object? sender, MouseEventArgs e)
+        {
+            if (!draggingReplaceScrollbar ||
+                replaceVehicleViewport == null ||
+                replaceVehicleList == null ||
+                replaceVehicleScrollTrack == null ||
+                replaceVehicleScrollThumb == null)
+                return;
+
+            int newThumbTop = replaceVehicleScrollThumb.Top + e.Y - replaceScrollbarDragOffset;
+
+            int maxThumbTop = replaceVehicleScrollTrack.Height - replaceVehicleScrollThumb.Height;
+            newThumbTop = Math.Max(0, Math.Min(newThumbTop, maxThumbTop));
+
+            replaceVehicleScrollThumb.Top = newThumbTop;
+
+            int maxScroll = Math.Max(0, replaceVehicleList.Height - replaceVehicleViewport.ClientSize.Height);
+
+            int newScrollY = (int)((float)newThumbTop / maxThumbTop * maxScroll);
+
+            SetReplaceVehicleScroll(newScrollY);
+        }
+
+        private void ReplaceVehicleScrollThumb_MouseUp(object? sender, MouseEventArgs e)
+        {
+            draggingReplaceScrollbar = false;
+        }
+
+        private void ReplaceVehicleScrollTrack_MouseDown(object? sender, MouseEventArgs e)
+        {
+            if (replaceVehicleScrollThumb == null || replaceVehicleList == null)
+                return;
+
+            int currentScroll = -replaceVehicleList.Top;
+
+            if (e.Y < replaceVehicleScrollThumb.Top)
+                SetReplaceVehicleScroll(currentScroll - 120);
+            else if (e.Y > replaceVehicleScrollThumb.Bottom)
+                SetReplaceVehicleScroll(currentScroll + 120);
         }
         private void UpdateVehicleNavButtons()
         {
@@ -419,6 +852,7 @@ namespace MagicOGK_OIV_Builder
             LoadVehiclePage();
             UpdateVehicleNavButtons();
         }
+        
         private void LoadVehiclePage()
         {
             if (replaceVehicleList == null)
@@ -454,6 +888,7 @@ namespace MagicOGK_OIV_Builder
                     )
                 );
             }
+            UpdateCustomReplaceScrollbar();
         }
 
         private string GetVehicleImagePath(string imageName)
@@ -475,12 +910,18 @@ namespace MagicOGK_OIV_Builder
 
         private Panel CreateVehicleReplaceCard(string displayName, string spawnName, string imagePath)
         {
+            int cardW = 160;
+            int cardH = 150;
+
+            int imgW = 140;
+            int imgH = 80;
+
             var card = new Panel
             {
-                Width = 160,
-                Height = 150,
+                Width = cardW,
+                Height = cardH,
                 Margin = new Padding(8),
-                BackColor = Color.FromArgb(20, 20, 20),
+                BackColor = Color.FromArgb(16, 16, 16),
                 Cursor = Cursors.Hand,
                 Tag = spawnName
             };
@@ -500,7 +941,6 @@ namespace MagicOGK_OIV_Builder
                 using Pen pen = new Pen(borderColor, thickness);
                 e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
 
-                // subtle glow fill on hover
                 if (isHovered)
                 {
                     using Brush glow = new SolidBrush(Color.FromArgb(20, 120, 30, 30));
@@ -537,10 +977,14 @@ namespace MagicOGK_OIV_Builder
 
             var pic = new PictureBox
             {
-                Size = new Size(140, 80),
-                Location = new Point(10, 10),
-                BackColor = Color.FromArgb(30, 30, 30),
-                SizeMode = PictureBoxSizeMode.Zoom
+                Size = new Size(imgW, imgH),
+
+                // perfectly centered
+                Location = new Point((cardW - imgW) / 2, 10),
+
+                BackColor = Color.FromArgb(16, 16, 16),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BorderStyle = BorderStyle.None
             };
 
             if (!string.IsNullOrWhiteSpace(imagePath) && File.Exists(imagePath))
@@ -575,7 +1019,8 @@ namespace MagicOGK_OIV_Builder
                 AutoSize = false,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Location = new Point(5, 96),
-                Size = new Size(150, 22)
+                Size = new Size(cardW - 10, 22),
+                BackColor = Color.Transparent
             };
 
             var spawn = new Label
@@ -586,7 +1031,8 @@ namespace MagicOGK_OIV_Builder
                 AutoSize = false,
                 TextAlign = ContentAlignment.MiddleCenter,
                 Location = new Point(5, 120),
-                Size = new Size(150, 18)
+                Size = new Size(cardW - 10, 18),
+                BackColor = Color.Transparent
             };
 
             void SelectCard()
@@ -673,6 +1119,647 @@ namespace MagicOGK_OIV_Builder
             );
         }
 
+        private void OpenReplaceClothesMenu()
+        {
+            MessageBox.Show("Clothes replacement menu coming here.");
+        }
+
+        private string? selectedReplaceWeapon = null;
+        private Label? lblSelectedReplaceWeapon = null;
+
+        // REPLACE MENU - WEAPONS
+
+        private readonly List<(string display, string spawn)> allWeapons = new()
+{
+    // Melee
+    ("Antique Cavalry Dagger", "weapon_dagger"),
+    ("Baseball Bat", "weapon_bat"),
+    ("Broken Bottle", "weapon_bottle"),
+    ("Crowbar", "weapon_crowbar"),
+    ("Fist", "weapon_unarmed"),
+    ("Flashlight", "weapon_flashlight"),
+    ("Golf Club", "weapon_golfclub"),
+    ("Hammer", "weapon_hammer"),
+    ("Hatchet", "weapon_hatchet"),
+    ("Brass Knuckles", "weapon_knuckle"),
+    ("Knife", "weapon_knife"),
+    ("Machete", "weapon_machete"),
+    ("Switchblade", "weapon_switchblade"),
+    ("Nightstick", "weapon_nightstick"),
+    ("Pipe Wrench", "weapon_wrench"),
+    ("Battle Axe", "weapon_battleaxe"),
+    ("Pool Cue", "weapon_poolcue"),
+    ("Stone Hatchet", "weapon_stone_hatchet"),
+    ("Candy Cane", "weapon_candycane"),
+    ("The Shocker", "weapon_stunrod"),
+
+    // Handguns
+    ("Pistol", "weapon_pistol"),
+    ("Pistol Mk II", "weapon_pistol_mk2"),
+    ("Combat Pistol", "weapon_combatpistol"),
+    ("AP Pistol", "weapon_appistol"),
+    ("Stun Gun", "weapon_stungun"),
+    ("Pistol .50", "weapon_pistol50"),
+    ("SNS Pistol", "weapon_snspistol"),
+    ("SNS Pistol Mk II", "weapon_snspistol_mk2"),
+    ("Heavy Pistol", "weapon_heavypistol"),
+    ("Vintage Pistol", "weapon_vintagepistol"),
+    ("Flare Gun", "weapon_flaregun"),
+    ("Marksman Pistol", "weapon_marksmanpistol"),
+    ("Heavy Revolver", "weapon_revolver"),
+    ("Heavy Revolver Mk II", "weapon_revolver_mk2"),
+    ("Double Action Revolver", "weapon_doubleaction"),
+    ("Up-n-Atomizer", "weapon_raypistol"),
+    ("Ceramic Pistol", "weapon_ceramicpistol"),
+    ("Navy Revolver", "weapon_navyrevolver"),
+    ("Perico Pistol", "weapon_gadgetpistol"),
+    ("Stun Gun (MP)", "weapon_stungun_mp"),
+    ("WM 29 Pistol", "weapon_pistolxm3"),
+
+    // SMGs
+    ("Micro SMG", "weapon_microsmg"),
+    ("SMG", "weapon_smg"),
+    ("SMG Mk II", "weapon_smg_mk2"),
+    ("Assault SMG", "weapon_assaultsmg"),
+    ("Combat PDW", "weapon_combatpdw"),
+    ("Machine Pistol", "weapon_machinepistol"),
+    ("Mini SMG", "weapon_minismg"),
+    ("Unholy Hellbringer", "weapon_raycarbine"),
+    ("Tactical SMG", "weapon_tecpistol"),
+
+    // Shotguns
+    ("Pump Shotgun", "weapon_pumpshotgun"),
+    ("Pump Shotgun Mk II", "weapon_pumpshotgun_mk2"),
+    ("Sawed-Off Shotgun", "weapon_sawnoffshotgun"),
+    ("Assault Shotgun", "weapon_assaultshotgun"),
+    ("Bullpup Shotgun", "weapon_bullpupshotgun"),
+    ("Heavy Shotgun", "weapon_heavyshotgun"),
+    ("Double Barrel Shotgun", "weapon_dbshotgun"),
+    ("Sweeper Shotgun", "weapon_autoshotgun"),
+    ("Combat Shotgun", "weapon_combatshotgun"),
+
+    // Assault Rifles
+    ("Assault Rifle", "weapon_assaultrifle"),
+    ("Assault Rifle Mk II", "weapon_assaultrifle_mk2"),
+    ("Carbine Rifle", "weapon_carbinerifle"),
+    ("Carbine Rifle Mk II", "weapon_carbinerifle_mk2"),
+    ("Advanced Rifle", "weapon_advancedrifle"),
+    ("Special Carbine", "weapon_specialcarbine"),
+    ("Special Carbine Mk II", "weapon_specialcarbine_mk2"),
+    ("Bullpup Rifle", "weapon_bullpuprifle"),
+    ("Bullpup Rifle Mk II", "weapon_bullpuprifle_mk2"),
+    ("Compact Rifle", "weapon_compactrifle"),
+    ("Military Rifle", "weapon_militaryrifle"),
+    ("Heavy Rifle", "weapon_heavyrifle"),
+    ("Tactical Rifle", "weapon_tacticalrifle"),
+
+    // LMGs
+    ("MG", "weapon_mg"),
+    ("Combat MG", "weapon_combatmg"),
+    ("Combat MG Mk II", "weapon_combatmg_mk2"),
+    ("Gusenberg Sweeper", "weapon_gusenberg"),
+
+    // Snipers
+    ("Sniper Rifle", "weapon_sniperrifle"),
+    ("Heavy Sniper", "weapon_heavysniper"),
+    ("Heavy Sniper Mk II", "weapon_heavysniper_mk2"),
+    ("Marksman Rifle", "weapon_marksmanrifle"),
+    ("Marksman Rifle Mk II", "weapon_marksmanrifle_mk2"),
+    ("Precision Rifle", "weapon_precisionrifle"),
+    ("Musket", "weapon_musket"),
+
+    // Heavy Weapons
+    ("RPG", "weapon_rpg"),
+    ("Grenade Launcher", "weapon_grenadelauncher"),
+    ("Grenade Launcher Smoke", "weapon_grenadelauncher_smoke"),
+    ("Minigun", "weapon_minigun"),
+    ("Firework Launcher", "weapon_firework"),
+    ("Railgun", "weapon_railgun"),
+    ("Homing Launcher", "weapon_hominglauncher"),
+    ("Compact Grenade Launcher", "weapon_compactlauncher"),
+    ("Widowmaker", "weapon_rayminigun"),
+    ("EMP Launcher", "weapon_emplauncher"),
+    ("Railgun XM3", "weapon_railgunxm3"),
+
+    // Throwables
+    ("Grenade", "weapon_grenade"),
+    ("BZ Gas", "weapon_bzgas"),
+    ("Molotov", "weapon_molotov"),
+    ("Sticky Bomb", "weapon_stickybomb"),
+    ("Proximity Mine", "weapon_proxmine"),
+    ("Snowball", "weapon_snowball"),
+    ("Pipe Bomb", "weapon_pipebomb"),
+    ("Baseball", "weapon_ball"),
+    ("Tear Gas", "weapon_smokegrenade"),
+    ("Flare", "weapon_flare"),
+    ("Acid Package", "weapon_acidpackage"),
+
+    // Misc
+    ("Jerry Can", "weapon_petrolcan"),
+    ("Parachute", "gadget_parachute"),
+    ("Fire Extinguisher", "weapon_fireextinguisher"),
+    ("Hazardous Jerry Can", "weapon_hazardcan"),
+    ("Fertilizer Can", "weapon_fertilizercan")
+};
+
+        private void OpenReplaceWeaponsMenu()
+        {
+            if (replaceScreenPanel == null)
+            {
+                replaceScreenPanel = new Panel
+                {
+                    BackColor = Color.FromArgb(16, 16, 16),
+                    Location = new Point(0, panelMarquee.Height),
+                    Size = new Size(ClientSize.Width, ClientSize.Height - panelMarquee.Height),
+                    Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+                };
+
+                Controls.Add(replaceScreenPanel);
+            }
+
+            replaceScreenPanel.Controls.Clear();
+            replaceScreenPanel.Visible = true;
+            replaceScreenPanel.BringToFront();
+            PositionReplaceScreen();
+
+            Label title = new Label
+            {
+                Text = "REPLACE WEAPONS",
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Syne", 11F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(24, 22)
+            };
+
+            Button back = new Button
+            {
+                Text = "← Back",
+                Size = new Size(100, 32),
+                Location = new Point(24, 62),
+                BackColor = Color.FromArgb(55, 0, 0),
+                ForeColor = Color.FromArgb(230, 170, 170),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 8F, FontStyle.Bold)
+            };
+            back.FlatAppearance.BorderColor = Color.FromArgb(120, 30, 30);
+            back.Click += (s, e) => replaceScreenPanel.Visible = false;
+
+            lblSelectedReplaceWeapon = new Label
+            {
+                Text = "Selected weapon: none",
+                ForeColor = Color.FromArgb(150, 100, 100),
+                Font = new Font("Segoe UI", 9F),
+                AutoSize = true,
+                Location = new Point(140, 68)
+            };
+
+            Button replaceBtn = new Button
+            {
+                Text = "Replace Selected Weapon",
+                Size = new Size(220, 36),
+                Location = new Point(24, 110),
+                BackColor = Color.FromArgb(90, 0, 0),
+                ForeColor = Color.FromArgb(240, 180, 180),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 8F, FontStyle.Bold)
+            };
+            replaceBtn.FlatAppearance.BorderColor = Color.FromArgb(140, 40, 40);
+            replaceBtn.Click += (s, e) => ReplaceSelectedWeapon();
+
+            Label searchLabel = new Label
+            {
+                Text = "SEARCH WEAPON",
+                ForeColor = Color.FromArgb(188, 143, 143),
+                Font = new Font("Syne", 8F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(620, 82)
+            };
+
+            TextBox txtWeaponSearch = new TextBox
+            {
+                Size = new Size(300, 28),
+                Location = new Point(620, 105),
+                BackColor = Color.FromArgb(30, 30, 30),
+                ForeColor = Color.FromArgb(220, 220, 220),
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 9F)
+            };
+
+            replaceWeaponViewport = new Panel
+            {
+                Location = new Point(58, 165),
+                Size = new Size(replaceScreenPanel.Width - 120, replaceScreenPanel.Height - 190),
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right,
+                BackColor = Color.FromArgb(16, 16, 16)
+            };
+
+            replaceWeaponList = new FlowLayoutPanel
+            {
+                Location = new Point(0, 0),
+                Size = new Size(replaceWeaponViewport.Width, replaceWeaponViewport.Height),
+                AutoSize = false,
+                AutoScroll = false,
+                WrapContents = true,
+                Padding = new Padding(34, 0, 0, 0),
+                BackColor = Color.FromArgb(16, 16, 16)
+            };
+
+            replaceWeaponViewport.Controls.Add(replaceWeaponList);
+            replaceWeaponViewport.MouseEnter += (s, e) => replaceWeaponViewport.Focus();
+            replaceWeaponViewport.TabStop = true;
+
+            replaceWeaponScrollTrack = new Panel
+            {
+                Location = new Point(replaceWeaponViewport.Right + 8, replaceWeaponViewport.Top),
+                Size = new Size(10, replaceWeaponViewport.Height),
+                Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Right,
+                BackColor = Color.FromArgb(24, 24, 24),
+                Cursor = Cursors.Hand
+            };
+
+            replaceWeaponScrollThumb = new Panel
+            {
+                Location = new Point(1, 0),
+                Size = new Size(8, 60),
+                BackColor = Color.FromArgb(180, 70, 70),
+                Cursor = Cursors.Hand
+            };
+
+            replaceWeaponScrollTrack.Controls.Add(replaceWeaponScrollThumb);
+
+            replaceWeaponScrollThumb.MouseDown += ReplaceWeaponScrollThumb_MouseDown;
+            replaceWeaponScrollThumb.MouseMove += ReplaceWeaponScrollThumb_MouseMove;
+            replaceWeaponScrollThumb.MouseUp += ReplaceWeaponScrollThumb_MouseUp;
+
+            replaceWeaponScrollTrack.MouseDown += ReplaceWeaponScrollTrack_MouseDown;
+
+            replaceWeaponViewport.MouseWheel += ReplaceWeaponViewport_MouseWheel;
+            replaceWeaponList.MouseWheel += ReplaceWeaponViewport_MouseWheel;
+
+            replaceScreenPanel.Controls.Add(replaceWeaponViewport);
+            replaceScreenPanel.Controls.Add(replaceWeaponScrollTrack);
+
+            void LoadWeapons()
+            {
+                if (replaceWeaponList == null)
+                    return;
+
+                replaceWeaponList.Controls.Clear();
+                replaceWeaponList.Top = 0;
+
+                string search = txtWeaponSearch.Text.Trim();
+
+                var filtered = allWeapons.Where(w =>
+                    string.IsNullOrWhiteSpace(search) ||
+                    w.display.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                    w.spawn.Contains(search, StringComparison.OrdinalIgnoreCase)
+                );
+
+                foreach (var weapon in filtered)
+                {
+                    replaceWeaponList.Controls.Add(CreateWeaponReplaceCard(weapon.display, weapon.spawn));
+                }
+
+                UpdateCustomReplaceWeaponScrollbar();
+            }
+
+            txtWeaponSearch.TextChanged += (s, e) => LoadWeapons();
+
+            replaceScreenPanel.Controls.Add(title);
+            replaceScreenPanel.Controls.Add(back);
+            replaceScreenPanel.Controls.Add(lblSelectedReplaceWeapon);
+            replaceScreenPanel.Controls.Add(replaceBtn);
+            replaceScreenPanel.Controls.Add(searchLabel);
+            replaceScreenPanel.Controls.Add(txtWeaponSearch);
+
+            LoadWeapons();
+
+            replaceScreenPanel.BringToFront();
+            panelMarquee.BringToFront();
+            btnHamburger.BringToFront();
+        }
+
+        private void UpdateCustomReplaceWeaponScrollbar()
+        {
+            if (replaceWeaponViewport == null ||
+                replaceWeaponList == null ||
+                replaceWeaponScrollTrack == null ||
+                replaceWeaponScrollThumb == null)
+                return;
+
+            replaceWeaponList.Width = replaceWeaponViewport.ClientSize.Width;
+
+            int contentHeight = replaceWeaponList.Controls
+                .Cast<Control>()
+                .Select(c => c.Bottom + c.Margin.Bottom)
+                .DefaultIfEmpty(0)
+                .Max();
+
+            int visibleHeight = replaceWeaponViewport.ClientSize.Height;
+
+            replaceWeaponList.Height = Math.Max(contentHeight, visibleHeight);
+
+            if (contentHeight <= visibleHeight)
+            {
+                replaceWeaponScrollTrack.Visible = false;
+                replaceWeaponList.Top = 0;
+                return;
+            }
+
+            replaceWeaponScrollTrack.Visible = true;
+
+            int thumbHeight = Math.Max(
+                35,
+                (int)((float)visibleHeight / contentHeight * replaceWeaponScrollTrack.Height)
+            );
+
+            replaceWeaponScrollThumb.Height = thumbHeight;
+
+            SetReplaceWeaponScroll(-replaceWeaponList.Top);
+        }
+
+        private void SetReplaceWeaponScroll(int scrollY)
+        {
+            if (replaceWeaponViewport == null ||
+                replaceWeaponList == null ||
+                replaceWeaponScrollTrack == null ||
+                replaceWeaponScrollThumb == null)
+                return;
+
+            int maxScroll = Math.Max(0, replaceWeaponList.Height - replaceWeaponViewport.ClientSize.Height);
+
+            scrollY = Math.Max(0, Math.Min(scrollY, maxScroll));
+
+            replaceWeaponList.Top = -scrollY;
+
+            if (maxScroll <= 0)
+            {
+                replaceWeaponScrollThumb.Top = 0;
+                return;
+            }
+
+            int maxThumbTop = replaceWeaponScrollTrack.Height - replaceWeaponScrollThumb.Height;
+
+            replaceWeaponScrollThumb.Top = (int)((float)scrollY / maxScroll * maxThumbTop);
+        }
+
+        private void ReplaceWeaponViewport_MouseWheel(object? sender, MouseEventArgs e)
+        {
+            if (replaceWeaponList == null)
+                return;
+
+            int currentScroll = -replaceWeaponList.Top;
+            int scrollAmount = e.Delta > 0 ? -45 : 45;
+
+            SetReplaceWeaponScroll(currentScroll + scrollAmount);
+        }
+
+        private void ReplaceWeaponScrollThumb_MouseDown(object? sender, MouseEventArgs e)
+        {
+            draggingWeaponScrollbar = true;
+            weaponScrollbarDragOffset = e.Y;
+        }
+
+        private void ReplaceWeaponScrollThumb_MouseMove(object? sender, MouseEventArgs e)
+        {
+            if (!draggingWeaponScrollbar ||
+                replaceWeaponViewport == null ||
+                replaceWeaponList == null ||
+                replaceWeaponScrollTrack == null ||
+                replaceWeaponScrollThumb == null)
+                return;
+
+            int newThumbTop = replaceWeaponScrollThumb.Top + e.Y - weaponScrollbarDragOffset;
+
+            int maxThumbTop = replaceWeaponScrollTrack.Height - replaceWeaponScrollThumb.Height;
+            newThumbTop = Math.Max(0, Math.Min(newThumbTop, maxThumbTop));
+
+            replaceWeaponScrollThumb.Top = newThumbTop;
+
+            int maxScroll = Math.Max(0, replaceWeaponList.Height - replaceWeaponViewport.ClientSize.Height);
+
+            int newScrollY = (int)((float)newThumbTop / maxThumbTop * maxScroll);
+
+            SetReplaceWeaponScroll(newScrollY);
+        }
+
+        private void ReplaceWeaponScrollThumb_MouseUp(object? sender, MouseEventArgs e)
+        {
+            draggingWeaponScrollbar = false;
+        }
+
+        private void ReplaceWeaponScrollTrack_MouseDown(object? sender, MouseEventArgs e)
+        {
+            if (replaceWeaponScrollThumb == null || replaceWeaponList == null)
+                return;
+
+            int currentScroll = -replaceWeaponList.Top;
+
+            if (e.Y < replaceWeaponScrollThumb.Top)
+                SetReplaceWeaponScroll(currentScroll - 120);
+            else if (e.Y > replaceWeaponScrollThumb.Bottom)
+                SetReplaceWeaponScroll(currentScroll + 120);
+        }
+
+        private Panel CreateWeaponReplaceCard(string displayName, string spawnName)
+        {
+            int cardW = 160;
+            int cardH = 105;
+
+            Panel card = new Panel
+            {
+                Width = cardW,
+                Height = cardH,
+                Margin = new Padding(8),
+                BackColor = Color.FromArgb(16, 16, 16),
+                Cursor = Cursors.Hand,
+                Tag = spawnName
+            };
+
+            PictureBox pic = new PictureBox
+            {
+                Size = new Size(96, 56),
+                Location = new Point((cardW - 96) / 2, 6),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.Transparent
+            };
+
+            string iconPath = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "Assets",
+                "weapons",
+                spawnName + ".png"
+            );
+
+            if (File.Exists(iconPath))
+            {
+                try
+                {
+                    if (!weaponImageCache.TryGetValue(iconPath, out Image? img))
+                    {
+                        using Image original = Image.FromFile(iconPath);
+
+                        Bitmap resized = new Bitmap(96, 56);
+                        using (Graphics g = Graphics.FromImage(resized))
+                        {
+                            g.Clear(Color.Transparent);
+                            g.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                            g.SmoothingMode = SmoothingMode.HighQuality;
+                            g.PixelOffsetMode = PixelOffsetMode.HighQuality;
+
+                            float ratio = Math.Min(96f / original.Width, 56f / original.Height);
+
+                            int newW = (int)(original.Width * ratio);
+                            int newH = (int)(original.Height * ratio);
+
+                            int drawX = (96 - newW) / 2;
+                            int drawY = (56 - newH) / 2;
+
+                            g.DrawImage(original, drawX, drawY, newW, newH);
+                        }
+
+                        img = resized;
+                        weaponImageCache[iconPath] = img;
+                    }
+
+                    pic.Image = img;
+                }
+                catch
+                {
+                    pic.Image = null;
+                }
+            }
+
+            Label name = new Label
+            {
+                Text = displayName,
+                ForeColor = Color.FromArgb(220, 170, 170),
+                Font = new Font("Syne", 8F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(5, 68),
+                Size = new Size(cardW - 10, 22),
+                BackColor = Color.Transparent
+            };
+
+            Label spawn = new Label
+            {
+                Text = spawnName,
+                ForeColor = Color.FromArgb(120, 85, 85),
+                Font = new Font("Consolas", 8F),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(5, 88),
+                Size = new Size(cardW - 10, 18),
+                BackColor = Color.Transparent
+            };
+
+            card.Paint += (s, e) =>
+            {
+                bool selected = selectedReplaceWeapon == spawnName;
+
+                Color borderColor = selected
+                    ? Color.FromArgb(220, 50, 50)
+                    : Color.FromArgb(50, 25, 25);
+
+                using Pen pen = new Pen(borderColor, selected ? 2 : 1);
+                e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
+            };
+
+            card.MouseEnter += (s, e) => card.BackColor = Color.FromArgb(25, 25, 25);
+            card.MouseLeave += (s, e) => card.BackColor = Color.FromArgb(16, 16, 16);
+
+            void SelectWeapon()
+            {
+                selectedReplaceWeapon = spawnName;
+
+                if (lblSelectedReplaceWeapon != null)
+                    lblSelectedReplaceWeapon.Text = $"Selected weapon: {displayName} ({spawnName})";
+
+                if (card.Parent != null)
+                {
+                    foreach (Control c in card.Parent.Controls)
+                        c.Invalidate();
+                }
+            }
+
+            card.Click += (s, e) => SelectWeapon();
+            pic.Click += (s, e) => SelectWeapon();
+            name.Click += (s, e) => SelectWeapon();
+            spawn.Click += (s, e) => SelectWeapon();
+
+            card.Controls.Add(pic);
+            card.Controls.Add(name);
+            card.Controls.Add(spawn);
+
+            pic.BringToFront();
+
+            return card;
+        }
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            foreach (var img in weaponImageCache.Values)
+                img.Dispose();
+
+            weaponImageCache.Clear();
+
+            base.OnFormClosed(e);
+        }
+        private void ReplaceSelectedWeapon()
+        {
+            if (string.IsNullOrWhiteSpace(selectedReplaceWeapon))
+            {
+                MessageBox.Show(
+                    "Select a weapon first.",
+                    "No weapon selected",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
+            using var dlg = new OpenFileDialog
+            {
+                Title = $"Select replacement files for {selectedReplaceWeapon}",
+                Multiselect = true,
+                Filter = "Weapon files (*.ydr;*.ytd;*.ydd)|*.ydr;*.ytd;*.ydd|All files (*.*)|*.*"
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            int weaponsRpfId = EnsureEditorPath(
+                "x64e.rpf/models/cdimages/weapons.rpf"
+            );
+
+            foreach (string file in dlg.FileNames)
+            {
+                currentProject.Files.Add(new OIVFileEntry
+                {
+                    Id = currentProject.NextId++,
+                    SourcePath = file,
+                    FileName = Path.GetFileName(file),
+                    SubPath = string.Empty,
+                    Type = "replace",
+                    FolderId = weaponsRpfId
+                });
+            }
+
+            MarkDirty();
+
+            if (editorExpanded)
+            {
+                BuildEditorPanel();
+                SelectTreeNodeByFolderId(weaponsRpfId);
+            }
+
+            RenderFileList();
+
+            MessageBox.Show(
+                $"Replacement files added for {selectedReplaceWeapon}.",
+                "Weapon Replace Added",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
 
         // ─────────────────── UI ETC ───────────────────
         private void ApplyTextboxTheme()
@@ -1093,18 +2180,105 @@ namespace MagicOGK_OIV_Builder
             }
         }
 
-        private void btnSidebarOpenOIV_Click(object sender, EventArgs e)
+        private async void btnSidebarOpenOIV_Click(object sender, EventArgs e)
         {
-            using var dlg = new OpenFileDialog { Filter = "OIV Package (*.oiv)|*.oiv|All Files (*.*)|*.*" };
-            if (dlg.ShowDialog() != DialogResult.OK) return;
+            if (!ConfirmDiscardOrSaveChanges())
+                return;
+
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Open OIV Package",
+                Filter = "OpenIV Package (*.oiv)|*.oiv"
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            using LoadingForm loading = new LoadingForm("Opening OIV package...");
+
+            
+            loading.StartPosition = FormStartPosition.Manual;
+            loading.Location = new Point(
+                this.Left + (this.Width - loading.Width) / 2,
+                this.Top + (this.Height - loading.Height) / 2
+            );
+
             try
             {
-                System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    { FileName = dlg.FileName, UseShellExecute = true });
+                loading.Show(this);
+                loading.Refresh();
+
+                string selectedPath = dlg.FileName;
+
+                await Task.Run(() =>
+                {
+                    DisassembleOivToProject(selectedPath);
+                });
+
+                LoadProjectIntoUI();
+                MarkDirty();
             }
-            catch (Exception ex)
+            finally
             {
-                MessageBox.Show("Could not open: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                loading.Close();
+            }
+        }
+        private void DisassembleOivToProject(string oivPath)
+        {
+            string tempFolder = Path.Combine(
+                Path.GetTempPath(),
+                "MagicOGK_OIV_" + Guid.NewGuid().ToString("N")
+            );
+
+            Directory.CreateDirectory(tempFolder);
+            ZipFile.ExtractToDirectory(oivPath, tempFolder);
+
+            string? assemblyPath = Directory
+                .GetFiles(tempFolder, "assembly.xml", SearchOption.AllDirectories)
+                .FirstOrDefault();
+
+            if (assemblyPath == null)
+                throw new Exception("assembly.xml was not found inside this OIV.");
+
+            currentProject = new OIVProject();
+
+            XDocument doc = XDocument.Load(assemblyPath);
+            XElement? metadata = doc.Root?.Element("metadata");
+
+            if (metadata != null)
+            {
+                currentProject.ModName = metadata.Element("name")?.Value ?? "";
+                currentProject.Author = metadata.Element("author")?.Value ?? "";
+                currentProject.Version = metadata.Element("version")?.Value ?? "";
+                currentProject.Description = metadata.Element("description")?.Value ?? "";
+            }
+
+            string rootFolder = Path.GetDirectoryName(assemblyPath)!;
+
+            foreach (string filePath in Directory.GetFiles(rootFolder, "*.*", SearchOption.AllDirectories))
+            {
+                if (Path.GetFileName(filePath).Equals("assembly.xml", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string relativePath = Path.GetRelativePath(rootFolder, filePath).Replace("\\", "/");
+
+                int? folderId = null;
+                string? folderPath = Path.GetDirectoryName(relativePath)?.Replace("\\", "/");
+
+                if (!string.IsNullOrWhiteSpace(folderPath))
+                {
+                    folderId = EnsureEditorPath(folderPath);
+                }
+
+                currentProject.Files.Add(new OIVFileEntry
+                {
+                    Id = currentProject.NextId++,
+                    SourcePath = filePath,
+                    FileName = Path.GetFileName(filePath),
+                    SubPath = string.Empty,
+                    Type = "content",
+                    FolderId = folderId
+                });
             }
         }
 
