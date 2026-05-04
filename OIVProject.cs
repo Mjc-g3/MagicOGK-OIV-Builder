@@ -36,6 +36,7 @@ namespace MagicOGK_OIV_Builder
     {
         public string ModName     { get; set; } = string.Empty;
         public string Author      { get; set; } = string.Empty;
+        public string Website { get; set; } = "";
         public string Version     { get; set; } = "1.0";
         public string VersionTag  { get; set; } = "Stable";
         public string Description { get; set; } = string.Empty;

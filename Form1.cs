@@ -39,6 +39,9 @@ namespace MagicOGK_OIV_Builder
         private bool isDirty = false;
         private bool isLoadingProject = false;
 
+        private Label? lblWebsite = null;
+        private TextBox? txtWebsite = null;
+
         private TreeView? editorTree = null;
         private Panel? editorPropPanel = null;
 
@@ -59,6 +62,7 @@ namespace MagicOGK_OIV_Builder
         private int replaceScrollbarDragOffset = 0;
         private string? selectedReplaceVehicle = null;
         private Label? lblSelectedReplaceVehicle = null;
+
 
         private int vehiclePage = 0;
         private const int vehiclesPerPage = 60;
@@ -83,6 +87,8 @@ namespace MagicOGK_OIV_Builder
 
         private bool draggingWeaponScrollbar = false;
         private int weaponScrollbarDragOffset = 0;
+
+        private bool allowCloseWithoutPrompt = false;
 
         /*
         private int sidebarOpenX = 0;
@@ -116,6 +122,9 @@ namespace MagicOGK_OIV_Builder
             this.Opacity = 0;
             this.ShowInTaskbar = false;
 
+            this.Size = new Size(1030, 720);
+            this.MinimumSize = new Size(1030, 720);
+
             panelMarquee.MouseDown += DragWindow;
             ApplyTextboxTheme();
 
@@ -144,6 +153,23 @@ namespace MagicOGK_OIV_Builder
             panelSidebar.Height = ClientSize.Height - panelMarquee.Height;
 
             SetupReplaceMenu();
+
+            this.AutoScaleMode = AutoScaleMode.Dpi;
+
+            float scale = this.DeviceDpi / 96f;
+
+            int baseWidth = 1030;
+            int baseHeight = 720;
+
+            this.Size = new Size(
+                (int)(baseWidth * scale),
+                (int)(baseHeight * scale)
+            );
+
+            this.MinimumSize = new Size(
+                (int)(baseWidth * scale),
+                (int)(baseHeight * scale)
+            );
         }
 
         // ─────────────────── UI UPDATE ETC ───────────────────
@@ -190,21 +216,56 @@ namespace MagicOGK_OIV_Builder
             txtAuthor.Location = new Point(x, 62);
             txtAuthor.Size = new Size(w, 22);
 
-            MoveLabelByText("MOD NAME", new Point(34, 96));
-            txtModName.Location = new Point(x, 116);
+            // LINK textbox, made in code
+            if (lblWebsite == null)
+            {
+                lblWebsite = new Label
+                {
+                    Text = "LINK",
+                    AutoSize = true,
+                    BackColor = Color.Transparent,
+                    ForeColor = Color.FromArgb(220, 150, 150),
+                    Font = new Font("Syne", 8F, FontStyle.Bold)
+                };
+
+                host.Controls.Add(lblWebsite);
+            }
+
+            if (txtWebsite == null)
+            {
+                txtWebsite = new TextBox
+                {
+                    BackColor = Color.FromArgb(30, 30, 30),
+                    ForeColor = Color.FromArgb(230, 170, 170),
+                    BorderStyle = BorderStyle.FixedSingle,
+                    Font = txtAuthor.Font,
+                    PlaceholderText = "Website / Discord / GTA5-Mods link..."
+                };
+
+                txtWebsite.TextChanged += Metadata_Changed;
+
+                host.Controls.Add(txtWebsite);
+            }
+
+            lblWebsite.Location = new Point(34, 96);
+            txtWebsite.Location = new Point(x, 116);
+            txtWebsite.Size = new Size(w, 22);
+
+            MoveLabelByText("MOD NAME", new Point(34, 150));
+            txtModName.Location = new Point(x, 170);
             txtModName.Size = new Size(w, 22);
 
-            MoveLabelByText("VERSION TAG", new Point(34, 150));
-            MoveLabelByText("VERSION", new Point(188, 150));
+            MoveLabelByText("VERSION TAG", new Point(34, 204));
+            MoveLabelByText("VERSION", new Point(188, 204));
 
-            dropdownVersionTag.Location = new Point(x, 170);
+            dropdownVersionTag.Location = new Point(x, 224);
             dropdownVersionTag.Size = new Size(140, 24);
 
-            txtVersion.Location = new Point(186, 170);
+            txtVersion.Location = new Point(186, 224);
             txtVersion.Size = new Size(145, 22);
 
-            MoveLabelByText("DESCRIPTION", new Point(34, 202));
-            txtDescription.Location = new Point(x, 222);
+            MoveLabelByText("DESCRIPTION", new Point(34, 256));
+            txtDescription.Location = new Point(x, 276);
             txtDescription.Size = new Size(w, 60);
 
             // ---------- PHOTO / COLOR SECTION MOVED UP ----------
@@ -293,6 +354,10 @@ namespace MagicOGK_OIV_Builder
             lblActions.BringToFront();
 
             txtAuthor.BringToFront();
+
+            lblWebsite?.BringToFront();
+            txtWebsite?.BringToFront();
+
             txtModName.BringToFront();
             dropdownVersionTag.BringToFront();
             txtVersion.BringToFront();
@@ -473,7 +538,7 @@ namespace MagicOGK_OIV_Builder
                 }
             };
 
-            
+
 
             var back = new Button
             {
@@ -852,7 +917,7 @@ namespace MagicOGK_OIV_Builder
             LoadVehiclePage();
             UpdateVehicleNavButtons();
         }
-        
+
         private void LoadVehiclePage()
         {
             if (replaceVehicleList == null)
@@ -1119,13 +1184,455 @@ namespace MagicOGK_OIV_Builder
             );
         }
 
-        private void OpenReplaceClothesMenu()
-        {
-            MessageBox.Show("Clothes replacement menu coming here.");
-        }
+
+
+        private string? selectedClothesCharacter = null;
+        private Label? lblSelectedClothesCharacter = null;
 
         private string? selectedReplaceWeapon = null;
         private Label? lblSelectedReplaceWeapon = null;
+
+        // REPLACE MENU - CLOTHES
+
+        private void OpenReplaceClothesMenu()
+        {
+            if (replaceScreenPanel == null)
+            {
+                replaceScreenPanel = new Panel
+                {
+                    BackColor = Color.FromArgb(16, 16, 16),
+                    Location = new Point(0, panelMarquee.Height),
+                    Size = new Size(
+                        this.ClientSize.Width,
+                        this.ClientSize.Height - panelMarquee.Height
+                    ),
+                    Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+                };
+
+                Controls.Add(replaceScreenPanel);
+            }
+
+            replaceScreenPanel.Controls.Clear();
+            replaceScreenPanel.Visible = true;
+            replaceScreenPanel.BringToFront();
+            PositionReplaceScreen();
+
+            selectedClothesCharacter = null;
+
+            Label title = new Label
+            {
+                Text = "REPLACE CLOTHES",
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Syne", 11F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(24, 22)
+            };
+
+            Button back = CreateSecondaryButton("← Back");
+            back.Size = new Size(100, 32);
+            back.Location = new Point(24, 62);
+            back.Click += (s, e) =>
+            {
+                replaceScreenPanel.Visible = false;
+                panelMarquee.BringToFront();
+                btnHamburger.BringToFront();
+            };
+
+            lblSelectedClothesCharacter = new Label
+            {
+                Text = "Selected character: none",
+                ForeColor = Color.FromArgb(150, 100, 100),
+                Font = new Font("Segoe UI", 9F),
+                AutoSize = true,
+                Location = new Point(140, 68)
+            };
+
+            Button replaceBtn = new Button
+            {
+                Text = "Replace Selected Clothes",
+                Size = new Size(220, 36),
+                Location = new Point(24, 110),
+                BackColor = Color.FromArgb(90, 0, 0),
+                ForeColor = Color.FromArgb(240, 180, 180),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 8F, FontStyle.Bold)
+            };
+            replaceBtn.FlatAppearance.BorderColor = Color.FromArgb(140, 40, 40);
+            replaceBtn.Click += (s, e) => ReplaceSelectedClothes();
+
+            Panel characterList = new Panel
+            {
+                Location = new Point(24, 175),
+                Size = new Size(replaceScreenPanel.Width - 48, 230),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                BackColor = Color.FromArgb(16, 16, 16)
+            };
+
+            Panel franklinCard = CreateClothesCharacterCard("Franklin", "franklin", "player_one", "franklin.png");
+            Panel michaelCard = CreateClothesCharacterCard("Michael", "michael", "player_zero", "michael.png");
+            Panel trevorCard = CreateClothesCharacterCard("Trevor", "trevor", "player_two", "trevor.png");
+            Panel addonCard = CreateAddonClothingCard();
+
+            Panel[] cards = { franklinCard, michaelCard, trevorCard, addonCard };
+
+            void CenterClothesCards()
+            {
+                int cardW = 190;
+                int gap = 24;
+                int totalW = (cardW * cards.Length) + (gap * (cards.Length - 1));
+                int startX = Math.Max(0, (characterList.Width - totalW) / 2);
+                int y = 10;
+
+                for (int i = 0; i < cards.Length; i++)
+                {
+                    cards[i].Location = new Point(startX + i * (cardW + gap), y);
+                }
+            }
+
+            foreach (Panel card in cards)
+                characterList.Controls.Add(card);
+
+            CenterClothesCards();
+            characterList.Resize += (s, e) => CenterClothesCards();
+
+            Label info = new Label
+            {
+                Text = "Choose which story character you want to replace clothing files for.",
+                ForeColor = Color.FromArgb(130, 90, 90),
+                Font = new Font("Segoe UI", 9F),
+                AutoSize = true,
+                Location = new Point(58, 425)
+            };
+
+            replaceScreenPanel.Controls.Add(title);
+            replaceScreenPanel.Controls.Add(back);
+            replaceScreenPanel.Controls.Add(lblSelectedClothesCharacter);
+            replaceScreenPanel.Controls.Add(replaceBtn);
+            replaceScreenPanel.Controls.Add(characterList);
+            replaceScreenPanel.Controls.Add(info);
+
+            replaceScreenPanel.BringToFront();
+            panelMarquee.BringToFront();
+            btnHamburger.BringToFront();
+        }
+
+        private Panel CreateAddonClothingCard()
+        {
+            int cardW = 190;
+            int cardH = 210;
+
+            Panel card = new Panel
+            {
+                Width = cardW,
+                Height = cardH,
+                Margin = new Padding(12),
+                BackColor = Color.FromArgb(16, 16, 16),
+                Cursor = Cursors.Hand
+            };
+
+            card.Paint += (s, e) =>
+            {
+                bool hover = card.ClientRectangle.Contains(card.PointToClient(Cursor.Position));
+
+                Color borderColor = hover
+                    ? Color.FromArgb(220, 50, 50)   // hover = bright red
+                    : Color.FromArgb(50, 25, 25);   // normal = subtle like others
+
+                using Pen pen = new Pen(borderColor, hover ? 2 : 1);
+                e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
+            };
+
+            Label plus = new Label
+            {
+                Text = "+",
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Segoe UI", 32F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(0, 45),
+                Size = new Size(cardW, 55),
+                BackColor = Color.Transparent
+            };
+
+            Label title = new Label
+            {
+                Text = "Add-On Clothing",
+                ForeColor = Color.FromArgb(220, 170, 170),
+                Font = new Font("Syne", 10F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(5, 115),
+                Size = new Size(cardW - 10, 30),
+                BackColor = Color.Transparent
+            };
+
+            Label subtitle = new Label
+            {
+                Text = "mpclothes / addon",
+                ForeColor = Color.FromArgb(120, 85, 85),
+                Font = new Font("Consolas", 8F),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(5, 145),
+                Size = new Size(cardW - 10, 20),
+                BackColor = Color.Transparent
+            };
+
+            void ClickCard()
+            {
+                AddAddonClothing();
+            }
+
+            card.Click += (s, e) => ClickCard();
+            plus.Click += (s, e) => ClickCard();
+            title.Click += (s, e) => ClickCard();
+            subtitle.Click += (s, e) => ClickCard();
+
+            card.MouseEnter += (s, e) => card.Invalidate();
+            card.MouseLeave += (s, e) => card.Invalidate();
+
+            card.Controls.Add(plus);
+            card.Controls.Add(title);
+            card.Controls.Add(subtitle);
+
+            return card;
+        }
+
+        private Panel CreateClothesCharacterCard(string displayName, string characterId, string fileId, string imageFile)
+        {
+            int cardW = 190;
+            int cardH = 210;
+
+            Panel card = new Panel
+            {
+                Width = cardW,
+                Height = cardH,
+                Margin = new Padding(12),
+                BackColor = Color.FromArgb(16, 16, 16),
+                Cursor = Cursors.Hand,
+                Tag = characterId
+            };
+
+            PictureBox pic = new PictureBox
+            {
+                Size = new Size(150, 135),
+                Location = new Point((cardW - 150) / 2, 14),
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.FromArgb(16, 16, 16)
+            };
+
+            string imagePath = Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                "Assets",
+                "characters",
+                imageFile
+            );
+
+            if (File.Exists(imagePath))
+            {
+                try
+                {
+                    pic.Image = Image.FromFile(imagePath);
+                }
+                catch
+                {
+                    pic.Image = null;
+                }
+            }
+            else
+            {
+                pic.Paint += (s, e) =>
+                {
+                    using Brush brush = new SolidBrush(Color.FromArgb(120, 70, 70));
+                    using Font font = new Font("Segoe UI", 9F, FontStyle.Bold);
+
+                    string text = "No image";
+                    SizeF size = e.Graphics.MeasureString(text, font);
+
+                    e.Graphics.DrawString(
+                        text,
+                        font,
+                        brush,
+                        (pic.Width - size.Width) / 2,
+                        (pic.Height - size.Height) / 2
+                    );
+                };
+            }
+
+            Label name = new Label
+            {
+                Text = displayName,
+                ForeColor = Color.FromArgb(220, 170, 170),
+                Font = new Font("Syne", 10F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(5, 158),
+                Size = new Size(cardW - 10, 28),
+                BackColor = Color.Transparent
+            };
+
+            Label file = new Label
+            {
+                Text = fileId,
+                ForeColor = Color.FromArgb(120, 85, 85),
+                Font = new Font("Consolas", 8F),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(5, 184),
+                Size = new Size(cardW - 10, 18),
+                BackColor = Color.Transparent
+            };
+
+            card.Paint += (s, e) =>
+            {
+                bool selected = selectedClothesCharacter == characterId;
+                bool hover = card.ClientRectangle.Contains(card.PointToClient(Cursor.Position));
+
+                Color borderColor =
+                    selected ? Color.FromArgb(220, 50, 50) :
+                    hover ? Color.FromArgb(180, 70, 70) :
+                              Color.FromArgb(50, 25, 25);
+
+                int thickness = selected ? 2 : hover ? 2 : 1;
+
+                using Pen pen = new Pen(borderColor, thickness);
+                e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
+            };
+
+            void SelectCharacter()
+            {
+                selectedClothesCharacter = characterId;
+
+                if (lblSelectedClothesCharacter != null)
+                    lblSelectedClothesCharacter.Text = $"Selected character: {displayName}";
+
+                if (card.Parent != null)
+                {
+                    foreach (Control c in card.Parent.Controls)
+                        c.Invalidate();
+                }
+            }
+
+            card.Click += (s, e) => SelectCharacter();
+            pic.Click += (s, e) => SelectCharacter();
+            name.Click += (s, e) => SelectCharacter();
+            file.Click += (s, e) => SelectCharacter();
+
+            card.MouseEnter += (s, e) => card.Invalidate();
+            card.MouseLeave += (s, e) => card.Invalidate();
+
+            card.Controls.Add(pic);
+            card.Controls.Add(name);
+            card.Controls.Add(file);
+
+            return card;
+        }
+
+        private void ReplaceSelectedClothes()
+        {
+            if (string.IsNullOrWhiteSpace(selectedClothesCharacter))
+            {
+                MessageBox.Show(
+                    "Select Franklin, Michael, or Trevor first.",
+                    "No character selected",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+                return;
+            }
+
+            using var dlg = new OpenFileDialog
+            {
+                Title = $"Select clothing replacement files for {selectedClothesCharacter}",
+                Multiselect = true,
+                Filter = "Clothing files (*.ydd;*.ytd;*.ymt;*.yft)|*.ydd;*.ytd;*.ymt;*.yft|All files (*.*)|*.*"
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string targetPath = selectedClothesCharacter switch
+            {
+                "franklin" => "x64v.rpf/models/cdimages/streamedpeds_players.rpf/player_one",
+                "michael" => "x64v.rpf/models/cdimages/streamedpeds_players.rpf/player_zero",
+                "trevor" => "x64v.rpf/models/cdimages/streamedpeds_players.rpf/player_two",
+                _ => "x64v.rpf/models/cdimages/streamedpeds_players.rpf"
+            };
+
+            int folderId = EnsureEditorPath(targetPath);
+
+            foreach (string file in dlg.FileNames)
+            {
+                currentProject.Files.Add(new OIVFileEntry
+                {
+                    Id = currentProject.NextId++,
+                    SourcePath = file,
+                    FileName = Path.GetFileName(file),
+                    SubPath = string.Empty,
+                    Type = "replace",
+                    FolderId = folderId
+                });
+            }
+
+            MarkDirty();
+
+            if (editorExpanded)
+            {
+                BuildEditorPanel();
+                SelectTreeNodeByFolderId(folderId);
+            }
+
+            RenderFileList();
+
+            MessageBox.Show(
+                $"Clothing replacement files added for {selectedClothesCharacter}.",
+                "Clothes Replace Added",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
+        private void AddAddonClothing()
+        {
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Select add-on clothing files/folders",
+                Multiselect = true,
+                Filter = "Clothing files (*.ydd;*.ytd;*.ymt;*.yft;*.meta)|*.ydd;*.ytd;*.ymt;*.yft;*.meta|All files (*.*)|*.*"
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            int folderId = EnsureEditorPath(
+                "update/x64/dlcpacks/mpclothes/dlc.rpf/x64/models/cdimages/mpclothes_male.rpf/mp_m_freemode_01_mp_m_clothes_01"
+            );
+
+            foreach (string file in dlg.FileNames)
+            {
+                currentProject.Files.Add(new OIVFileEntry
+                {
+                    Id = currentProject.NextId++,
+                    SourcePath = file,
+                    FileName = Path.GetFileName(file),
+                    SubPath = string.Empty,
+                    Type = "add",
+                    FolderId = folderId
+                });
+            }
+
+            MarkDirty();
+
+            if (editorExpanded)
+            {
+                BuildEditorPanel();
+                SelectTreeNodeByFolderId(folderId);
+            }
+
+            RenderFileList();
+
+            MessageBox.Show(
+                "Add-on clothing files added to mpclothes path.",
+                "Add-On Clothing Added",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
+        }
+
 
         // REPLACE MENU - WEAPONS
 
@@ -1827,31 +2334,31 @@ namespace MagicOGK_OIV_Builder
             // Drag
             panelDrag.MouseDown += PanelDrag_MouseDown;
             panelDrag.MouseMove += PanelDrag_MouseMove;
-            panelDrag.MouseUp   += PanelDrag_MouseUp;
+            panelDrag.MouseUp += PanelDrag_MouseUp;
 
             // Drop zone
             panelDropZone.DragEnter += PanelDropZone_DragEnter;
-            panelDropZone.DragDrop  += PanelDropZone_DragDrop;
-            panelDropZone.AllowDrop  = true;
+            panelDropZone.DragDrop += PanelDropZone_DragDrop;
+            panelDropZone.AllowDrop = true;
 
             // Button events
-            btnAddFiles.Click        += btnAddFiles_Click;
-            btnAddPhoto.Click        += btnAddPhoto_Click;
-            btnOpenEditor.Click      += btnOpenEditor_Click;
-            btnBuildOIV.Click        += btnBuildOIV_Click;
-            panelColorPicker.Click   += panelColorPicker_Click;
+            btnAddFiles.Click += btnAddFiles_Click;
+            btnAddPhoto.Click += btnAddPhoto_Click;
+            btnOpenEditor.Click += btnOpenEditor_Click;
+            btnBuildOIV.Click += btnBuildOIV_Click;
+            panelColorPicker.Click += panelColorPicker_Click;
 
-            btnSidebarOpenProject.Click   += btnSidebarOpenProject_Click;
+            btnSidebarOpenProject.Click += btnSidebarOpenProject_Click;
             btnSidebarSaveProjectAs.Click += btnSidebarSaveProjectAs_Click;
-            btnSidebarOpenOIV.Click       += btnSidebarOpenOIV_Click;
-            btnSidebarBuildOIV.Click      += btnBuildOIV_Click;
-            btnSidebarFeedback.Click      += btnSidebarFeedback_Click;
+            btnSidebarOpenOIV.Click += btnSidebarOpenOIV_Click;
+            btnSidebarBuildOIV.Click += btnBuildOIV_Click;
+            btnSidebarFeedback.Click += btnSidebarFeedback_Click;
 
             // Timers
             sidebarTimer.Interval = 12;
-            sidebarTimer.Tick    += SidebarTimer_Tick;
-            editorTimer.Interval  = 12;
-            editorTimer.Tick     += EditorTimer_Tick;
+            sidebarTimer.Tick += SidebarTimer_Tick;
+            editorTimer.Interval = 12;
+            editorTimer.Tick += EditorTimer_Tick;
 
             // Button hover effects
             AddButtonHover(btnOpenEditor);
@@ -1865,9 +2372,9 @@ namespace MagicOGK_OIV_Builder
 
             // WebView
             await webViewFileList.EnsureCoreWebView2Async();
-            webViewFileList.CoreWebView2.Settings.IsZoomControlEnabled        = false;
+            webViewFileList.CoreWebView2.Settings.IsZoomControlEnabled = false;
             webViewFileList.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
-            webViewFileList.CoreWebView2.Settings.AreDevToolsEnabled           = false;
+            webViewFileList.CoreWebView2.Settings.AreDevToolsEnabled = false;
             webViewFileList.CoreWebView2.WebMessageReceived += CoreWebView2_WebMessageReceived;
             webViewReady = true;
             RenderFileList();
@@ -1899,14 +2406,14 @@ namespace MagicOGK_OIV_Builder
         {
             panelMarquee.Paint += MarqueePaint;
 
-            _marqueeTimer          = new System.Windows.Forms.Timer();
+            _marqueeTimer = new System.Windows.Forms.Timer();
             _marqueeTimer.Interval = 16;
-            _marqueeTimer.Tick    += (s, e) =>
+            _marqueeTimer.Tick += (s, e) =>
             {
                 if (_marqueeTextWidth <= 0)
                 {
-                    using var g2   = Graphics.FromHwnd(panelMarquee.Handle);
-                    using var mf   = new Font("Syne", 9.5F, FontStyle.Bold);
+                    using var g2 = Graphics.FromHwnd(panelMarquee.Handle);
+                    using var mf = new Font("Syne", 9.5F, FontStyle.Bold);
                     _marqueeTextWidth = g2.MeasureString(MarqueeText, mf).Width;
                     // Start fully off the left edge
                     _marqueeX = -_marqueeTextWidth;
@@ -1925,9 +2432,9 @@ namespace MagicOGK_OIV_Builder
 
         private void MarqueePaint(object? sender, PaintEventArgs e)
         {
-            var g    = e.Graphics;
+            var g = e.Graphics;
             var rect = panelMarquee.ClientRectangle;
-            g.SmoothingMode     = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.AntiAliasGridFit;
 
             g.Clear(Color.FromArgb(10, 10, 10));
@@ -1942,7 +2449,7 @@ namespace MagicOGK_OIV_Builder
             int fadeW = 80;
 
             // Text left edge and right edge in panel coords
-            float textLeft  = _marqueeX;
+            float textLeft = _marqueeX;
             float textRight = _marqueeX + _marqueeTextWidth;
 
             // Alpha based on position: 0 when fully outside, 255 in the middle
@@ -1974,11 +2481,11 @@ namespace MagicOGK_OIV_Builder
         // Each column has a head (bright) and a tail that fades to black.
 
         private System.Windows.Forms.Timer? _matrixTimer;
-        private int[]   _matrixY    = Array.Empty<int>();
-        private int[]   _matrixSpeed = Array.Empty<int>();
-        private char[]  _matrixHeadChar = Array.Empty<char>();
-        private int     _matrixColW = 12;
-        private int     _matrixCols = 0;
+        private int[] _matrixY = Array.Empty<int>();
+        private int[] _matrixSpeed = Array.Empty<int>();
+        private char[] _matrixHeadChar = Array.Empty<char>();
+        private int _matrixColW = 12;
+        private int _matrixCols = 0;
 
         private static readonly char[] MatrixChars =
             "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789<>[]{}|\\/-_=+*#@!?".ToCharArray();
@@ -1988,23 +2495,23 @@ namespace MagicOGK_OIV_Builder
         {
             int w = panelMatrixTitle.Width;
             int h = panelMatrixTitle.Height;
-            _matrixCols  = w / _matrixColW;
-            _matrixY     = new int[_matrixCols];
-            _matrixSpeed  = new int[_matrixCols];
+            _matrixCols = w / _matrixColW;
+            _matrixY = new int[_matrixCols];
+            _matrixSpeed = new int[_matrixCols];
             _matrixHeadChar = new char[_matrixCols];
 
             for (int i = 0; i < _matrixCols; i++)
             {
-                _matrixY[i]        = MatrixRnd.Next(-h, 0);
-                _matrixSpeed[i]    = MatrixRnd.Next(1, 4);
+                _matrixY[i] = MatrixRnd.Next(-h, 0);
+                _matrixSpeed[i] = MatrixRnd.Next(1, 4);
                 _matrixHeadChar[i] = MatrixChars[MatrixRnd.Next(MatrixChars.Length)];
             }
 
             panelMatrixTitle.Paint += MatrixTitlePaint;
 
-            _matrixTimer           = new System.Windows.Forms.Timer();
-            _matrixTimer.Interval  = 75;
-            _matrixTimer.Tick     += (s, e) =>
+            _matrixTimer = new System.Windows.Forms.Timer();
+            _matrixTimer.Interval = 75;
+            _matrixTimer.Tick += (s, e) =>
             {
                 int h2 = panelMatrixTitle.Height;
                 for (int i = 0; i < _matrixCols; i++)
@@ -2012,8 +2519,8 @@ namespace MagicOGK_OIV_Builder
                     _matrixY[i] += _matrixSpeed[i] * _matrixColW;
                     if (_matrixY[i] > h2 + _matrixColW * 8)
                     {
-                        _matrixY[i]        = MatrixRnd.Next(-h2, -_matrixColW);
-                        _matrixSpeed[i]    = MatrixRnd.Next(1, 4);
+                        _matrixY[i] = MatrixRnd.Next(-h2, -_matrixColW);
+                        _matrixSpeed[i] = MatrixRnd.Next(1, 4);
                     }
                     // Randomise head char occasionally
                     if (MatrixRnd.Next(4) == 0)
@@ -2026,10 +2533,10 @@ namespace MagicOGK_OIV_Builder
 
         private void MatrixTitlePaint(object? sender, PaintEventArgs e)
         {
-            var g    = e.Graphics;
-            int w    = panelMatrixTitle.Width;
-            int h    = panelMatrixTitle.Height;
-            int cw   = _matrixColW;
+            var g = e.Graphics;
+            int w = panelMatrixTitle.Width;
+            int h = panelMatrixTitle.Height;
+            int cw = _matrixColW;
             int tailLen = 7; // how many chars trail behind the head
 
             panelMatrixTitle.BackColor = Color.FromArgb(15, 15, 15);
@@ -2049,7 +2556,7 @@ namespace MagicOGK_OIV_Builder
                     if (cy < -cw || cy > h) continue;
 
                     float alpha = 1f - (float)t / tailLen;
-                    int   a     = (int)(alpha * alpha * 200); // quadratic falloff
+                    int a = (int)(alpha * alpha * 200); // quadratic falloff
                     if (a <= 5) continue;
 
                     // Pick a deterministic-ish char for the tail slot
@@ -2143,7 +2650,7 @@ namespace MagicOGK_OIV_Builder
                 var proj = System.Text.Json.JsonSerializer.Deserialize<OIVProject>(File.ReadAllText(dlg.FileName));
                 if (proj != null)
                 {
-                    currentProject     = proj;
+                    currentProject = proj;
                     currentProjectPath = dlg.FileName;
                     LoadProjectIntoUI();
                     MarkClean();
@@ -2159,8 +2666,8 @@ namespace MagicOGK_OIV_Builder
         {
             using var dlg = new SaveFileDialog
             {
-                Title    = "Save MagicOGK Project",
-                Filter   = "MagicOGK Project (*.mogk)|*.mogk|All Files (*.*)|*.*",
+                Title = "Save MagicOGK Project",
+                Filter = "MagicOGK Project (*.mogk)|*.mogk|All Files (*.*)|*.*",
                 FileName = string.IsNullOrWhiteSpace(currentProject.ModName) ? "MyMod" : currentProject.ModName
             };
             if (dlg.ShowDialog() != DialogResult.OK) return;
@@ -2196,7 +2703,7 @@ namespace MagicOGK_OIV_Builder
 
             using LoadingForm loading = new LoadingForm("Opening OIV package...");
 
-            
+
             loading.StartPosition = FormStartPosition.Manual;
             loading.Location = new Point(
                 this.Left + (this.Width - loading.Width) / 2,
@@ -2243,43 +2750,328 @@ namespace MagicOGK_OIV_Builder
             currentProject = new OIVProject();
 
             XDocument doc = XDocument.Load(assemblyPath);
-            XElement? metadata = doc.Root?.Element("metadata");
+            string rootFolder = Path.GetDirectoryName(assemblyPath)!;
+
+            XElement? metadata = doc.Descendants()
+                .FirstOrDefault(x => x.Name.LocalName.Equals("metadata", StringComparison.OrdinalIgnoreCase));
 
             if (metadata != null)
             {
-                currentProject.ModName = metadata.Element("name")?.Value ?? "";
-                currentProject.Author = metadata.Element("author")?.Value ?? "";
-                currentProject.Version = metadata.Element("version")?.Value ?? "";
-                currentProject.Description = metadata.Element("description")?.Value ?? "";
+                currentProject.ModName = GetMetadataText(metadata, "name");
+                currentProject.Description = GetMetadataText(metadata, "description");
+
+                ReadOivAuthorAndWebsite(metadata, out string cleanAuthor, out string website);
+
+                currentProject.Author = cleanAuthor;
+                currentProject.Website = website;
+
+                ReadOivVersion(metadata, out string cleanVersion, out string versionTag);
+                currentProject.Version = cleanVersion;
+                currentProject.VersionTag = versionTag;
             }
 
-            string rootFolder = Path.GetDirectoryName(assemblyPath)!;
+            string? iconPath = Directory
+                .GetFiles(rootFolder, "icon.png", SearchOption.AllDirectories)
+                .FirstOrDefault();
 
-            foreach (string filePath in Directory.GetFiles(rootFolder, "*.*", SearchOption.AllDirectories))
+            if (iconPath != null)
             {
-                if (Path.GetFileName(filePath).Equals("assembly.xml", StringComparison.OrdinalIgnoreCase))
+                selectedPhotoPath = iconPath;
+                currentProject.PhotoPath = iconPath;
+            }
+
+            var installNodes = doc.Descendants()
+                    .Where(x =>
+                    {
+                        string n = x.Name.LocalName.ToLowerInvariant();
+                        return n == "file" || n == "add" || n == "replace" || n == "import";
+                    })
+                    .ToList();
+
+            foreach (XElement node in installNodes)
+            {
+                string source = GetAttr(node, "source", "src", "file");
+
+                if (string.IsNullOrWhiteSpace(source))
                     continue;
 
-                string relativePath = Path.GetRelativePath(rootFolder, filePath).Replace("\\", "/");
+                string? extractedFile = ResolveExtractedFile(rootFolder, tempFolder, source);
+
+                if (extractedFile == null || !File.Exists(extractedFile))
+                    continue;
+
+                string finalTarget = BuildFinalOivTarget(node, source);
+
+                if (string.IsNullOrWhiteSpace(finalTarget))
+                    continue;
+
+                finalTarget = finalTarget
+                    .Replace("\\", "/")
+                    .Trim('/');
+
+                string fileName = Path.GetFileName(finalTarget);
+                string? folderPath = Path.GetDirectoryName(finalTarget)?.Replace("\\", "/");
 
                 int? folderId = null;
-                string? folderPath = Path.GetDirectoryName(relativePath)?.Replace("\\", "/");
 
                 if (!string.IsNullOrWhiteSpace(folderPath))
-                {
                     folderId = EnsureEditorPath(folderPath);
-                }
 
                 currentProject.Files.Add(new OIVFileEntry
                 {
                     Id = currentProject.NextId++,
-                    SourcePath = filePath,
-                    FileName = Path.GetFileName(filePath),
+                    SourcePath = extractedFile,
+                    FileName = fileName,
                     SubPath = string.Empty,
                     Type = "content",
                     FolderId = folderId
                 });
             }
+        }
+
+        private string BuildFinalOivTarget(XElement node, string source)
+        {
+            string nodeTarget = GetAttr(node, "target", "destination", "dest", "path");
+            string archivePath = GetFullArchivePath(node);
+
+            source = source.Replace("\\", "/").Trim('/');
+            nodeTarget = nodeTarget.Replace("\\", "/").Trim('/');
+            archivePath = archivePath.Replace("\\", "/").Trim('/');
+
+            // IMPORTANT:
+            // If this is a whole RPF install, the real path is the archive path itself.
+            // Example:
+            // <archive path="x64/audio/sfx/dlc_apartment/ptl_revolver.awc">
+            //     <add source="content/dlc_1.rpf" />
+            // </archive>
+            if (!string.IsNullOrWhiteSpace(archivePath) &&
+                archivePath.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase) &&
+                string.IsNullOrWhiteSpace(nodeTarget))
+            {
+                string sourceName = Path.GetFileName(source);
+
+                if (sourceName.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase))
+                    return archivePath;
+
+                return archivePath + "/" + sourceName;
+            }
+
+            // If the node itself has the actual path, use it
+            if (!string.IsNullOrWhiteSpace(nodeTarget))
+            {
+                if (!string.IsNullOrWhiteSpace(archivePath) &&
+                    !nodeTarget.StartsWith(archivePath, StringComparison.OrdinalIgnoreCase))
+                {
+                    return archivePath + "/" + nodeTarget;
+                }
+
+                return nodeTarget;
+            }
+
+            // Last fallback
+            if (!string.IsNullOrWhiteSpace(archivePath))
+                return archivePath + "/" + Path.GetFileName(source);
+
+            return Path.GetFileName(source);
+        }
+
+        private string GetChildValue(XElement parent, string childName)
+        {
+            return parent.Elements()
+                .FirstOrDefault(x => x.Name.LocalName.Equals(childName, StringComparison.OrdinalIgnoreCase))
+                ?.Value ?? "";
+        }
+
+        private string GetMetadataText(XElement parent, string childName)
+        {
+            XElement? node = parent.Elements()
+                .FirstOrDefault(x => x.Name.LocalName.Equals(childName, StringComparison.OrdinalIgnoreCase));
+
+            if (node == null)
+                return "";
+
+            // Handles normal metadata:
+            // <author>XENORT</author>
+            if (!node.HasElements)
+                return node.Value.Trim();
+
+            // Handles OpenIV-style metadata:
+            // <author><displayName>XENORT</displayName></author>
+            XElement? displayName = node.Descendants()
+                .FirstOrDefault(x => x.Name.LocalName.Equals("displayName", StringComparison.OrdinalIgnoreCase));
+
+            if (displayName != null)
+                return displayName.Value.Trim();
+
+            return node.Value.Trim();
+        }
+        private void ReadOivAuthorAndWebsite(XElement metadata, out string author, out string website)
+        {
+            author = "";
+            website = "";
+
+            XElement? authorNode = metadata.Elements()
+                .FirstOrDefault(x => x.Name.LocalName.Equals("author", StringComparison.OrdinalIgnoreCase));
+
+            if (authorNode == null)
+                return;
+
+            XElement? displayName = authorNode.Descendants()
+                .FirstOrDefault(x => x.Name.LocalName.Equals("displayName", StringComparison.OrdinalIgnoreCase));
+
+            author = displayName != null
+                ? displayName.Value.Trim()
+                : authorNode.Value.Trim();
+
+            XElement? linkNode = authorNode.Descendants()
+                .FirstOrDefault(x =>
+                    x.Name.LocalName.Equals("web", StringComparison.OrdinalIgnoreCase) ||
+                    x.Name.LocalName.Equals("website", StringComparison.OrdinalIgnoreCase) ||
+                    x.Name.LocalName.Equals("url", StringComparison.OrdinalIgnoreCase) ||
+                    x.Name.LocalName.Equals("link", StringComparison.OrdinalIgnoreCase));
+
+            if (linkNode != null)
+                website = linkNode.Value.Trim();
+
+            if (string.IsNullOrWhiteSpace(website))
+            {
+                int httpIndex = authorNode.Value.IndexOf("http", StringComparison.OrdinalIgnoreCase);
+
+                if (httpIndex >= 0)
+                {
+                    string raw = authorNode.Value.Trim();
+                    author = raw.Substring(0, httpIndex).Trim();
+                    website = raw.Substring(httpIndex).Trim();
+                }
+            }
+        }
+
+        private void SplitAuthorAndWebsite(string rawAuthor, out string author, out string website)
+        {
+            author = rawAuthor.Trim();
+            website = "";
+
+            int httpIndex = rawAuthor.IndexOf("http", StringComparison.OrdinalIgnoreCase);
+
+            if (httpIndex >= 0)
+            {
+                author = rawAuthor.Substring(0, httpIndex).Trim();
+                website = rawAuthor.Substring(httpIndex).Trim();
+            }
+        }
+
+        private void ReadOivVersion(XElement metadata, out string version, out string versionTag)
+        {
+            version = "";
+            versionTag = "Stable";
+
+            XElement? versionNode = metadata.Elements()
+                .FirstOrDefault(x => x.Name.LocalName.Equals("version", StringComparison.OrdinalIgnoreCase));
+
+            if (versionNode == null)
+                return;
+
+            string major = versionNode.Elements()
+                .FirstOrDefault(x => x.Name.LocalName.Equals("major", StringComparison.OrdinalIgnoreCase))
+                ?.Value.Trim() ?? "";
+
+            string minor = versionNode.Elements()
+                .FirstOrDefault(x => x.Name.LocalName.Equals("minor", StringComparison.OrdinalIgnoreCase))
+                ?.Value.Trim() ?? "";
+
+            string tag = versionNode.Elements()
+                .FirstOrDefault(x => x.Name.LocalName.Equals("tag", StringComparison.OrdinalIgnoreCase))
+                ?.Value.Trim() ?? "";
+
+            if (!string.IsNullOrWhiteSpace(major) || !string.IsNullOrWhiteSpace(minor))
+            {
+                version = string.IsNullOrWhiteSpace(minor) ? major : $"{major}.{minor}";
+            }
+            else
+            {
+                version = versionNode.Value.Trim();
+            }
+
+            if (!string.IsNullOrWhiteSpace(tag))
+            {
+                if (tag.Equals("MAIN", StringComparison.OrdinalIgnoreCase))
+                    versionTag = "Stable";
+                else
+                    versionTag = tag;
+            }
+
+            version = version
+                .Replace("Main", "", StringComparison.OrdinalIgnoreCase)
+                .Replace("Stable", "", StringComparison.OrdinalIgnoreCase)
+                .Trim();
+        }
+
+        private string GetAttr(XElement node, params string[] names)
+        {
+            foreach (string name in names)
+            {
+                XAttribute? attr = node.Attributes()
+                    .FirstOrDefault(a => a.Name.LocalName.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+                if (attr != null)
+                    return attr.Value.Trim();
+            }
+
+            return "";
+        }
+
+        private string GetFullArchivePath(XElement node)
+        {
+            List<string> parts = new List<string>();
+
+            foreach (XElement archive in node.Ancestors().Reverse())
+            {
+                if (!archive.Name.LocalName.Equals("archive", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string p = GetAttr(archive, "path", "target", "destination");
+
+                if (!string.IsNullOrWhiteSpace(p))
+                    parts.Add(p.Replace("\\", "/").Trim('/'));
+            }
+
+            return string.Join("/", parts);
+        }
+
+        private string CombineOivPath(string archivePath, string target)
+        {
+            archivePath = archivePath.Replace("\\", "/").Trim('/');
+            target = target.Replace("\\", "/").Trim('/');
+
+            if (string.IsNullOrWhiteSpace(archivePath))
+                return target;
+
+            if (string.IsNullOrWhiteSpace(target))
+                return archivePath;
+
+            if (target.StartsWith(archivePath, StringComparison.OrdinalIgnoreCase))
+                return target;
+
+            return archivePath + "/" + target;
+        }
+
+        private string? ResolveExtractedFile(string rootFolder, string tempFolder, string source)
+        {
+            source = source.Replace("/", "\\").TrimStart('\\');
+
+            string p1 = Path.Combine(rootFolder, source);
+            if (File.Exists(p1))
+                return p1;
+
+            string p2 = Path.Combine(tempFolder, source);
+            if (File.Exists(p2))
+                return p2;
+
+            string fileName = Path.GetFileName(source);
+
+            return Directory
+                .GetFiles(tempFolder, fileName, SearchOption.AllDirectories)
+                .FirstOrDefault();
         }
 
         private void btnSidebarFeedback_Click(object sender, EventArgs e)
@@ -2292,6 +3084,114 @@ namespace MagicOGK_OIV_Builder
                 UseShellExecute = true
             });
         }
+
+        private Button MagicDialogButton(string text, Point location)
+        {
+            Button btn = new Button
+            {
+                Text = text,
+                Location = location,
+                Size = new Size(84, 30),
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(90, 0, 0),
+                ForeColor = Color.FromArgb(235, 170, 170),
+                Font = new Font("Syne", 8F, FontStyle.Bold)
+            };
+
+            btn.FlatAppearance.BorderColor = Color.FromArgb(150, 35, 35);
+            btn.FlatAppearance.BorderSize = 1;
+
+            btn.MouseEnter += (s, e) => btn.BackColor = Color.FromArgb(125, 0, 0);
+            btn.MouseLeave += (s, e) => btn.BackColor = Color.FromArgb(90, 0, 0);
+
+            return btn;
+        }
+
+        // ─────────────────── CUSTOM POP-UP BOXES ───────────────────
+        private DialogResult ShowMagicConfirmBox(string message, string title)
+        {
+            using Form dialog = new Form
+            {
+                Text = title,
+                Size = new Size(420, 210),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.None,
+                BackColor = Color.FromArgb(16, 16, 16),
+                ShowInTaskbar = false,
+                TopMost = true
+            };
+
+            Panel titleBar = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 36,
+                BackColor = Color.FromArgb(24, 24, 24)
+            };
+
+            Label lblTitle = new Label
+            {
+                Text = title.ToUpper(),
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Syne", 9F, FontStyle.Bold),
+                AutoSize = false,
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(14, 0, 0, 0)
+            };
+
+            Button btnX = new Button
+            {
+                Text = "×",
+                Dock = DockStyle.Right,
+                Width = 40,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(24, 24, 24),
+                ForeColor = Color.FromArgb(220, 90, 90),
+                Font = new Font("Segoe UI", 12F, FontStyle.Regular)
+            };
+            btnX.FlatAppearance.BorderSize = 0;
+            btnX.Click += (s, e) => dialog.DialogResult = DialogResult.Cancel;
+
+            titleBar.Controls.Add(lblTitle);
+            titleBar.Controls.Add(btnX);
+
+            Label icon = new Label
+            {
+                Text = "⚠",
+                ForeColor = Color.FromArgb(255, 210, 80),
+                Font = new Font("Segoe UI", 30F, FontStyle.Bold),
+                Location = new Point(25, 62),
+                Size = new Size(55, 55),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+
+            Label lblMessage = new Label
+            {
+                Text = message,
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Syne", 9F, FontStyle.Regular),
+                Location = new Point(92, 62),
+                Size = new Size(300, 65)
+            };
+
+            Button btnYes = MagicDialogButton("YES", new Point(92, 145));
+            Button btnNo = MagicDialogButton("NO", new Point(195, 145));
+            Button btnCancel = MagicDialogButton("CANCEL", new Point(298, 145));
+
+            btnYes.Click += (s, e) => dialog.DialogResult = DialogResult.Yes;
+            btnNo.Click += (s, e) => dialog.DialogResult = DialogResult.No;
+            btnCancel.Click += (s, e) => dialog.DialogResult = DialogResult.Cancel;
+
+            dialog.Controls.Add(titleBar);
+            dialog.Controls.Add(icon);
+            dialog.Controls.Add(lblMessage);
+            dialog.Controls.Add(btnYes);
+            dialog.Controls.Add(btnNo);
+            dialog.Controls.Add(btnCancel);
+
+            return dialog.ShowDialog(this);
+        }
+
 
         // ─────────────────── RIGHT EDITOR PANEL ───────────────────
 
@@ -2530,19 +3430,9 @@ namespace MagicOGK_OIV_Builder
             AddPresetButton(panel, "common/data", "common/data", 198, 30);
             AddPresetButton(panel, "scaleform", "update/update.rpf/x64/patch/data/cdimages/scaleform_generic.rpf", 292, 30);
 
-            AddReplacePresetButton(panel, 10, 66);
-
             return panel;
         }
 
-
-
-        private void AddReplacePresetButton(Panel parent, int x, int y)
-        {
-            var btn = CreatePresetButton("replace", x, y, 130);
-            btn.Click += (s, e) => ShowReplacePresetWindow();
-            parent.Controls.Add(btn);
-        }
         private void ShowReplacePresetWindow()
         {
             Form win = new Form
@@ -3132,30 +4022,30 @@ namespace MagicOGK_OIV_Builder
 
                 editorPropPanel.Controls.Add(new Label
                 {
-                    Text      = folder.IsRpf ? "RPF ARCHIVE" : "FOLDER",
+                    Text = folder.IsRpf ? "RPF ARCHIVE" : "FOLDER",
                     ForeColor = Color.FromArgb(140, 90, 90),
-                    Font      = new Font("Syne", 7F, FontStyle.Bold),
-                    AutoSize  = true,
-                    Location  = new Point(10, 8)
+                    Font = new Font("Syne", 7F, FontStyle.Bold),
+                    AutoSize = true,
+                    Location = new Point(10, 8)
                 });
 
                 editorPropPanel.Controls.Add(new Label
                 {
-                    Text      = "NAME:",
+                    Text = "NAME:",
                     ForeColor = Color.FromArgb(120, 80, 80),
-                    Font      = new Font("Syne", 7F, FontStyle.Bold),
-                    AutoSize  = true,
-                    Location  = new Point(10, 26)
+                    Font = new Font("Syne", 7F, FontStyle.Bold),
+                    AutoSize = true,
+                    Location = new Point(10, 26)
                 });
                 var txtName = new TextBox
                 {
-                    BackColor   = Color.Black,
-                    ForeColor   = Color.FromArgb(210, 210, 210),
+                    BackColor = Color.Black,
+                    ForeColor = Color.FromArgb(210, 210, 210),
                     BorderStyle = BorderStyle.FixedSingle,
-                    Text        = folder.Name,
-                    Size        = new Size(220, 20),
-                    Location    = new Point(56, 23),
-                    Font        = new Font("Consolas", 8F)
+                    Text = folder.Name,
+                    Size = new Size(220, 20),
+                    Location = new Point(56, 23),
+                    Font = new Font("Consolas", 8F)
                 };
                 txtName.TextChanged += (s, ev) =>
                 {
@@ -3168,13 +4058,13 @@ namespace MagicOGK_OIV_Builder
 
                 var chkDlc = new CheckBox
                 {
-                    Text      = "Add to dlclist.xml on install",
+                    Text = "Add to dlclist.xml on install",
                     ForeColor = Color.FromArgb(170, 130, 130),
                     BackColor = Color.Transparent,
-                    Font      = new Font("Syne", 7F),
-                    Checked   = folder.AddToDlcList,
-                    AutoSize  = true,
-                    Location  = new Point(10, 50)
+                    Font = new Font("Syne", 7F),
+                    Checked = folder.AddToDlcList,
+                    AutoSize = true,
+                    Location = new Point(10, 50)
                 };
                 chkDlc.CheckedChanged += (s, ev) =>
                 {
@@ -3186,13 +4076,13 @@ namespace MagicOGK_OIV_Builder
 
                 var chkRpf = new CheckBox
                 {
-                    Text      = "This is an RPF archive",
+                    Text = "This is an RPF archive",
                     ForeColor = Color.FromArgb(130, 160, 200),
                     BackColor = Color.Transparent,
-                    Font      = new Font("Syne", 7F),
-                    Checked   = folder.IsRpf,
-                    AutoSize  = true,
-                    Location  = new Point(10, 70)
+                    Font = new Font("Syne", 7F),
+                    Checked = folder.IsRpf,
+                    AutoSize = true,
+                    Location = new Point(10, 70)
                 };
                 chkRpf.CheckedChanged += (s, ev) =>
                 {
@@ -3207,40 +4097,40 @@ namespace MagicOGK_OIV_Builder
 
                 editorPropPanel.Controls.Add(new Label
                 {
-                    Text      = "FILE",
+                    Text = "FILE",
                     ForeColor = Color.FromArgb(140, 90, 90),
-                    Font      = new Font("Syne", 7F, FontStyle.Bold),
-                    AutoSize  = true,
-                    Location  = new Point(10, 8)
+                    Font = new Font("Syne", 7F, FontStyle.Bold),
+                    AutoSize = true,
+                    Location = new Point(10, 8)
                 });
 
                 editorPropPanel.Controls.Add(new Label
                 {
-                    Text      = TruncatePath(file.SourcePath, 48),
+                    Text = TruncatePath(file.SourcePath, 48),
                     ForeColor = Color.FromArgb(80, 80, 80),
-                    Font      = new Font("Consolas", 7F),
-                    AutoSize  = true,
-                    Location  = new Point(10, 26)
+                    Font = new Font("Consolas", 7F),
+                    AutoSize = true,
+                    Location = new Point(10, 26)
                 });
 
                 editorPropPanel.Controls.Add(new Label
                 {
-                    Text      = "TYPE:",
+                    Text = "TYPE:",
                     ForeColor = Color.FromArgb(120, 80, 80),
-                    Font      = new Font("Syne", 7F, FontStyle.Bold),
-                    AutoSize  = true,
-                    Location  = new Point(10, 50)
+                    Font = new Font("Syne", 7F, FontStyle.Bold),
+                    AutoSize = true,
+                    Location = new Point(10, 50)
                 });
 
                 var typeBox = new ComboBox
                 {
-                    BackColor     = Color.Black,
-                    ForeColor     = Color.FromArgb(200, 200, 200),
-                    FlatStyle     = FlatStyle.Flat,
+                    BackColor = Color.Black,
+                    ForeColor = Color.FromArgb(200, 200, 200),
+                    FlatStyle = FlatStyle.Flat,
                     DropDownStyle = ComboBoxStyle.DropDownList,
-                    Size          = new Size(110, 20),
-                    Location      = new Point(48, 48),
-                    Font          = new Font("Syne", 7F)
+                    Size = new Size(110, 20),
+                    Location = new Point(48, 48),
+                    Font = new Font("Syne", 7F)
                 };
                 typeBox.Items.AddRange(new object[] { "Content", "Replace", "XML Edit" });
                 typeBox.SelectedIndex = file.Type switch { "replace" => 1, "xmledit" => 2, _ => 0 };
@@ -3252,11 +4142,11 @@ namespace MagicOGK_OIV_Builder
                 string resolved = ResolveFilePath(file);
                 editorPropPanel.Controls.Add(new Label
                 {
-                    Text      = "→ " + TruncatePath(resolved, 50),
+                    Text = "→ " + TruncatePath(resolved, 50),
                     ForeColor = Color.FromArgb(100, 130, 100),
-                    Font      = new Font("Consolas", 7F),
-                    AutoSize  = true,
-                    Location  = new Point(10, 72)
+                    Font = new Font("Consolas", 7F),
+                    AutoSize = true,
+                    Location = new Point(10, 72)
                 });
             }
             else
@@ -3344,7 +4234,7 @@ namespace MagicOGK_OIV_Builder
         }
 
         private void TreeCmd_NewFolder() => TreeCmd_NewNode(isRpf: false);
-        private void TreeCmd_NewRpf()    => TreeCmd_NewNode(isRpf: true);
+        private void TreeCmd_NewRpf() => TreeCmd_NewNode(isRpf: true);
 
         private void TreeCmd_NewNode(bool isRpf)
         {
@@ -3386,9 +4276,9 @@ namespace MagicOGK_OIV_Builder
 
             using var dlg = new OpenFileDialog
             {
-                Title       = "Add file to selected folder",
+                Title = "Add file to selected folder",
                 Multiselect = true,
-                Filter      = "All Files (*.*)|*.*"
+                Filter = "All Files (*.*)|*.*"
             };
             if (dlg.ShowDialog() != DialogResult.OK) return;
 
@@ -3396,12 +4286,12 @@ namespace MagicOGK_OIV_Builder
             {
                 currentProject.Files.Add(new OIVFileEntry
                 {
-                    Id         = currentProject.NextId++,
+                    Id = currentProject.NextId++,
                     SourcePath = path,
-                    FileName   = Path.GetFileName(path),
-                    SubPath    = string.Empty,
-                    Type       = "content",
-                    FolderId   = parentFolderId
+                    FileName = Path.GetFileName(path),
+                    SubPath = string.Empty,
+                    Type = "content",
+                    FolderId = parentFolderId
                 });
             }
             MarkDirty();
@@ -3625,7 +4515,7 @@ namespace MagicOGK_OIV_Builder
         private void EditorTree_KeyDown(object? sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Delete) TreeCmd_Delete();
-            if (e.KeyCode == Keys.F2)     TreeCmd_Rename();
+            if (e.KeyCode == Keys.F2) TreeCmd_Rename();
         }
 
         private void EditorTree_MouseDoubleClick(object? sender, MouseEventArgs e)
@@ -3778,42 +4668,55 @@ namespace MagicOGK_OIV_Builder
         {
             using var dlg = new Form
             {
-                Text            = label,
-                BackColor       = Color.FromArgb(20, 20, 20),
+                Text = label,
+                BackColor = Color.FromArgb(20, 20, 20),
                 FormBorderStyle = FormBorderStyle.FixedDialog,
-                StartPosition   = FormStartPosition.CenterParent,
-                ClientSize      = new Size(320, 86),
-                MaximizeBox     = false,
-                MinimizeBox     = false,
-                ControlBox      = false
+                StartPosition = FormStartPosition.CenterParent,
+                ClientSize = new Size(320, 86),
+                MaximizeBox = false,
+                MinimizeBox = false,
+                ControlBox = false
             };
             dlg.Controls.Add(new Label
             {
-                Text = label, ForeColor = Color.FromArgb(160, 110, 110),
+                Text = label,
+                ForeColor = Color.FromArgb(160, 110, 110),
                 Font = new Font("Syne", 8F, FontStyle.Bold),
-                AutoSize = true, Location = new Point(12, 10)
+                AutoSize = true,
+                Location = new Point(12, 10)
             });
             var txt = new TextBox
             {
-                BackColor = Color.Black, ForeColor = Color.FromArgb(210, 210, 210),
-                BorderStyle = BorderStyle.FixedSingle, Text = defaultVal,
-                Size = new Size(294, 22), Location = new Point(12, 28),
+                BackColor = Color.Black,
+                ForeColor = Color.FromArgb(210, 210, 210),
+                BorderStyle = BorderStyle.FixedSingle,
+                Text = defaultVal,
+                Size = new Size(294, 22),
+                Location = new Point(12, 28),
                 Font = new Font("Consolas", 9F)
             };
             dlg.Controls.Add(txt);
             var ok = new Button
             {
-                Text = "OK", DialogResult = DialogResult.OK,
-                BackColor = Color.FromArgb(70, 0, 0), ForeColor = Color.FromArgb(220, 160, 160),
-                FlatStyle = FlatStyle.Flat, Size = new Size(70, 26), Location = new Point(12, 54)
+                Text = "OK",
+                DialogResult = DialogResult.OK,
+                BackColor = Color.FromArgb(70, 0, 0),
+                ForeColor = Color.FromArgb(220, 160, 160),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(70, 26),
+                Location = new Point(12, 54)
             };
             ok.FlatAppearance.BorderColor = Color.FromArgb(110, 40, 40);
             dlg.Controls.Add(ok);
             dlg.Controls.Add(new Button
             {
-                Text = "Cancel", DialogResult = DialogResult.Cancel,
-                BackColor = Color.FromArgb(30, 30, 30), ForeColor = Color.FromArgb(140, 100, 100),
-                FlatStyle = FlatStyle.Flat, Size = new Size(70, 26), Location = new Point(90, 54)
+                Text = "Cancel",
+                DialogResult = DialogResult.Cancel,
+                BackColor = Color.FromArgb(30, 30, 30),
+                ForeColor = Color.FromArgb(140, 100, 100),
+                FlatStyle = FlatStyle.Flat,
+                Size = new Size(70, 26),
+                Location = new Point(90, 54)
             });
             dlg.AcceptButton = ok;
             txt.SelectAll();
@@ -3890,8 +4793,8 @@ td{padding:7px 12px;vertical-align:middle}
 
                 foreach (var file in currentProject.Files)
                 {
-                    string name  = System.Net.WebUtility.HtmlEncode(file.FileName);
-                    string src   = System.Net.WebUtility.HtmlEncode(file.SourcePath);
+                    string name = System.Net.WebUtility.HtmlEncode(file.FileName);
+                    string src = System.Net.WebUtility.HtmlEncode(file.SourcePath);
                     string resolvedPath = ResolveFilePath(file);
                     string path = System.Net.WebUtility.HtmlEncode(resolvedPath).Replace("'", "&#39;");
                     sb.Append($@"<tr>
@@ -3918,9 +4821,9 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
         {
             using var dlg = new OpenFileDialog
             {
-                Title      = "Select mod file(s)",
+                Title = "Select mod file(s)",
                 Multiselect = true,
-                Filter     = "All Files (*.*)|*.*|YFT (*.yft)|*.yft|YTD (*.ytd)|*.ytd|META (*.meta)|*.meta|XML (*.xml)|*.xml|ASI (*.asi)|*.asi"
+                Filter = "All Files (*.*)|*.*|YFT (*.yft)|*.yft|YTD (*.ytd)|*.ytd|META (*.meta)|*.meta|XML (*.xml)|*.xml|ASI (*.asi)|*.asi"
             };
             if (dlg.ShowDialog() != DialogResult.OK) return;
             foreach (string path in dlg.FileNames)
@@ -3951,11 +4854,11 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
         {
             currentProject.Files.Add(new OIVFileEntry
             {
-                Id         = currentProject.NextId++,
+                Id = currentProject.NextId++,
                 SourcePath = path,
-                FileName   = Path.GetFileName(path),
+                FileName = Path.GetFileName(path),
                 TargetPath = "",
-                Type       = "content"
+                Type = "content"
             });
             MarkDirty();
         }
@@ -3966,14 +4869,14 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
         {
             using var dlg = new OpenFileDialog
             {
-                Title  = "Select preview image",
+                Title = "Select preview image",
                 Filter = "Images (*.png;*.jpg;*.jpeg;*.bmp)|*.png;*.jpg;*.jpeg;*.bmp|All Files (*.*)|*.*"
             };
             if (dlg.ShowDialog() != DialogResult.OK) return;
             try
             {
                 selectedPhotoPath = dlg.FileName;
-                btnAddPhoto.Text  = "CHANGE";
+                btnAddPhoto.Text = "CHANGE";
                 panelPhotoPreview.Invalidate();
 
                 SyncUIToProject();
@@ -3999,7 +4902,7 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
                 catch { }
             }
             // placeholder
-            using var font  = new Font("Syne", 8F);
+            using var font = new Font("Syne", 8F);
             using var brush = new SolidBrush(Color.FromArgb(70, 70, 70));
             var rect = panelPhotoPreview.ClientRectangle;
             e.Graphics.DrawString("No photo", font, brush, rect,
@@ -4040,8 +4943,8 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
 
             using var dlg = new SaveFileDialog
             {
-                Title    = "Save OIV Package",
-                Filter   = "OIV Package (*.oiv)|*.oiv",
+                Title = "Save OIV Package",
+                Filter = "OIV Package (*.oiv)|*.oiv",
                 FileName = currentProject.ModName.Replace(" ", "_") + ".oiv"
             };
             if (dlg.ShowDialog() != DialogResult.OK) return;
@@ -4064,9 +4967,10 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
 
         private void SyncUIToProject()
         {
-            currentProject.ModName     = txtModName.Text.Trim();
-            currentProject.Author      = txtAuthor.Text.Trim();
-            currentProject.Version     = txtVersion.Text.Trim();
+            currentProject.ModName = txtModName.Text.Trim();
+            currentProject.Author = txtAuthor.Text.Trim();
+            currentProject.Website = txtWebsite?.Text.Trim() ?? "";
+            currentProject.Version = txtVersion.Text.Trim();
             currentProject.Description = txtDescription.Text.Trim();
             if (dropdownVersionTag.SelectedItem != null)
                 currentProject.VersionTag = dropdownVersionTag.SelectedItem.ToString() ?? "Stable";
@@ -4088,6 +4992,8 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
                 // Reset all UI first so old values do not leak into the newly opened project
                 txtModName.Text = string.Empty;
                 txtAuthor.Text = string.Empty;
+                if (txtWebsite != null)
+                    txtWebsite.Text = string.Empty;
                 txtVersion.Text = string.Empty;
                 txtDescription.Text = string.Empty;
 
@@ -4105,6 +5011,8 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
                 // Now load current project values
                 txtModName.Text = currentProject.ModName ?? string.Empty;
                 txtAuthor.Text = currentProject.Author ?? string.Empty;
+                if (txtWebsite != null)
+                    txtWebsite.Text = currentProject.Website ?? string.Empty;
                 txtVersion.Text = currentProject.Version ?? string.Empty;
                 txtDescription.Text = currentProject.Description ?? string.Empty;
 
@@ -4220,28 +5128,37 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
         // -- FORM CLOSING ALERT METHOD --
         private void Main_FormClosing(object? sender, FormClosingEventArgs e)
         {
+            if (allowCloseWithoutPrompt)
+                return;
+
             if (!isDirty)
                 return;
 
-            var result = MessageBox.Show(
+            e.Cancel = true;
+
+            var result = ShowMagicConfirmBox(
                 "You have unsaved changes.\n\nDo you want to save before exiting?",
-                "Unsaved Changes",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Warning
+                "Unsaved Changes"
             );
 
             if (result == DialogResult.Cancel)
-            {
-                e.Cancel = true;
                 return;
-            }
 
             if (result == DialogResult.Yes)
             {
                 bool saved = TrySaveProject();
+
                 if (!saved)
-                    e.Cancel = true;
+                    return;
             }
+
+            // YES saved, or NO = close safely
+            allowCloseWithoutPrompt = true;
+
+            BeginInvoke(new Action(() =>
+            {
+                Close();
+            }));
         }
 
         private bool ConfirmDiscardOrSaveChanges()
@@ -4249,11 +5166,9 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             if (!isDirty)
                 return true;
 
-            var result = MessageBox.Show(
-                "You have unsaved changes.\n\nDo you want to save before continuing?",
-                "Unsaved Changes",
-                MessageBoxButtons.YesNoCancel,
-                MessageBoxIcon.Warning
+            var result = ShowMagicConfirmBox(
+             "You have unsaved changes.\n\nDo you want to save before continuing?",
+              "Unsaved Changes"
             );
 
             if (result == DialogResult.Cancel)
@@ -4308,7 +5223,7 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
         private void Metadata_Changed(object? sender, EventArgs e)
         {
             if (isLoadingProject)
-               return;
+                return;
 
             SyncUIToProject();
             MarkDirty();
@@ -4356,8 +5271,6 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             panelSidebar.Controls.Add(logo);
             logo.BringToFront();
         }
-
-
 
     }
     public static class MultiFolderPicker
@@ -4457,5 +5370,7 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             void GetAttributes();
             void Compare();
         }
+
+        
     }
 }

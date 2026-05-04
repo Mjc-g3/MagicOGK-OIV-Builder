@@ -27,6 +27,7 @@ namespace MagicOGK_OIV_Builder
             button6 = new Button();
             button5 = new Button();
             panelLeft = new Panel();
+            btnReplaceMods = new Button();
             panelEditorRight = new Panel();
             panelRight = new Panel();
             panelSidebar = new Panel();
@@ -59,7 +60,6 @@ namespace MagicOGK_OIV_Builder
             btnBuildOIV = new Button();
             btnAddFiles = new Button();
             webViewFileList = new Microsoft.Web.WebView2.WinForms.WebView2();
-            btnReplaceMods = new Button();
             panelDrag.SuspendLayout();
             panelLeft.SuspendLayout();
             panelSidebar.SuspendLayout();
@@ -152,6 +152,20 @@ namespace MagicOGK_OIV_Builder
             panelLeft.Name = "panelLeft";
             panelLeft.Size = new Size(360, 632);
             panelLeft.TabIndex = 2;
+            // 
+            // btnReplaceMods
+            // 
+            btnReplaceMods.BackColor = Color.FromArgb(64, 0, 0);
+            btnReplaceMods.FlatAppearance.BorderColor = Color.FromArgb(110, 40, 40);
+            btnReplaceMods.FlatStyle = FlatStyle.Flat;
+            btnReplaceMods.Font = new Font("Syne", 11F);
+            btnReplaceMods.ForeColor = Color.FromArgb(200, 140, 140);
+            btnReplaceMods.Location = new Point(185, 452);
+            btnReplaceMods.Name = "btnReplaceMods";
+            btnReplaceMods.Size = new Size(146, 28);
+            btnReplaceMods.TabIndex = 0;
+            btnReplaceMods.Text = "Replace Menu";
+            btnReplaceMods.UseVisualStyleBackColor = false;
             // 
             // panelEditorRight
             // 
@@ -393,20 +407,6 @@ namespace MagicOGK_OIV_Builder
             webViewFileList.Size = new Size(0, 0);
             webViewFileList.TabIndex = 0;
             webViewFileList.ZoomFactor = 1D;
-            // 
-            // btnReplaceMods
-            // 
-            btnReplaceMods.BackColor = Color.FromArgb(64, 0, 0);
-            btnReplaceMods.ForeColor = Color.FromArgb(200, 140, 140);
-            btnReplaceMods.FlatStyle = FlatStyle.Flat;
-            btnReplaceMods.FlatAppearance.BorderColor = Color.FromArgb(110, 40, 40);
-            btnReplaceMods.Location = new Point(185, 452);
-            btnReplaceMods.Name = "btnReplaceMods";
-            btnReplaceMods.Size = new Size(146, 28);
-            //btnReplaceMods.TabIndex = 5;
-            btnReplaceMods.Text = "Replace Menu";
-            //btnReplaceMods.UseVisualStyleBackColor = true;
-            btnReplaceMods.Font = new Font("Syne", 11F);
             // 
             // main
             // 

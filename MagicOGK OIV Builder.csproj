@@ -12,6 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\characters\franklin.png" />
+    <None Remove="Assets\characters\michael.png" />
+    <None Remove="Assets\characters\trevor.png" />
     <None Remove="Assets\weapons\gadget_parachute.png" />
     <None Remove="Assets\weapons\weapon_acidpackage.png" />
     <None Remove="Assets\weapons\weapon_advancedrifle.png" />
@@ -126,6 +129,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Assets\characters\franklin.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\characters\michael.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\characters\trevor.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="Assets\weapons\gadget_parachute.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
