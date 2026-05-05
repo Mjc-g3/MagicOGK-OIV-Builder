@@ -22,7 +22,21 @@ namespace MagicOGK_OIV_Builder
             {
                 webViewBackground.SendToBack();
 
-                await webViewBackground.EnsureCoreWebView2Async();
+                string webViewDataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "MagicOGK",
+                "WebView2",
+                "Splash"
+                );
+
+                Directory.CreateDirectory(webViewDataFolder);
+
+                var env = await CoreWebView2Environment.CreateAsync(
+                    null,
+                    webViewDataFolder
+                );
+
+                await webViewBackground.EnsureCoreWebView2Async(env);
 
                 string assetsPath = Path.Combine(Application.StartupPath, "Assets");
 

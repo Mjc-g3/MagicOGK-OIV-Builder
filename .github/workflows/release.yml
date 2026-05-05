@@ -1,0 +1,88 @@
+name: Build Release
+
+on:
+  push:
+    tags:
+      - "*.*.*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Get version
+        shell: pwsh
+        run: |
+          $version = "${{ github.ref_name }}"
+          echo "VERSION=$version" >> $env:GITHUB_ENV
+
+      - name: Publish app
+        shell: pwsh
+        run: |
+          dotnet publish "MagicOGK OIV Builder.csproj" `
+            -c Release `
+            -r win-x64 `
+            --self-contained true `
+            /p:PublishSingleFile=true `
+            /p:PublishReadyToRun=false `
+            /p:Version=$env:VERSION `
+            /p:AssemblyVersion=$env:VERSION.0 `
+            /p:FileVersion=$env:VERSION.0 `
+            -o publish
+
+      - name: Zip published app
+        shell: pwsh
+        run: |
+          Compress-Archive -Path publish\* -DestinationPath "MagicOGK-$env:VERSION.zip" -Force
+
+      - name: Generate appcast.xml
+        shell: pwsh
+        run: |
+          $file = "MagicOGK-$env:VERSION.zip"
+          $url = "https://github.com/Mjc-g3/MagicOGK-OIV-Builder/releases/download/$env:VERSION/$file"
+          $length = (Get-Item $file).Length
+
+          @"
+          <?xml version="1.0" encoding="utf-8"?>
+          <rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+            <channel>
+              <title>MagicOGK Updates</title>
+              <item>
+                <title>Version $env:VERSION</title>
+                <sparkle:version>$env:VERSION</sparkle:version>
+                <sparkle:shortVersionString>$env:VERSION</sparkle:shortVersionString>
+                <enclosure
+                  url="$url"
+                  sparkle:version="$env:VERSION"
+                  sparkle:shortVersionString="$env:VERSION"
+                  length="$length"
+                  type="application/octet-stream" />
+              </item>
+            </channel>
+          </rss>
+          "@ | Out-File appcast.xml -Encoding utf8
+
+      - name: Commit updated appcast
+        shell: pwsh
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add appcast.xml
+          git commit -m "Update appcast for $env:VERSION" || exit 0
+          git push origin HEAD:main
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: MagicOGK-${{ env.VERSION }}.zip

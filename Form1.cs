@@ -4,15 +4,18 @@ using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
+using System.Xml.Linq;
 using Microsoft.VisualBasic.Logging;
 using Microsoft.Web.WebView2.Core;
-using System.IO.Compression;
-using System.Xml.Linq;
-using System.Threading.Tasks;
+using NetSparkleUpdater;
+using NetSparkleUpdater.Enums;
+using NetSparkleUpdater.SignatureVerifiers;
 
 namespace MagicOGK_OIV_Builder
 {
@@ -38,6 +41,10 @@ namespace MagicOGK_OIV_Builder
         private bool webViewReady = false;
         private bool isDirty = false;
         private bool isLoadingProject = false;
+        private SparkleUpdater? sparkle;
+
+        private const string AppCastUrl =
+            "https://raw.githubusercontent.com/Mjc-g3/MagicOGK-OIV-Builder/main/appcast.xml";
 
         private Label? lblWebsite = null;
         private TextBox? txtWebsite = null;
@@ -2315,11 +2322,28 @@ namespace MagicOGK_OIV_Builder
                 SendMessage(this.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
             }
         }
+        // Auto -updater
+        private void StartUpdateCheck()
+        {
+            if (sparkle != null)
+                return;
 
+            sparkle = new SparkleUpdater(
+                AppCastUrl,
+                new Ed25519Checker(SecurityMode.Unsafe)
+            )
+            {
+                UIFactory = new NetSparkleUpdater.UI.WinForms.UIFactory(this.Icon),
+                RelaunchAfterUpdate = true
+            };
+
+            sparkle.StartLoop(true);
+        }
         // ─────────────────── INIT ───────────────────
 
         private async void Form1_Load(object sender, EventArgs e)
         {
+            StartUpdateCheck();
 
             using (var splash = new SplashForm())
             {
@@ -2371,7 +2395,21 @@ namespace MagicOGK_OIV_Builder
             panelPhotoPreview.Paint += PanelPhotoPreview_Paint;
 
             // WebView
-            await webViewFileList.EnsureCoreWebView2Async();
+            string webViewDataFolder = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "MagicOGK",
+                "WebView2",
+               "FileList"
+            );
+
+            Directory.CreateDirectory(webViewDataFolder);
+
+            var env = await CoreWebView2Environment.CreateAsync(
+                null,
+                webViewDataFolder
+            );
+
+            await webViewFileList.EnsureCoreWebView2Async(env);
             webViewFileList.CoreWebView2.Settings.IsZoomControlEnabled = false;
             webViewFileList.CoreWebView2.Settings.AreDefaultContextMenusEnabled = false;
             webViewFileList.CoreWebView2.Settings.AreDevToolsEnabled = false;
