@@ -9,14 +9,13 @@ namespace MagicOGK_OIV_Builder
         public Action OnVehicles;
         public Action OnClothes;
         public Action OnWeapons;
-        public Action OnPeds;
 
         public ReplaceMenuForm()
         {
             // FORM
             FormBorderStyle = FormBorderStyle.None;
             StartPosition = FormStartPosition.Manual;
-            Size = new Size(260, 235);
+            Size = new Size(260, 190);
             BackColor = Color.FromArgb(16, 16, 16);
             ShowInTaskbar = false;
             TopMost = true;
@@ -32,7 +31,7 @@ namespace MagicOGK_OIV_Builder
             Panel main = new Panel
             {
                 Location = new Point(1, 1),
-                Size = new Size(258, 233),
+                Size = new Size(258, 188),
                 BackColor = Color.FromArgb(16, 16, 16)
             };
             border.Controls.Add(main);
@@ -52,17 +51,14 @@ namespace MagicOGK_OIV_Builder
             Button btnVehicles = CreateButton("Replace Vehicles", 50);
             Button btnClothes = CreateButton("Replace Clothes", 95);
             Button btnWeapons = CreateButton("Replace Weapons", 140);
-            Button btnPeds = CreateButton("Replace Peds", 185);
 
             main.Controls.Add(btnVehicles);
             main.Controls.Add(btnClothes);
             main.Controls.Add(btnWeapons);
-            main.Controls.Add(btnPeds);
 
             btnVehicles.Click += (s, e) => { OnVehicles?.Invoke(); Close(); };
             btnClothes.Click += (s, e) => { OnClothes?.Invoke(); Close(); };
             btnWeapons.Click += (s, e) => { OnWeapons?.Invoke(); Close(); };
-            btnPeds.Click += (s, e) => { OnPeds?.Invoke(); Close(); };
 
             this.Deactivate += (s, e) => this.Close();
         }

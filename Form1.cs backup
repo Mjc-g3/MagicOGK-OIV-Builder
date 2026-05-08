@@ -85,7 +85,6 @@ namespace MagicOGK_OIV_Builder
         private ToolStripMenuItem replaceVehiclesItem;
         private ToolStripMenuItem replaceClothesItem;
         private ToolStripMenuItem replaceWeaponsItem;
-        private ToolStripMenuItem replacePedsItem;
         private readonly Dictionary<string, Image> weaponImageCache = new();
 
         private Panel? replaceWeaponViewport = null;
@@ -441,17 +440,14 @@ namespace MagicOGK_OIV_Builder
             replaceVehiclesItem = new ToolStripMenuItem("Replace Vehicles");
             replaceClothesItem = new ToolStripMenuItem("Replace Clothes");
             replaceWeaponsItem = new ToolStripMenuItem("Replace Weapons");
-            replacePedsItem = new ToolStripMenuItem("Replace Peds");
 
             replaceVehiclesItem.Click += (s, e) => OpenReplaceVehiclesMenu();
             replaceClothesItem.Click += (s, e) => OpenReplaceClothesMenu();
             replaceWeaponsItem.Click += (s, e) => OpenReplaceWeaponsMenu();
-            replacePedsItem.Click += (s, e) => OpenReplacePedsMenu();
 
             replaceMenu.Items.Add(replaceVehiclesItem);
             replaceMenu.Items.Add(replaceClothesItem);
             replaceMenu.Items.Add(replaceWeaponsItem);
-            replaceMenu.Items.Add(replacePedsItem);
         }
 
         private void PositionReplaceScreen()
@@ -483,7 +479,6 @@ namespace MagicOGK_OIV_Builder
             menu.OnVehicles = () => OpenReplaceVehiclesMenu();
             menu.OnClothes = () => OpenReplaceClothesMenu();
             menu.OnWeapons = () => OpenReplaceWeaponsMenu();
-            menu.OnPeds = () => OpenReplacePedsMenu();
 
             menu.Show(this);
         }
@@ -1198,231 +1193,11 @@ namespace MagicOGK_OIV_Builder
 
 
 
-        private ComboBox? dropdownPedTargetPath = null;
-        private TextBox? txtPedFolderName = null;
-        private Label? lblSelectedPedTarget = null;
-
         private string? selectedClothesCharacter = null;
         private Label? lblSelectedClothesCharacter = null;
 
         private string? selectedReplaceWeapon = null;
         private Label? lblSelectedReplaceWeapon = null;
-
-        // REPLACE MENU - PEDS
-
-        private void OpenReplacePedsMenu()
-        {
-            if (replaceScreenPanel == null)
-            {
-                replaceScreenPanel = new Panel
-                {
-                    BackColor = Color.FromArgb(16, 16, 16),
-                    Location = new Point(0, panelMarquee.Height),
-                    Size = new Size(
-                        this.ClientSize.Width,
-                        this.ClientSize.Height - panelMarquee.Height
-                    ),
-                    Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
-                };
-
-                Controls.Add(replaceScreenPanel);
-            }
-
-            replaceScreenPanel.Controls.Clear();
-            replaceScreenPanel.Visible = true;
-            replaceScreenPanel.BringToFront();
-            PositionReplaceScreen();
-
-            Label title = new Label
-            {
-                Text = "REPLACE PEDS",
-                ForeColor = Color.FromArgb(220, 150, 150),
-                Font = new Font("Syne", 11F, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(24, 22)
-            };
-
-            Button back = CreateSecondaryButton("← Back");
-            back.Size = new Size(100, 32);
-            back.Location = new Point(24, 62);
-            back.Click += (s, e) =>
-            {
-                replaceScreenPanel.Visible = false;
-                panelMarquee.BringToFront();
-                btnHamburger.BringToFront();
-            };
-
-            lblSelectedPedTarget = new Label
-            {
-                Text = "Target: choose path + ped folder",
-                ForeColor = Color.FromArgb(150, 100, 100),
-                Font = new Font("Segoe UI", 9F),
-                AutoSize = true,
-                Location = new Point(140, 68)
-            };
-
-            Label targetLabel = new Label
-            {
-                Text = "TARGET RPF / BASE PATH",
-                ForeColor = Color.FromArgb(188, 143, 143),
-                Font = new Font("Syne", 8F, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(24, 122)
-            };
-
-            dropdownPedTargetPath = new ComboBox
-            {
-                Location = new Point(24, 145),
-                Size = new Size(640, 28),
-                BackColor = Color.FromArgb(35, 35, 35),
-                ForeColor = Color.FromArgb(220, 180, 180),
-                FlatStyle = FlatStyle.Flat,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 9F)
-            };
-
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/streamedpeds_ig.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_a_m_m.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_a_m_y.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_a_f_m.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_a_f_y.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_s_m_m.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_s_m_y.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_s_f_m.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_s_f_y.rpf");
-            dropdownPedTargetPath.SelectedIndex = 0;
-
-            Label folderLabel = new Label
-            {
-                Text = "PED FOLDER / MODEL NAME",
-                ForeColor = Color.FromArgb(188, 143, 143),
-                Font = new Font("Syne", 8F, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(24, 195)
-            };
-
-            txtPedFolderName = new TextBox
-            {
-                Location = new Point(24, 218),
-                Size = new Size(300, 26),
-                BackColor = Color.FromArgb(35, 35, 35),
-                ForeColor = Color.FromArgb(220, 180, 180),
-                BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font("Segoe UI", 9F),
-                Text = "a_m_m_business_01"
-            };
-
-            Label hint = new Label
-            {
-                Text = "Example: for streamed peds use the ped folder name. For component peds, this can usually stay as the model name you are replacing.",
-                ForeColor = Color.FromArgb(130, 90, 90),
-                Font = new Font("Segoe UI", 9F),
-                AutoSize = false,
-                Location = new Point(24, 255),
-                Size = new Size(760, 44)
-            };
-
-            Button replaceBtn = new Button
-            {
-                Text = "Replace Selected Ped",
-                Size = new Size(220, 36),
-                Location = new Point(24, 315),
-                BackColor = Color.FromArgb(90, 0, 0),
-                ForeColor = Color.FromArgb(240, 180, 180),
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Syne", 8F, FontStyle.Bold)
-            };
-            replaceBtn.FlatAppearance.BorderColor = Color.FromArgb(140, 40, 40);
-            replaceBtn.Click += (s, e) => ReplaceSelectedPed();
-
-            replaceScreenPanel.Controls.Add(title);
-            replaceScreenPanel.Controls.Add(back);
-            replaceScreenPanel.Controls.Add(lblSelectedPedTarget);
-            replaceScreenPanel.Controls.Add(targetLabel);
-            replaceScreenPanel.Controls.Add(dropdownPedTargetPath);
-            replaceScreenPanel.Controls.Add(folderLabel);
-            replaceScreenPanel.Controls.Add(txtPedFolderName);
-            replaceScreenPanel.Controls.Add(hint);
-            replaceScreenPanel.Controls.Add(replaceBtn);
-
-            replaceScreenPanel.BringToFront();
-            panelMarquee.BringToFront();
-            btnHamburger.BringToFront();
-        }
-
-        private void ReplaceSelectedPed()
-        {
-            if (dropdownPedTargetPath == null || txtPedFolderName == null)
-                return;
-
-            string basePath = dropdownPedTargetPath.Text.Trim().Replace("\\", "/").Trim('/');
-            string pedFolder = txtPedFolderName.Text.Trim().Replace("\\", "/").Trim('/');
-
-            if (string.IsNullOrWhiteSpace(basePath))
-            {
-                MessageBox.Show(
-                    "Choose a target RPF/base path first.",
-                    "No target path",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(pedFolder))
-            {
-                MessageBox.Show(
-                    "Type the ped folder/model name first, for example a_m_m_business_01.",
-                    "No ped name",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-                return;
-            }
-
-            using var dlg = new OpenFileDialog
-            {
-                Title = $"Select replacement files for {pedFolder}",
-                Multiselect = true,
-                Filter = "Ped files (*.ydd;*.ytd;*.ymt;*.yft;*.ycd)|*.ydd;*.ytd;*.ymt;*.yft;*.ycd|All files (*.*)|*.*"
-            };
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            string targetPath = basePath + "/" + pedFolder;
-            int folderId = EnsureEditorPath(targetPath);
-
-            foreach (string file in dlg.FileNames)
-            {
-                currentProject.Files.Add(new OIVFileEntry
-                {
-                    Id = currentProject.NextId++,
-                    SourcePath = file,
-                    FileName = Path.GetFileName(file),
-                    SubPath = string.Empty,
-                    Type = "replace",
-                    FolderId = folderId
-                });
-            }
-
-            MarkDirty();
-
-            if (editorExpanded)
-            {
-                BuildEditorPanel();
-                SelectTreeNodeByFolderId(folderId);
-            }
-
-            RenderFileList();
-
-            MessageBox.Show(
-                $"Ped replacement files added to {targetPath}.",
-                "Ped Replace Added",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
-        }
 
         // REPLACE MENU - CLOTHES
 
