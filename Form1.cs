@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -82,10 +82,10 @@ namespace MagicOGK_OIV_Builder
         private Button? btnVehicleNext = null;
 
         private ContextMenuStrip replaceMenu;
+        private ToolStripMenuItem replacePedsItem;
         private ToolStripMenuItem replaceVehiclesItem;
         private ToolStripMenuItem replaceClothesItem;
         private ToolStripMenuItem replaceWeaponsItem;
-        private ToolStripMenuItem replacePedsItem;
         private readonly Dictionary<string, Image> weaponImageCache = new();
 
         private Panel? replaceWeaponViewport = null;
@@ -1198,231 +1198,16 @@ namespace MagicOGK_OIV_Builder
 
 
 
-        private ComboBox? dropdownPedTargetPath = null;
-        private TextBox? txtPedFolderName = null;
-        private Label? lblSelectedPedTarget = null;
-
         private string? selectedClothesCharacter = null;
         private Label? lblSelectedClothesCharacter = null;
 
         private string? selectedReplaceWeapon = null;
         private Label? lblSelectedReplaceWeapon = null;
 
-        // REPLACE MENU - PEDS
-
-        private void OpenReplacePedsMenu()
-        {
-            if (replaceScreenPanel == null)
-            {
-                replaceScreenPanel = new Panel
-                {
-                    BackColor = Color.FromArgb(16, 16, 16),
-                    Location = new Point(0, panelMarquee.Height),
-                    Size = new Size(
-                        this.ClientSize.Width,
-                        this.ClientSize.Height - panelMarquee.Height
-                    ),
-                    Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
-                };
-
-                Controls.Add(replaceScreenPanel);
-            }
-
-            replaceScreenPanel.Controls.Clear();
-            replaceScreenPanel.Visible = true;
-            replaceScreenPanel.BringToFront();
-            PositionReplaceScreen();
-
-            Label title = new Label
-            {
-                Text = "REPLACE PEDS",
-                ForeColor = Color.FromArgb(220, 150, 150),
-                Font = new Font("Syne", 11F, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(24, 22)
-            };
-
-            Button back = CreateSecondaryButton("← Back");
-            back.Size = new Size(100, 32);
-            back.Location = new Point(24, 62);
-            back.Click += (s, e) =>
-            {
-                replaceScreenPanel.Visible = false;
-                panelMarquee.BringToFront();
-                btnHamburger.BringToFront();
-            };
-
-            lblSelectedPedTarget = new Label
-            {
-                Text = "Target: choose path + ped folder",
-                ForeColor = Color.FromArgb(150, 100, 100),
-                Font = new Font("Segoe UI", 9F),
-                AutoSize = true,
-                Location = new Point(140, 68)
-            };
-
-            Label targetLabel = new Label
-            {
-                Text = "TARGET RPF / BASE PATH",
-                ForeColor = Color.FromArgb(188, 143, 143),
-                Font = new Font("Syne", 8F, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(24, 122)
-            };
-
-            dropdownPedTargetPath = new ComboBox
-            {
-                Location = new Point(24, 145),
-                Size = new Size(640, 28),
-                BackColor = Color.FromArgb(35, 35, 35),
-                ForeColor = Color.FromArgb(220, 180, 180),
-                FlatStyle = FlatStyle.Flat,
-                DropDownStyle = ComboBoxStyle.DropDownList,
-                Font = new Font("Segoe UI", 9F)
-            };
-
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/streamedpeds_ig.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_a_m_m.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_a_m_y.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_a_f_m.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_a_f_y.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_s_m_m.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_s_m_y.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_s_f_m.rpf");
-            dropdownPedTargetPath.Items.Add("x64e.rpf/models/cdimages/componentpeds_s_f_y.rpf");
-            dropdownPedTargetPath.SelectedIndex = 0;
-
-            Label folderLabel = new Label
-            {
-                Text = "PED FOLDER / MODEL NAME",
-                ForeColor = Color.FromArgb(188, 143, 143),
-                Font = new Font("Syne", 8F, FontStyle.Bold),
-                AutoSize = true,
-                Location = new Point(24, 195)
-            };
-
-            txtPedFolderName = new TextBox
-            {
-                Location = new Point(24, 218),
-                Size = new Size(300, 26),
-                BackColor = Color.FromArgb(35, 35, 35),
-                ForeColor = Color.FromArgb(220, 180, 180),
-                BorderStyle = BorderStyle.FixedSingle,
-                Font = new Font("Segoe UI", 9F),
-                Text = "a_m_m_business_01"
-            };
-
-            Label hint = new Label
-            {
-                Text = "Example: for streamed peds use the ped folder name. For component peds, this can usually stay as the model name you are replacing.",
-                ForeColor = Color.FromArgb(130, 90, 90),
-                Font = new Font("Segoe UI", 9F),
-                AutoSize = false,
-                Location = new Point(24, 255),
-                Size = new Size(760, 44)
-            };
-
-            Button replaceBtn = new Button
-            {
-                Text = "Replace Selected Ped",
-                Size = new Size(220, 36),
-                Location = new Point(24, 315),
-                BackColor = Color.FromArgb(90, 0, 0),
-                ForeColor = Color.FromArgb(240, 180, 180),
-                FlatStyle = FlatStyle.Flat,
-                Font = new Font("Syne", 8F, FontStyle.Bold)
-            };
-            replaceBtn.FlatAppearance.BorderColor = Color.FromArgb(140, 40, 40);
-            replaceBtn.Click += (s, e) => ReplaceSelectedPed();
-
-            replaceScreenPanel.Controls.Add(title);
-            replaceScreenPanel.Controls.Add(back);
-            replaceScreenPanel.Controls.Add(lblSelectedPedTarget);
-            replaceScreenPanel.Controls.Add(targetLabel);
-            replaceScreenPanel.Controls.Add(dropdownPedTargetPath);
-            replaceScreenPanel.Controls.Add(folderLabel);
-            replaceScreenPanel.Controls.Add(txtPedFolderName);
-            replaceScreenPanel.Controls.Add(hint);
-            replaceScreenPanel.Controls.Add(replaceBtn);
-
-            replaceScreenPanel.BringToFront();
-            panelMarquee.BringToFront();
-            btnHamburger.BringToFront();
-        }
-
-        private void ReplaceSelectedPed()
-        {
-            if (dropdownPedTargetPath == null || txtPedFolderName == null)
-                return;
-
-            string basePath = dropdownPedTargetPath.Text.Trim().Replace("\\", "/").Trim('/');
-            string pedFolder = txtPedFolderName.Text.Trim().Replace("\\", "/").Trim('/');
-
-            if (string.IsNullOrWhiteSpace(basePath))
-            {
-                MessageBox.Show(
-                    "Choose a target RPF/base path first.",
-                    "No target path",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(pedFolder))
-            {
-                MessageBox.Show(
-                    "Type the ped folder/model name first, for example a_m_m_business_01.",
-                    "No ped name",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning
-                );
-                return;
-            }
-
-            using var dlg = new OpenFileDialog
-            {
-                Title = $"Select replacement files for {pedFolder}",
-                Multiselect = true,
-                Filter = "Ped files (*.ydd;*.ytd;*.ymt;*.yft;*.ycd)|*.ydd;*.ytd;*.ymt;*.yft;*.ycd|All files (*.*)|*.*"
-            };
-
-            if (dlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            string targetPath = basePath + "/" + pedFolder;
-            int folderId = EnsureEditorPath(targetPath);
-
-            foreach (string file in dlg.FileNames)
-            {
-                currentProject.Files.Add(new OIVFileEntry
-                {
-                    Id = currentProject.NextId++,
-                    SourcePath = file,
-                    FileName = Path.GetFileName(file),
-                    SubPath = string.Empty,
-                    Type = "replace",
-                    FolderId = folderId
-                });
-            }
-
-            MarkDirty();
-
-            if (editorExpanded)
-            {
-                BuildEditorPanel();
-                SelectTreeNodeByFolderId(folderId);
-            }
-
-            RenderFileList();
-
-            MessageBox.Show(
-                $"Ped replacement files added to {targetPath}.",
-                "Ped Replace Added",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
-        }
+        private string? selectedPedReplaceType = null;
+        private Label? lblSelectedPedReplaceType = null;
+        private ComboBox? cmbPedBasePath = null;
+        private TextBox? txtPedModelName = null;
 
         // REPLACE MENU - CLOTHES
 
@@ -2000,6 +1785,432 @@ namespace MagicOGK_OIV_Builder
     ("Hazardous Jerry Can", "weapon_hazardcan"),
     ("Fertilizer Can", "weapon_fertilizercan")
 };
+
+
+
+        // REPLACE MENU - PEDS
+        private void OpenReplacePedsMenu()
+        {
+            if (replaceScreenPanel == null)
+            {
+                replaceScreenPanel = new Panel
+                {
+                    BackColor = Color.FromArgb(16, 16, 16),
+                    Location = new Point(0, panelMarquee.Height),
+                    Size = new Size(ClientSize.Width, ClientSize.Height - panelMarquee.Height),
+                    Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right
+                };
+
+                Controls.Add(replaceScreenPanel);
+            }
+
+            replaceScreenPanel.Controls.Clear();
+            replaceScreenPanel.Visible = true;
+            replaceScreenPanel.BringToFront();
+            PositionReplaceScreen();
+
+            selectedPedReplaceType = "streamed";
+
+            Label title = new Label
+            {
+                Text = "REPLACE PEDS",
+                ForeColor = Color.FromArgb(255, 115, 125),
+                Font = new Font("Syne", 16F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(24, 22)
+            };
+
+            Label subtitle = new Label
+            {
+                Text = "Choose what type of ped you want to replace, then select the target and files.",
+                ForeColor = Color.FromArgb(190, 160, 160),
+                Font = new Font("Segoe UI", 9.5F),
+                AutoSize = true,
+                Location = new Point(26, 56)
+            };
+
+            Button back = CreateSecondaryButton("← Back");
+            back.Size = new Size(100, 34);
+            back.Location = new Point(24, 92);
+            back.Click += (s, e) =>
+            {
+                replaceScreenPanel.Visible = false;
+                panelMarquee.BringToFront();
+                btnHamburger.BringToFront();
+            };
+
+            Panel leftPanel = CreatePedGlassPanel(new Point(24, 148), new Size(570, 440));
+            Label leftTitle = CreatePedSectionLabel("1. CHOOSE WHAT TO REPLACE", 16, 14);
+            leftPanel.Controls.Add(leftTitle);
+
+            Panel rightPanel = CreatePedGlassPanel(new Point(610, 148), new Size(Math.Max(380, replaceScreenPanel.Width - 635), 440));
+            rightPanel.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+
+            Label targetTitle = CreatePedSectionLabel("2. SELECT TARGET", 22, 14);
+            rightPanel.Controls.Add(targetTitle);
+
+            Label pathLbl = CreatePedSmallLabel("RPF / BASE PATH", 22, 58);
+            rightPanel.Controls.Add(pathLbl);
+
+            cmbPedBasePath = new ComboBox
+            {
+                Location = new Point(22, 82),
+                Size = new Size(rightPanel.Width - 44, 32),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                DropDownStyle = ComboBoxStyle.DropDown,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(32, 32, 32),
+                ForeColor = Color.FromArgb(235, 220, 220),
+                Font = new Font("Segoe UI", 10F)
+            };
+            cmbPedBasePath.Items.AddRange(new object[]
+            {
+                "x64e.rpf/models/cdimages/streamedpeds_ig.rpf",
+                "x64v.rpf/models/cdimages/streamedpeds_players.rpf",
+                "x64g.rpf/levels/gta5/generic/cutsobjects.rpf",
+                "update/x64/dlcpacks/patchday3ng/dlc.rpf/x64/models/cdimages/streamedpeds.rpf",
+                "update/x64/dlcpacks/patchday8ng/dlc.rpf/x64/models/cdimages/streamedpeds.rpf",
+                "update/x64/dlcpacks/mpheist/dlc.rpf/x64/models/cdimages/streamedpeds_mp.rpf"
+            });
+            cmbPedBasePath.SelectedIndex = 0;
+            rightPanel.Controls.Add(cmbPedBasePath);
+
+            Label pathHint = CreatePedHintLabel("Choose the RPF where the original ped is located.", 22, 120);
+            rightPanel.Controls.Add(pathHint);
+
+            Label modelLbl = CreatePedSmallLabel("PED FOLDER / MODEL NAME", 22, 158);
+            rightPanel.Controls.Add(modelLbl);
+
+            txtPedModelName = new TextBox
+            {
+                Location = new Point(22, 182),
+                Size = new Size(rightPanel.Width - 44, 32),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right,
+                BackColor = Color.FromArgb(32, 32, 32),
+                ForeColor = Color.FromArgb(235, 220, 220),
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 10F),
+                Text = "a_m_m_business_01"
+            };
+            rightPanel.Controls.Add(txtPedModelName);
+
+            Label modelHint = CreatePedHintLabel("Example: a_m_m_business_01, s_m_y_cop_01, player_one, etc.", 22, 220);
+            rightPanel.Controls.Add(modelHint);
+
+            Label fileTitle = CreatePedSectionLabel("3. SELECT FILES", 22, 270);
+            rightPanel.Controls.Add(fileTitle);
+
+            Label fileHint = CreatePedHintLabel("Allowed: .ydd, .ytd, .ymt, .yft, .ycd. You can select multiple files at once.", 22, 304);
+            rightPanel.Controls.Add(fileHint);
+
+            Button replaceBtn = new Button
+            {
+                Text = "Replace Selected Ped",
+                Size = new Size(250, 42),
+                Location = new Point(22, 354),
+                BackColor = Color.FromArgb(95, 0, 0),
+                ForeColor = Color.FromArgb(245, 190, 190),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 9F, FontStyle.Bold),
+                Cursor = Cursors.Hand
+            };
+            replaceBtn.FlatAppearance.BorderColor = Color.FromArgb(190, 55, 55);
+            replaceBtn.FlatAppearance.MouseOverBackColor = Color.FromArgb(125, 0, 0);
+            replaceBtn.Click += (s, e) => ReplaceSelectedPed();
+            rightPanel.Controls.Add(replaceBtn);
+
+            lblSelectedPedReplaceType = new Label
+            {
+                Text = "Selected: Streamed Ped Model",
+                ForeColor = Color.FromArgb(255, 115, 125),
+                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(290, 366)
+            };
+            rightPanel.Controls.Add(lblSelectedPedReplaceType);
+
+            var pedCards = new[]
+            {
+                CreatePedTypeCard("Streamed Ped", "streamed", "👤", "Most NPC peds", "a_m_m_business_01", "x64e.rpf/models/cdimages/streamedpeds_ig.rpf"),
+                CreatePedTypeCard("Player Ped", "player", "★", "Franklin / Michael / Trevor", "player_one", "x64v.rpf/models/cdimages/streamedpeds_players.rpf"),
+                CreatePedTypeCard("Cutscene Ped", "cutscene", "🎬", "Cutscene models", "csb_ramp_marine", "x64g.rpf/levels/gta5/generic/cutsobjects.rpf"),
+                CreatePedTypeCard("Patchday Ped", "patchday", "📦", "DLC / patchday peds", "s_m_y_cop_01", "update/x64/dlcpacks/patchday8ng/dlc.rpf/x64/models/cdimages/streamedpeds.rpf"),
+                CreatePedTypeCard("Ped Variation", "variation", "☷", "YMT / YCD extras", "a_m_m_business_01", "x64e.rpf/models/cdimages/streamedpeds_ig.rpf")
+            };
+
+            void LayoutPedCards()
+            {
+                int cardW = 165;
+                int cardH = 180;
+                int gap = 18;
+                int startX = 16;
+                int y1 = 58;
+                int y2 = y1 + cardH + 20;
+
+                for (int i = 0; i < pedCards.Length; i++)
+                {
+                    int row = i < 3 ? 0 : 1;
+                    int col = i < 3 ? i : i - 3;
+                    int rowCount = row == 0 ? 3 : 2;
+                    int totalW = rowCount * cardW + (rowCount - 1) * gap;
+                    int xBase = Math.Max(16, (leftPanel.Width - totalW) / 2);
+                    pedCards[i].Location = new Point(xBase + col * (cardW + gap), row == 0 ? y1 : y2);
+                }
+            }
+
+            foreach (Panel card in pedCards)
+                leftPanel.Controls.Add(card);
+
+            LayoutPedCards();
+            leftPanel.Resize += (s, e) => LayoutPedCards();
+
+            Panel info = new Panel
+            {
+                Location = new Point(24, 604),
+                Size = new Size(570, 70),
+                BackColor = Color.FromArgb(22, 22, 22),
+                Anchor = AnchorStyles.Left | AnchorStyles.Bottom
+            };
+            info.Paint += (s, e) =>
+            {
+                using Pen p = new Pen(Color.FromArgb(65, 45, 45));
+                e.Graphics.DrawRectangle(p, 0, 0, info.Width - 1, info.Height - 1);
+            };
+            info.Controls.Add(new Label
+            {
+                Text = "ℹ  Tip: for streamed peds, the final path should usually be base RPF + / + ped folder name.",
+                ForeColor = Color.FromArgb(190, 160, 160),
+                Font = new Font("Segoe UI", 9F),
+                AutoSize = false,
+                Location = new Point(14, 15),
+                Size = new Size(info.Width - 28, 44),
+                BackColor = Color.Transparent
+            });
+
+            replaceScreenPanel.Controls.Add(title);
+            replaceScreenPanel.Controls.Add(subtitle);
+            replaceScreenPanel.Controls.Add(back);
+            replaceScreenPanel.Controls.Add(leftPanel);
+            replaceScreenPanel.Controls.Add(rightPanel);
+            replaceScreenPanel.Controls.Add(info);
+
+            replaceScreenPanel.BringToFront();
+            panelMarquee.BringToFront();
+            btnHamburger.BringToFront();
+        }
+
+        private Panel CreatePedGlassPanel(Point location, Size size)
+        {
+            Panel panel = new Panel
+            {
+                Location = location,
+                Size = size,
+                BackColor = Color.FromArgb(18, 18, 18),
+                Anchor = AnchorStyles.Top | AnchorStyles.Left
+            };
+
+            panel.Paint += (s, e) =>
+            {
+                using LinearGradientBrush bg = new LinearGradientBrush(panel.ClientRectangle, Color.FromArgb(24, 24, 24), Color.FromArgb(14, 14, 14), 90f);
+                e.Graphics.FillRectangle(bg, panel.ClientRectangle);
+                using Pen p = new Pen(Color.FromArgb(65, 45, 45));
+                e.Graphics.DrawRectangle(p, 0, 0, panel.Width - 1, panel.Height - 1);
+            };
+
+            return panel;
+        }
+
+        private Label CreatePedSectionLabel(string text, int x, int y)
+        {
+            return new Label
+            {
+                Text = text,
+                ForeColor = Color.FromArgb(255, 115, 125),
+                Font = new Font("Syne", 10F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(x, y),
+                BackColor = Color.Transparent
+            };
+        }
+
+        private Label CreatePedSmallLabel(string text, int x, int y)
+        {
+            return new Label
+            {
+                Text = text,
+                ForeColor = Color.FromArgb(190, 150, 150),
+                Font = new Font("Syne", 8F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(x, y),
+                BackColor = Color.Transparent
+            };
+        }
+
+        private Label CreatePedHintLabel(string text, int x, int y)
+        {
+            return new Label
+            {
+                Text = text,
+                ForeColor = Color.FromArgb(135, 115, 115),
+                Font = new Font("Segoe UI", 8.5F),
+                AutoSize = true,
+                Location = new Point(x, y),
+                BackColor = Color.Transparent
+            };
+        }
+
+        private Panel CreatePedTypeCard(string title, string typeId, string icon, string description, string defaultModel, string defaultPath)
+        {
+            int cardW = 165;
+            int cardH = 180;
+            Panel card = new Panel
+            {
+                Size = new Size(cardW, cardH),
+                BackColor = Color.FromArgb(25, 25, 25),
+                Cursor = Cursors.Hand,
+                Tag = new Tuple<string, string, string, string>(typeId, title, defaultModel, defaultPath)
+            };
+
+            Label iconLbl = new Label
+            {
+                Text = icon,
+                ForeColor = Color.FromArgb(235, 235, 235),
+                Font = new Font("Segoe UI Emoji", 30F, FontStyle.Regular),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(0, 20),
+                Size = new Size(cardW, 54),
+                BackColor = Color.Transparent
+            };
+
+            Label nameLbl = new Label
+            {
+                Text = title,
+                ForeColor = Color.FromArgb(255, 115, 125),
+                Font = new Font("Syne", 9F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(6, 88),
+                Size = new Size(cardW - 12, 22),
+                BackColor = Color.Transparent
+            };
+
+            Label descLbl = new Label
+            {
+                Text = description,
+                ForeColor = Color.FromArgb(185, 165, 165),
+                Font = new Font("Segoe UI", 8.5F),
+                TextAlign = ContentAlignment.TopCenter,
+                Location = new Point(10, 118),
+                Size = new Size(cardW - 20, 42),
+                BackColor = Color.Transparent
+            };
+
+            Label check = new Label
+            {
+                Text = "●",
+                ForeColor = Color.FromArgb(255, 115, 125),
+                Font = new Font("Segoe UI", 13F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(cardW - 30, cardH - 32),
+                Size = new Size(24, 24),
+                BackColor = Color.Transparent,
+                Visible = typeId == "streamed"
+            };
+
+            card.Paint += (s, e) =>
+            {
+                bool selected = selectedPedReplaceType == typeId;
+                bool hover = card.ClientRectangle.Contains(card.PointToClient(Cursor.Position));
+                Color c = selected ? Color.FromArgb(255, 85, 95) : hover ? Color.FromArgb(170, 70, 70) : Color.FromArgb(55, 45, 45);
+                using LinearGradientBrush bg = new LinearGradientBrush(card.ClientRectangle, Color.FromArgb(34, 34, 34), Color.FromArgb(18, 18, 18), 90f);
+                e.Graphics.FillRectangle(bg, card.ClientRectangle);
+                using Pen p = new Pen(c, selected ? 2 : 1);
+                e.Graphics.DrawRectangle(p, 0, 0, card.Width - 1, card.Height - 1);
+                check.Visible = selected;
+            };
+
+            void SelectCard()
+            {
+                selectedPedReplaceType = typeId;
+                if (lblSelectedPedReplaceType != null)
+                    lblSelectedPedReplaceType.Text = $"Selected: {title}";
+                if (txtPedModelName != null)
+                    txtPedModelName.Text = defaultModel;
+                if (cmbPedBasePath != null)
+                    cmbPedBasePath.Text = defaultPath;
+
+                if (card.Parent != null)
+                {
+                    foreach (Control c in card.Parent.Controls)
+                        c.Invalidate();
+                }
+            }
+
+            card.Click += (s, e) => SelectCard();
+            iconLbl.Click += (s, e) => SelectCard();
+            nameLbl.Click += (s, e) => SelectCard();
+            descLbl.Click += (s, e) => SelectCard();
+            card.MouseEnter += (s, e) => card.Invalidate();
+            card.MouseLeave += (s, e) => card.Invalidate();
+
+            card.Controls.Add(iconLbl);
+            card.Controls.Add(nameLbl);
+            card.Controls.Add(descLbl);
+            card.Controls.Add(check);
+            return card;
+        }
+
+        private void ReplaceSelectedPed()
+        {
+            string basePath = cmbPedBasePath?.Text.Trim().Replace('\\', '/') ?? string.Empty;
+            string modelName = txtPedModelName?.Text.Trim().Trim('/').Replace('\\', '/') ?? string.Empty;
+
+            if (string.IsNullOrWhiteSpace(basePath) || string.IsNullOrWhiteSpace(modelName))
+            {
+                MessageBox.Show("Choose a base path and type the ped folder/model name first.", "Missing ped target", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            using var dlg = new OpenFileDialog
+            {
+                Title = $"Select replacement files for {modelName}",
+                Multiselect = true,
+                Filter = "Ped files (*.ydd;*.ytd;*.ymt;*.yft;*.ycd)|*.ydd;*.ytd;*.ymt;*.yft;*.ycd|All files (*.*)|*.*"
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string targetPath = basePath.EndsWith("/" + modelName, StringComparison.OrdinalIgnoreCase)
+                ? basePath
+                : basePath.TrimEnd('/') + "/" + modelName;
+
+            int folderId = EnsureEditorPath(targetPath);
+
+            foreach (string file in dlg.FileNames)
+            {
+                currentProject.Files.Add(new OIVFileEntry
+                {
+                    Id = currentProject.NextId++,
+                    SourcePath = file,
+                    FileName = Path.GetFileName(file),
+                    SubPath = string.Empty,
+                    Type = "replace",
+                    FolderId = folderId
+                });
+            }
+
+            MarkDirty();
+
+            if (editorExpanded)
+            {
+                BuildEditorPanel();
+                SelectTreeNodeByFolderId(folderId);
+            }
+
+            RenderFileList();
+
+            MessageBox.Show($"Ped replacement files added to:\n\n{targetPath}", "Ped Replace Added", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
         private void OpenReplaceWeaponsMenu()
         {
