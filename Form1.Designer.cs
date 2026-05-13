@@ -37,6 +37,7 @@ namespace MagicOGK_OIV_Builder
             btnSidebarOpenOIV = new Button();
             btnSidebarExtractOIV = new Button();
             btnSidebarBuildOIV = new Button();
+            btnCheckUpdates = new Button();
             btnSidebarFeedback = new Button();
             panelDropZone = new Panel();
             panelPhotoPreview = new Panel();
@@ -195,6 +196,7 @@ namespace MagicOGK_OIV_Builder
             panelSidebar.Controls.Add(btnSidebarOpenOIV);
             panelSidebar.Controls.Add(btnSidebarExtractOIV);
             panelSidebar.Controls.Add(btnSidebarBuildOIV);
+            panelSidebar.Controls.Add(btnCheckUpdates);
             panelSidebar.Controls.Add(btnSidebarFeedback);
             panelSidebar.Dock = DockStyle.Left;
             panelSidebar.Location = new Point(0, 28);
@@ -244,6 +246,13 @@ namespace MagicOGK_OIV_Builder
             btnSidebarBuildOIV.Name = "btnSidebarBuildOIV";
             btnSidebarBuildOIV.Size = new Size(75, 23);
             btnSidebarBuildOIV.TabIndex = 4;
+            // 
+            // btnCheckUpdates
+            // 
+            btnCheckUpdates.Location = new Point(0, 0);
+            btnCheckUpdates.Name = "btnCheckUpdates";
+            btnCheckUpdates.Size = new Size(75, 23);
+            btnCheckUpdates.TabIndex = 4;
             // 
             // btnSidebarFeedback
             // 
@@ -716,6 +725,7 @@ namespace MagicOGK_OIV_Builder
         private Button      btnSidebarExtractOIV;
         private Button      btnSidebarSaveProjectAs;
         private Button      btnSidebarBuildOIV;
+        private Button      btnCheckUpdates;
         private Button      btnSidebarFeedback;
 
         private Microsoft.Web.WebView2.WinForms.WebView2 webViewFileList;

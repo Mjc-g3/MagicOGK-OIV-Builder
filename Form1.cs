@@ -41,10 +41,9 @@ namespace MagicOGK_OIV_Builder
         private bool webViewReady = false;
         private bool isDirty = false;
         private bool isLoadingProject = false;
-        private SparkleUpdater? sparkle;
 
         private const string AppCastUrl =
-            "https://raw.githubusercontent.com/Mjc-g3/MagicOGK-OIV-Builder/main/appcast.xml";
+            "https://github.com/Mjc-g3/MagicOGK-OIV-Builder/releases/download/1.5.1/MagicOGK-OIV-Builder-Setup-1.5.1.exe";
 
         private Label? lblWebsite = null;
         private TextBox? txtWebsite = null;
@@ -98,6 +97,8 @@ namespace MagicOGK_OIV_Builder
 
         private bool allowCloseWithoutPrompt = false;
 
+        private SparkleUpdater? _sparkle;
+
         /*
         private int sidebarOpenX = 0;
         private int sidebarClosedX => -panelSidebar.Width;
@@ -116,6 +117,7 @@ namespace MagicOGK_OIV_Builder
             StyleSidebarBtn(btnSidebarOpenOIV, "    🔎    Open OIV", 236);
             StyleSidebarBtn(btnSidebarExtractOIV, "    📤    Extract OIV", 294);
             StyleSidebarBtn(btnSidebarBuildOIV, "    ⚒️    Build OIV", 352);
+            StyleSidebarBtn(btnCheckUpdates, "    ⚒️    Check for updates", 410);
             StyleSidebarBtn(btnSidebarFeedback, "        Feedback", 580);
 
             btnReplaceMods.Click += btnReplaceMods_Click;
@@ -2763,10 +2765,10 @@ namespace MagicOGK_OIV_Builder
         // Auto -updater
         private void StartUpdateCheck()
         {
-            if (sparkle != null)
+            if (_sparkle != null)
                 return;
 
-            sparkle = new SparkleUpdater(
+            _sparkle = new SparkleUpdater(
                 AppCastUrl,
                 new Ed25519Checker(SecurityMode.Unsafe)
             )
@@ -2775,7 +2777,135 @@ namespace MagicOGK_OIV_Builder
                 RelaunchAfterUpdate = true
             };
 
-            sparkle.StartLoop(true);
+            _sparkle.StartLoop(true);
+        }
+        //Check for updates manually
+        private async void btnCheckUpdates_Click(object sender, EventArgs e)
+        {
+            await CheckForUpdatesManualAsync();
+        }
+        private async Task CheckForUpdatesManualAsync()
+        {
+            try
+            {
+                using HttpClient client = new HttpClient();
+                string xml = await client.GetStringAsync(AppCastUrl);
+
+                XDocument doc = XDocument.Parse(xml);
+
+                XNamespace sparkle = "http://www.andymatuschak.org/xml-namespaces/sparkle";
+
+                string? latestVersionText = doc
+                    .Descendants("item")
+                    .FirstOrDefault()?
+                    .Element(sparkle + "version")?
+                    .Value;
+
+                if (string.IsNullOrWhiteSpace(latestVersionText))
+                {
+                    ShowMagicInfoBox("Could not read latest version from appcast.xml.", "Update Check");
+                    return;
+                }
+
+                Version latestVersion = new Version(latestVersionText);
+                Version currentVersion = new Version(Application.ProductVersion);
+
+                if (latestVersion > currentVersion)
+                {
+                    _sparkle?.CheckForUpdatesAtUserRequest();
+                }
+                else
+                {
+                    ShowMagicInfoBox(
+                        $"You are already using the latest version.\n\nCurrent version: {currentVersion}",
+                        "No Updates Found"
+                    );
+                }
+            }
+            catch (Exception ex)
+            {
+                ShowMagicInfoBox(
+                    "Could not check for updates.\n\n" + ex.Message,
+                    "Update Check Failed"
+                );
+            }
+        }
+        private DialogResult ShowMagicInfoBox(string message, string title)
+        {
+            using Form dialog = new Form
+            {
+                Text = title,
+                Size = new Size(420, 210),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.None,
+                BackColor = Color.FromArgb(16, 16, 16),
+                ShowInTaskbar = false,
+                TopMost = true
+            };
+
+            Panel titleBar = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 36,
+                BackColor = Color.FromArgb(24, 24, 24)
+            };
+
+            Label lblTitle = new Label
+            {
+                Text = title.ToUpper(),
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Syne", 9F, FontStyle.Bold),
+                AutoSize = false,
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(14, 0, 0, 0)
+            };
+
+            Button btnX = new Button
+            {
+                Text = "×",
+                Dock = DockStyle.Right,
+                Width = 40,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(24, 24, 24),
+                ForeColor = Color.FromArgb(220, 90, 90),
+                Font = new Font("Segoe UI", 12F)
+            };
+
+            btnX.FlatAppearance.BorderSize = 0;
+            btnX.Click += (s, e) => dialog.DialogResult = DialogResult.OK;
+
+            titleBar.Controls.Add(lblTitle);
+            titleBar.Controls.Add(btnX);
+
+            Label icon = new Label
+            {
+                Text = "✓",
+                ForeColor = Color.FromArgb(120, 220, 140),
+                Font = new Font("Segoe UI", 30F, FontStyle.Bold),
+                Location = new Point(25, 62),
+                Size = new Size(55, 55),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+
+            Label lblMessage = new Label
+            {
+                Text = message,
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Syne", 9F),
+                Location = new Point(92, 62),
+                Size = new Size(300, 65)
+            };
+
+            Button btnOk = MagicDialogButton("OK", new Point(168, 145));
+            btnOk.Click += (s, e) => dialog.DialogResult = DialogResult.OK;
+
+            dialog.Controls.Add(titleBar);
+            dialog.Controls.Add(icon);
+            dialog.Controls.Add(lblMessage);
+            dialog.Controls.Add(btnOk);
+
+            return dialog.ShowDialog(this);
         }
         // ─────────────────── INIT ───────────────────
 
@@ -2815,6 +2945,7 @@ namespace MagicOGK_OIV_Builder
             btnSidebarOpenOIV.Click += btnSidebarOpenOIV_Click;
             btnSidebarExtractOIV.Click += btnSidebarExtractOIV_Click;
             btnSidebarBuildOIV.Click += btnBuildOIV_Click;
+            btnCheckUpdates.Click += btnCheckUpdates_Click;
             btnSidebarFeedback.Click += btnSidebarFeedback_Click;
 
             // Timers
