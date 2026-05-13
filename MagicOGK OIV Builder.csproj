@@ -12,6 +12,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Installer\**" />
+    <EmbeddedResource Remove="Installer\**" />
+    <None Remove="Installer\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="Assets\characters\franklin.png" />
     <None Remove="Assets\characters\michael.png" />
     <None Remove="Assets\characters\trevor.png" />
@@ -2756,7 +2762,6 @@
 
   <ItemGroup>
     <Folder Include="Assets\vehicles\" />
-    <Folder Include="Installer\" />
   </ItemGroup>
 
 </Project>

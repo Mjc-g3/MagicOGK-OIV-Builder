@@ -6,6 +6,7 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -43,7 +44,7 @@ namespace MagicOGK_OIV_Builder
         private bool isLoadingProject = false;
 
         private const string AppCastUrl =
-            "https://github.com/Mjc-g3/MagicOGK-OIV-Builder/releases/download/1.5.1/MagicOGK-OIV-Builder-Setup-1.5.1.exe";
+     "https://raw.githubusercontent.com/Mjc-g3/MagicOGK-OIV-Builder/master/appcast.xml";
 
         private Label? lblWebsite = null;
         private TextBox? txtWebsite = null;
@@ -2808,7 +2809,7 @@ namespace MagicOGK_OIV_Builder
                 }
 
                 Version latestVersion = new Version(latestVersionText);
-                Version currentVersion = new Version(Application.ProductVersion);
+                Version currentVersion = Assembly.GetExecutingAssembly().GetName().Version!;
 
                 if (latestVersion > currentVersion)
                 {
@@ -2825,8 +2826,8 @@ namespace MagicOGK_OIV_Builder
             catch (Exception ex)
             {
                 ShowMagicInfoBox(
-                    "Could not check for updates.\n\n" + ex.Message,
-                    "Update Check Failed"
+                  "Could not check for updates.",
+                  "Update Check Failed"
                 );
             }
         }
