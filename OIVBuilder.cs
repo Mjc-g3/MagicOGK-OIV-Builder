@@ -254,6 +254,7 @@ namespace MagicOGK_OIV_Builder
         // and the <archive path="..."> = "update\x64\dlcpacks\mod1\dlc.rpf"
         private static string ResolveInstallPath(OIVFileEntry file, OIVProject project)
         {
+
             var parts = new List<string>();
 
             int? cur = file.FolderId;

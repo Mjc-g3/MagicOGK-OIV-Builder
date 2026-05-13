@@ -15,6 +15,7 @@ namespace MagicOGK_OIV_Builder
 
         // Legacy compat — kept so old .mogk files deserialise cleanly
         public string TargetPath { get => SubPath; set => SubPath = value; }
+
     }
 
     // A node in the virtual folder tree inside the .oiv.

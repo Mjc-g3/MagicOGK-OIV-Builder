@@ -35,6 +35,7 @@ namespace MagicOGK_OIV_Builder
             btnSidebarOpenProject = new Button();
             btnSidebarSaveProjectAs = new Button();
             btnSidebarOpenOIV = new Button();
+            btnSidebarExtractOIV = new Button();
             btnSidebarBuildOIV = new Button();
             btnSidebarFeedback = new Button();
             panelDropZone = new Panel();
@@ -192,6 +193,7 @@ namespace MagicOGK_OIV_Builder
             panelSidebar.Controls.Add(btnSidebarOpenProject);
             panelSidebar.Controls.Add(btnSidebarSaveProjectAs);
             panelSidebar.Controls.Add(btnSidebarOpenOIV);
+            panelSidebar.Controls.Add(btnSidebarExtractOIV);
             panelSidebar.Controls.Add(btnSidebarBuildOIV);
             panelSidebar.Controls.Add(btnSidebarFeedback);
             panelSidebar.Dock = DockStyle.Left;
@@ -228,6 +230,13 @@ namespace MagicOGK_OIV_Builder
             btnSidebarOpenOIV.Name = "btnSidebarOpenOIV";
             btnSidebarOpenOIV.Size = new Size(75, 23);
             btnSidebarOpenOIV.TabIndex = 3;
+            // 
+            // btnSidebarExtractOIV
+            // 
+            btnSidebarExtractOIV.Location = new Point(0, 0);
+            btnSidebarExtractOIV.Name = "btnSidebarExtractOIV";
+            btnSidebarExtractOIV.Size = new Size(75, 23);
+            btnSidebarExtractOIV.TabIndex = 3;
             // 
             // btnSidebarBuildOIV
             // 
@@ -704,6 +713,7 @@ namespace MagicOGK_OIV_Builder
         private Button      btnAddFiles;
         private Button      btnSidebarOpenProject;
         private Button      btnSidebarOpenOIV;
+        private Button      btnSidebarExtractOIV;
         private Button      btnSidebarSaveProjectAs;
         private Button      btnSidebarBuildOIV;
         private Button      btnSidebarFeedback;

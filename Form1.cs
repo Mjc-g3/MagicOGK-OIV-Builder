@@ -114,7 +114,8 @@ namespace MagicOGK_OIV_Builder
             StyleSidebarBtn(btnSidebarOpenProject, "    📦    Open Project", 120);
             StyleSidebarBtn(btnSidebarSaveProjectAs, "    📁    Save Project As", 178);
             StyleSidebarBtn(btnSidebarOpenOIV, "    🔎    Open OIV", 236);
-            StyleSidebarBtn(btnSidebarBuildOIV, "    ⚒️    Build OIV", 294);
+            StyleSidebarBtn(btnSidebarExtractOIV, "    📤    Extract OIV", 294);
+            StyleSidebarBtn(btnSidebarBuildOIV, "    ⚒️    Build OIV", 352);
             StyleSidebarBtn(btnSidebarFeedback, "        Feedback", 580);
 
             btnReplaceMods.Click += btnReplaceMods_Click;
@@ -151,6 +152,7 @@ namespace MagicOGK_OIV_Builder
             btnSidebarOpenProject.BringToFront();
             btnSidebarSaveProjectAs.BringToFront();
             btnSidebarOpenOIV.BringToFront();
+            btnSidebarExtractOIV.BringToFront();
             btnSidebarBuildOIV.BringToFront();
             btnSidebarFeedback.BringToFront();
 
@@ -2811,6 +2813,7 @@ namespace MagicOGK_OIV_Builder
             btnSidebarOpenProject.Click += btnSidebarOpenProject_Click;
             btnSidebarSaveProjectAs.Click += btnSidebarSaveProjectAs_Click;
             btnSidebarOpenOIV.Click += btnSidebarOpenOIV_Click;
+            btnSidebarExtractOIV.Click += btnSidebarExtractOIV_Click;
             btnSidebarBuildOIV.Click += btnBuildOIV_Click;
             btnSidebarFeedback.Click += btnSidebarFeedback_Click;
 
@@ -3203,6 +3206,282 @@ namespace MagicOGK_OIV_Builder
             {
                 loading.Close();
             }
+        }
+        private async void btnSidebarExtractOIV_Click(object sender, EventArgs e)
+        {
+            DialogResult modeChoice = ShowMagicExtractChoiceBox();
+
+            if (modeChoice == DialogResult.Cancel)
+                return;
+
+            bool useNestedFolders = modeChoice == DialogResult.Yes;
+
+            using var openDlg = new OpenFileDialog
+            {
+                Title = "Extract OIV Package",
+                Filter = "OpenIV Package (*.oiv)|*.oiv"
+            };
+
+            if (openDlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            using var folderDlg = new FolderBrowserDialog
+            {
+                Description = "Choose where to extract the OIV"
+            };
+
+            if (folderDlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            using LoadingForm loading = new LoadingForm("Extracting OIV package...");
+
+            loading.StartPosition = FormStartPosition.Manual;
+            loading.Location = new Point(
+                this.Left + (this.Width - loading.Width) / 2,
+                this.Top + (this.Height - loading.Height) / 2
+            );
+
+            try
+            {
+                loading.Show(this);
+                loading.Refresh();
+
+                string oivPath = openDlg.FileName;
+                string outputFolder = Path.Combine(
+                    folderDlg.SelectedPath,
+                    Path.GetFileNameWithoutExtension(oivPath) + "_extracted"
+                );
+
+                await Task.Run(() =>
+                {
+                    ExtractOiv(oivPath, outputFolder, useNestedFolders);
+                });
+
+                MessageBox.Show(
+                    "OIV extracted successfully.",
+                    "Extract Complete",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+
+                Process.Start("explorer.exe", outputFolder);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Extract failed:\n\n" + ex.Message,
+                    "Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+            finally
+            {
+                loading.Close();
+            }
+        }
+        private DialogResult ShowMagicExtractChoiceBox()
+        {
+            using Form dialog = new Form
+            {
+                Text = "Extract OIV",
+                Size = new Size(440, 230),
+                StartPosition = FormStartPosition.CenterParent,
+                FormBorderStyle = FormBorderStyle.None,
+                BackColor = Color.FromArgb(16, 16, 16),
+                ShowInTaskbar = false,
+                TopMost = true
+            };
+
+            Panel titleBar = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 36,
+                BackColor = Color.FromArgb(24, 24, 24)
+            };
+
+            Label lblTitle = new Label
+            {
+                Text = "EXTRACT OIV",
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Syne", 9F, FontStyle.Bold),
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(14, 0, 0, 0)
+            };
+
+            Button btnX = new Button
+            {
+                Text = "×",
+                Dock = DockStyle.Right,
+                Width = 40,
+                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(24, 24, 24),
+                ForeColor = Color.FromArgb(220, 90, 90),
+                Font = new Font("Segoe UI", 12F)
+            };
+            btnX.FlatAppearance.BorderSize = 0;
+            btnX.Click += (s, e) => dialog.DialogResult = DialogResult.Cancel;
+
+            titleBar.Controls.Add(lblTitle);
+            titleBar.Controls.Add(btnX);
+
+            Label icon = new Label
+            {
+                Text = "📦",
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Segoe UI Emoji", 28F, FontStyle.Regular),
+                Location = new Point(28, 68),
+                Size = new Size(55, 55),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+
+            Label lblMessage = new Label
+            {
+                Text = "How do you want to extract this OIV?",
+                ForeColor = Color.FromArgb(235, 170, 170),
+                Font = new Font("Syne", 9F, FontStyle.Bold),
+                Location = new Point(96, 70),
+                Size = new Size(310, 24)
+            };
+
+            Label lblDetails = new Label
+            {
+                Text = "Nested folders keeps the real folder structure.\nFlat folders creates one folder per install path.",
+                ForeColor = Color.FromArgb(170, 120, 120),
+                Font = new Font("Syne", 8F, FontStyle.Regular),
+                Location = new Point(96, 100),
+                Size = new Size(320, 42)
+            };
+
+            Button btnNested = MagicDialogButton("NESTED", new Point(70, 165));
+            Button btnFlat = MagicDialogButton("FLAT", new Point(178, 165));
+            Button btnCancel = MagicDialogButton("CANCEL", new Point(286, 165));
+
+            btnNested.Click += (s, e) => dialog.DialogResult = DialogResult.Yes;
+            btnFlat.Click += (s, e) => dialog.DialogResult = DialogResult.No;
+            btnCancel.Click += (s, e) => dialog.DialogResult = DialogResult.Cancel;
+
+            dialog.Controls.Add(titleBar);
+            dialog.Controls.Add(icon);
+            dialog.Controls.Add(lblMessage);
+            dialog.Controls.Add(lblDetails);
+            dialog.Controls.Add(btnNested);
+            dialog.Controls.Add(btnFlat);
+            dialog.Controls.Add(btnCancel);
+
+            return dialog.ShowDialog(this);
+        }
+        private void ExtractOiv(string oivPath, string outputFolder, bool useNestedFolders)
+        {
+            string tempFolder = Path.Combine(
+                Path.GetTempPath(),
+                "MagicOGK_ExtractOIV_" + Guid.NewGuid().ToString("N")
+            );
+
+            Directory.CreateDirectory(tempFolder);
+            Directory.CreateDirectory(outputFolder);
+
+            ZipFile.ExtractToDirectory(oivPath, tempFolder);
+
+            string? assemblyPath = Directory
+                .GetFiles(tempFolder, "assembly.xml", SearchOption.AllDirectories)
+                .FirstOrDefault();
+
+            if (assemblyPath == null)
+                throw new Exception("assembly.xml was not found inside this OIV.");
+
+            XDocument doc = XDocument.Load(assemblyPath);
+            string rootFolder = Path.GetDirectoryName(assemblyPath)!;
+
+            var installNodes = doc.Descendants()
+                .Where(x =>
+                {
+                    string n = x.Name.LocalName.ToLowerInvariant();
+                    return n == "file" || n == "add" || n == "replace" || n == "import";
+                })
+                .ToList();
+
+            List<string> reportLines = new();
+
+            foreach (XElement node in installNodes)
+            {
+                string source = GetAttr(node, "source", "src", "file");
+
+                if (string.IsNullOrWhiteSpace(source))
+                    continue;
+
+                string? extractedFile = ResolveExtractedFile(rootFolder, tempFolder, source);
+
+                if (extractedFile == null || !File.Exists(extractedFile))
+                    continue;
+
+                string finalTarget = BuildFinalOivTarget(node, source);
+
+                if (string.IsNullOrWhiteSpace(finalTarget))
+                    continue;
+
+                finalTarget = finalTarget.Replace("\\", "/").Trim('/');
+
+                string fileName = Path.GetFileName(finalTarget);
+                string? folderPath = Path.GetDirectoryName(finalTarget)?.Replace("\\", "/");
+
+                string localFolderName;
+
+                if (string.IsNullOrWhiteSpace(folderPath))
+                {
+                    localFolderName = "_root";
+                }
+                else
+                {
+                    localFolderName = useNestedFolders
+                        ? MakeSafeRelativePath(folderPath)
+                        : MakeFlatOivFolderName(folderPath);
+                }
+
+                string localFolder = Path.Combine(outputFolder, localFolderName);
+                Directory.CreateDirectory(localFolder);
+
+                string localFilePath = Path.Combine(localFolder, fileName);
+                File.Copy(extractedFile, localFilePath, true);
+
+                reportLines.Add($"{localFolderName}/{fileName}  =>  {finalTarget}");
+            }
+
+            File.WriteAllLines(
+                Path.Combine(outputFolder, "_original_install_paths.txt"),
+                reportLines
+            );
+
+            Directory.Delete(tempFolder, true);
+        }
+        private string MakeSafeRelativePath(string path)
+        {
+            path = path.Replace("\\", "/").Trim('/');
+
+            string[] parts = path
+                .Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries)
+                .Select(part =>
+                {
+                    string safe = part;
+
+                    foreach (char c in Path.GetInvalidFileNameChars())
+                        safe = safe.Replace(c, '-');
+
+                    return safe;
+                })
+                .ToArray();
+
+            return Path.Combine(parts);
+        }
+        private string MakeFlatOivFolderName(string path)
+        {
+            path = path.Replace("\\", "/").Trim('/');
+
+            foreach (char c in Path.GetInvalidFileNameChars())
+                path = path.Replace(c, '-');
+
+            return path.Replace("/", "-");
         }
         private void DisassembleOivToProject(string oivPath)
         {
