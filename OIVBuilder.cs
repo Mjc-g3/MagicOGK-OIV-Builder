@@ -15,7 +15,7 @@ namespace MagicOGK_OIV_Builder
     {
         // ── Entry point ───────────────────────────────────────────────────────
 
-        public static void Build(OIVProject project, string outputPath)
+        public static void Build(OIVProject project, string outputPath, IProgress<int>? progress = null)
         {
             foreach (var file in project.Files)
                 if (!File.Exists(file.SourcePath))
@@ -23,6 +23,7 @@ namespace MagicOGK_OIV_Builder
 
             string tempDir = Path.Combine(Path.GetTempPath(), "MagicOGK_" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(tempDir);
+            progress?.Report(0);
 
             try
             {
@@ -35,13 +36,26 @@ namespace MagicOGK_OIV_Builder
                 var sourceToContentName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 var usedNames           = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
+                int copied = 0;
+                int totalFiles = project.Files.Count;
+
                 foreach (var file in project.Files)
                 {
                     if (sourceToContentName.ContainsKey(file.SourcePath)) continue;
-                    string name = MakeUniqueName(file.FileName, usedNames);
+                    string installPath = ResolveInstallPath(file, project);
+
+                    string name = MakeUniqueName(
+                        installPath.Replace("\\", "__").Replace("/", "__"),
+                        usedNames);
+
                     usedNames.Add(name);
                     sourceToContentName[file.SourcePath] = name;
                     File.Copy(file.SourcePath, Path.Combine(contentDir, name), overwrite: true);
+
+                    copied++;
+
+                    int percent = 5 + (int)((copied / (double)Math.Max(totalFiles, 1)) * 45);
+                    progress?.Report(percent);
                 }
 
                 // ── icon.png in package root ──────────────────────────────────
@@ -52,6 +66,8 @@ namespace MagicOGK_OIV_Builder
                 else
                     CreateDefaultIcon(iconPath);
 
+                progress?.Report(55);
+
                 // ── assembly.xml ──────────────────────────────────────────────
                 string assemblyXml = BuildAssemblyXml(project, sourceToContentName);
                 File.WriteAllText(
@@ -59,12 +75,12 @@ namespace MagicOGK_OIV_Builder
                     assemblyXml,
                     new UTF8Encoding(false));
 
+                progress?.Report(65);
+
                 // ── Zip to .oiv ───────────────────────────────────────────────
                 if (File.Exists(outputPath)) File.Delete(outputPath);
-                ZipFile.CreateFromDirectory(
-                    tempDir, outputPath,
-                    CompressionLevel.Optimal,
-                    includeBaseDirectory: false);
+                CreateZipWithProgress(tempDir, outputPath, progress);
+                progress?.Report(100);
             }
             finally
             {
@@ -241,6 +257,28 @@ namespace MagicOGK_OIV_Builder
                     addNode.SetAttribute("xpath",  "/SMandatoryPacksData/Paths");
                     AppendElem(doc, addNode, "Item").InnerText = dlcEntry;
                 }
+            }
+        }
+
+        // Create zip with progress reporting. Progress is reported from 65 to 100% during this phase.
+        private static void CreateZipWithProgress(string sourceFolder, string outputPath, IProgress<int>? progress)
+        {
+            string[] files = Directory.GetFiles(sourceFolder, "*", SearchOption.AllDirectories);
+
+            using FileStream zipStream = new FileStream(outputPath, FileMode.Create);
+            using ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create);
+
+            for (int i = 0; i < files.Length; i++)
+            {
+                string file = files[i];
+
+                string entryName = Path.GetRelativePath(sourceFolder, file)
+                    .Replace("\\", "/");
+
+                archive.CreateEntryFromFile(file, entryName, CompressionLevel.Optimal);
+
+                int percent = 65 + (int)(((i + 1) / (double)Math.Max(files.Length, 1)) * 35);
+                progress?.Report(percent);
             }
         }
 

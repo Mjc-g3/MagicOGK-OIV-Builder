@@ -100,6 +100,20 @@ namespace MagicOGK_OIV_Builder
 
         private SparkleUpdater? _sparkle;
 
+        private CancellationTokenSource sidebarStaggerCts;
+
+        //colors
+        private static readonly Color ThemeBg = Color.FromArgb(13, 13, 13);
+        private static readonly Color ThemePanel = Color.FromArgb(18, 18, 18);
+
+        private static readonly Color ThemeRedButton = Color.FromArgb(92, 18, 22);
+        private static readonly Color ThemeRedHover = Color.FromArgb(125, 32, 38);
+
+        private static readonly Color ThemeText = Color.FromArgb(210, 150, 150);
+        private static readonly Color ThemeTextSoft = Color.FromArgb(170, 120, 120);
+        private static readonly Color ThemeTextDim = Color.FromArgb(95, 75, 75);
+        private static readonly Color ThemeBorder = Color.FromArgb(90, 45, 45);
+
         /*
         private int sidebarOpenX = 0;
         private int sidebarClosedX => -panelSidebar.Width;
@@ -119,7 +133,7 @@ namespace MagicOGK_OIV_Builder
             StyleSidebarBtn(btnSidebarExtractOIV, "    📤    Extract OIV", 294);
             StyleSidebarBtn(btnSidebarBuildOIV, "    ⚒️    Build OIV", 352);
             StyleSidebarBtn(btnCheckUpdates, "    ⚒️    Check for updates", 410);
-            StyleSidebarBtn(btnSidebarFeedback, "        Feedback", 580);
+            StyleSidebarBtn(btnSidebarFeedback, "    📨    Feedback", 580);
 
             btnReplaceMods.Click += btnReplaceMods_Click;
 
@@ -139,14 +153,10 @@ namespace MagicOGK_OIV_Builder
 
             panelMarquee.MouseDown += DragWindow;
             ApplyTextboxTheme();
-
-            dropdownVersionTag.DrawMode = DrawMode.OwnerDrawFixed;
-            dropdownVersionTag.DropDownStyle = ComboBoxStyle.DropDownList;
-            dropdownVersionTag.FlatStyle = FlatStyle.Flat;
-
-            dropdownVersionTag.DrawItem += DropdownVersionTag_DrawItem;
-
-            SetupMatrixRain();
+            
+            dropdownVersionTag.BackColor = Color.FromArgb(28, 28, 28);
+            dropdownVersionTag.ForeColor = Color.FromArgb(235, 165, 165);
+            
             SetupLogo();
 
             panelMatrixTitle.Height = 520;
@@ -306,9 +316,9 @@ namespace MagicOGK_OIV_Builder
                 Text = "Click to change color",
                 Dock = DockStyle.Fill,
                 TextAlign = ContentAlignment.MiddleCenter,
-                ForeColor = Color.White,
+                ForeColor = Color.FromArgb(160, 120, 120),
                 BackColor = Color.Transparent,
-                Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                Font = new Font("Segoe UI", 9f, FontStyle.Regular),
                 Cursor = Cursors.Hand
             };
 
@@ -317,11 +327,8 @@ namespace MagicOGK_OIV_Builder
 
             panelColorPicker.Cursor = Cursors.Hand;
 
-            panelColorPicker.Click -= PanelColorPicker_Click;
-            panelColorPicker.Click += PanelColorPicker_Click;
 
-            lblColorHint.Click -= PanelColorPicker_Click;
-            lblColorHint.Click += PanelColorPicker_Click;
+            lblColorHint.Click += panelColorPicker_Click;
 
             btnAddPhoto.Location = new Point(x, baseY + 98);
             btnAddPhoto.Size = new Size(w, 25);
@@ -386,7 +393,71 @@ namespace MagicOGK_OIV_Builder
             btnReplaceMods.BringToFront();
             btnBuildOIV.BringToFront();
         }
-        private void PanelColorPicker_Click(object sender, EventArgs e)
+        //colors
+        private void ApplyThemeColors()
+        {
+            BackColor = ThemeBg;
+
+            panelLeft.BackColor = ThemePanel;
+            panelRight.BackColor = ThemeBg;
+            panelSidebar.BackColor = ThemeBg;
+
+            Label[] labels =
+            {
+        lblAuthor,
+        lblModName,
+        lblVersionTag,
+        lblVersion,
+        lblDescription,
+        lblPhotoLabel,
+        lblColorLabel,
+        lblPackageFiles
+    };
+
+            foreach (Label lbl in labels)
+                lbl.ForeColor = ThemeText;
+
+            TextBox[] textBoxes =
+            {
+        txtAuthor,
+        txtModName,
+        txtVersion
+    };
+
+            foreach (TextBox tb in textBoxes)
+            {
+                tb.BackColor = Color.FromArgb(28, 28, 28);
+                tb.ForeColor = ThemeText;
+                tb.BorderStyle = BorderStyle.FixedSingle;
+            }
+
+            dropdownVersionTag.BackColor = Color.FromArgb(28, 28, 28);
+            dropdownVersionTag.ForeColor = ThemeText;
+
+            txtDescription.BackColor = Color.FromArgb(28, 28, 28);
+            txtDescription.ForeColor = ThemeText;
+
+            panelDropZone.BackColor = Color.FromArgb(14, 14, 14);
+            lblNoFiles.ForeColor = ThemeTextDim;
+            lblAddFilesHint.ForeColor = ThemeTextDim;
+
+            ApplyRedButton(btnAddPhoto);
+            ApplyRedButton(btnOpenEditor);
+            ApplyRedButton(btnReplaceMods);
+            ApplyRedButton(btnBuildOIV);
+            ApplyRedButton(btnAddFiles);
+        }
+        private void ApplyRedButton(Button btn)
+        {
+            btn.BackColor = ThemeRedButton;
+            btn.ForeColor = ThemeText;
+            btn.FlatStyle = FlatStyle.Flat;
+            btn.FlatAppearance.BorderSize = 0;
+            btn.FlatAppearance.MouseOverBackColor = ThemeRedHover;
+            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(70, 10, 14);
+            btn.UseVisualStyleBackColor = false;
+        }
+        private void panelColorPicker_Click(object sender, EventArgs e)
         {
             using ColorDialog dlg = new ColorDialog();
 
@@ -436,6 +507,198 @@ namespace MagicOGK_OIV_Builder
             }
 
             return null;
+        }
+
+        // ─────────────────── CUSTOM DROPDOWN ───────────────────
+        public class CustomDropdown : Control
+        {
+            public List<object> Items { get; } = new();
+            public int SelectedIndex { get; set; } = -1;
+            public object? SelectedItem => SelectedIndex >= 0 && SelectedIndex < Items.Count ? Items[SelectedIndex] : null;
+
+            public event EventHandler? SelectedIndexChanged;
+
+            public CustomDropdown()
+            {
+                DoubleBuffered = true;
+                Cursor = Cursors.Hand;
+                Height = 24;
+                BackColor = Color.FromArgb(35, 35, 35);
+                ForeColor = Color.FromArgb(220, 180, 180);
+            }
+
+            protected override void OnClick(EventArgs e)
+            {
+                base.OnClick(e);
+
+                ContextMenuStrip menu = new ContextMenuStrip();
+                menu.BackColor = Color.FromArgb(25, 25, 25);
+                menu.ForeColor = ForeColor;
+                menu.RenderMode = ToolStripRenderMode.System;
+
+                for (int i = 0; i < Items.Count; i++)
+                {
+                    int index = i;
+                    var item = new ToolStripMenuItem(Items[i].ToString());
+                    item.BackColor = Color.FromArgb(25, 25, 25);
+                    item.ForeColor = ForeColor;
+                    item.Click += (s, ev) =>
+                    {
+                        SelectedIndex = index;
+                        SelectedIndexChanged?.Invoke(this, EventArgs.Empty);
+                        Invalidate();
+                    };
+                    menu.Items.Add(item);
+                }
+
+                menu.Show(this, new Point(0, Height));
+            }
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+                Rectangle rect = new Rectangle(0, 0, Width - 1, Height - 1);
+
+                using var bg = new SolidBrush(BackColor);
+                e.Graphics.FillRectangle(bg, rect);
+
+                using var border = new Pen(Color.FromArgb(95, 95, 95));
+                e.Graphics.DrawRectangle(border, rect);
+
+                string text = SelectedItem?.ToString() ?? "";
+
+                TextRenderer.DrawText(
+                    e.Graphics,
+                    text,
+                    Font,
+                    new Rectangle(6, 0, Width - 28, Height),
+                    ForeColor,
+                    TextFormatFlags.VerticalCenter | TextFormatFlags.Left
+                );
+
+                Point[] arrow =
+                {
+            new Point(Width - 17, Height / 2 - 2),
+            new Point(Width - 9, Height / 2 - 2),
+            new Point(Width - 13, Height / 2 + 3)
+        };
+
+                using var arrowBrush = new SolidBrush(Color.FromArgb(230, 170, 170));
+                e.Graphics.FillPolygon(arrowBrush, arrow);
+            }
+        }
+
+        // ────────────────── CUSTOM SCROLLBAR+TEXTBOX ───────────────────
+        public class CustomScrollTextBox : UserControl
+        {
+            private readonly TextBox innerTextBox;
+            private readonly Panel scrollTrack;
+            private readonly Panel scrollThumb;
+
+            public override string Text
+            {
+                get => innerTextBox.Text;
+                set => innerTextBox.Text = value;
+            }
+
+            public string PlaceholderText
+            {
+                get => innerTextBox.PlaceholderText;
+                set => innerTextBox.PlaceholderText = value;
+            }
+
+            public CustomScrollTextBox()
+            {
+                BackColor = Color.FromArgb(35, 35, 35);
+
+                innerTextBox = new TextBox
+                {
+                    Multiline = true,
+                    BorderStyle = BorderStyle.None,
+                    ScrollBars = ScrollBars.None,
+                    BackColor = Color.FromArgb(35, 35, 35),
+                    ForeColor = Color.FromArgb(220, 180, 180),
+                    Location = new Point(6, 6),
+                    Width = Width - 20,
+                    Height = Height - 12
+                };
+
+                scrollTrack = new Panel
+                {
+                    Width = 8,
+                    Dock = DockStyle.Right,
+                    BackColor = Color.FromArgb(45, 45, 45)
+                };
+
+                scrollThumb = new Panel
+                {
+                    Width = 6,
+                    Height = 28,
+                    Left = 1,
+                    Top = 4,
+                    BackColor = Color.FromArgb(180, 120, 120)
+                };
+
+                scrollTrack.Controls.Add(scrollThumb);
+                Controls.Add(innerTextBox);
+                Controls.Add(scrollTrack);
+
+                innerTextBox.TextChanged += (s, e) =>
+                {
+                    UpdateThumb();
+                    OnTextChanged(e);
+                };
+
+                innerTextBox.MouseWheel += ScrollText;
+                MouseWheel += ScrollText;
+
+                Resize += (s, e) =>
+                {
+                    innerTextBox.Width = Width - 20;
+                    innerTextBox.Height = Height - 12;
+                    UpdateThumb();
+                };
+            }
+
+            private void ScrollText(object? sender, MouseEventArgs e)
+            {
+                int lines = e.Delta > 0 ? -3 : 3;
+
+                int index = innerTextBox.GetFirstCharIndexFromLine(
+                    Math.Max(0, innerTextBox.GetLineFromCharIndex(innerTextBox.GetFirstCharIndexOfCurrentLine()) + lines)
+                );
+
+                if (index >= 0)
+                {
+                    innerTextBox.SelectionStart = index;
+                    innerTextBox.ScrollToCaret();
+                }
+
+                UpdateThumb();
+            }
+
+            private void UpdateThumb()
+            {
+                int lineCount = Math.Max(1, innerTextBox.Lines.Length);
+                int visibleLines = Math.Max(1, innerTextBox.Height / innerTextBox.Font.Height);
+
+                if (lineCount <= visibleLines)
+                {
+                    scrollThumb.Visible = false;
+                    return;
+                }
+
+                scrollThumb.Visible = true;
+
+                float ratio = visibleLines / (float)lineCount;
+                scrollThumb.Height = Math.Max(24, (int)(scrollTrack.Height * ratio));
+
+                int currentLine = innerTextBox.GetLineFromCharIndex(innerTextBox.SelectionStart);
+                float scrollRatio = currentLine / (float)Math.Max(1, lineCount - visibleLines);
+
+                scrollThumb.Top = 4 + (int)((scrollTrack.Height - scrollThumb.Height - 8) * scrollRatio);
+            }
         }
 
         // ─────────────────── REPLACE MENU ───────────────────
@@ -2722,7 +2985,7 @@ namespace MagicOGK_OIV_Builder
             StyleTextbox(txtAuthor);
             StyleTextbox(txtModName);
             StyleTextbox(txtVersion);
-            StyleTextbox(txtDescription);
+            //StyleTextbox(txtDescription);
         }
 
         private void StyleTextbox(TextBox tb)
@@ -2962,8 +3225,72 @@ namespace MagicOGK_OIV_Builder
             AddButtonHover(btnAddPhoto);
             AddButtonHover(btnReplaceMods);
 
+            // Button animations
+            AddPressAnimation(btnSidebarExtractOIV);
+            AddPressAnimation(btnBuildOIV);
+            AddPressAnimation(btnAddFiles);
+            AddPressAnimation(btnOpenEditor);
+            AddPressAnimation(btnAddPhoto);
+            AddPressAnimation(btnReplaceMods);
+
+            // Button colors
+            ((AnimatedGlowButton)btnAddPhoto).TransparentIdle = false;
+            ((AnimatedGlowButton)btnOpenEditor).TransparentIdle = false;
+            ((AnimatedGlowButton)btnReplaceMods).TransparentIdle = false;
+            ((AnimatedGlowButton)btnBuildOIV).TransparentIdle = false;
+
+            btnAddPhoto.BackColor = Color.FromArgb(92, 0, 0);
+            btnOpenEditor.BackColor = Color.FromArgb(92, 0, 0);
+            btnReplaceMods.BackColor = Color.FromArgb(92, 0, 0);
+            btnBuildOIV.BackColor = Color.FromArgb(92, 0, 0);
+
+            //Galaxy Sidebar Fill
+            panelMatrixTitle.Dock = DockStyle.Fill;
+            panelMatrixTitle.SendToBack();
+
+            // Sidebar buttons transparrency
+            if (btnSidebarOpenProject is AnimatedGlowButton b1) b1.TransparentIdle = true;
+            if (btnSidebarSaveProjectAs is AnimatedGlowButton b2) b2.TransparentIdle = true;
+            if (btnSidebarOpenOIV is AnimatedGlowButton b3) b3.TransparentIdle = true;
+            if (btnSidebarExtractOIV is AnimatedGlowButton b4) b4.TransparentIdle = true;
+            if (btnCheckUpdates is AnimatedGlowButton b5) b5.TransparentIdle = true;
+            if (btnSidebarFeedback is AnimatedGlowButton b6) b6.TransparentIdle = true;
+
+            if (btnAddPhoto is AnimatedGlowButton b7) b7.TransparentIdle = false;
+            if (btnOpenEditor is AnimatedGlowButton b8) b8.TransparentIdle = false;
+            if (btnReplaceMods is AnimatedGlowButton b9) b9.TransparentIdle = false;
+            if (btnBuildOIV is AnimatedGlowButton b10) b10.TransparentIdle = false;
+
             // Photo preview paint
             panelPhotoPreview.Paint += PanelPhotoPreview_Paint;
+
+            //Sidebar Panel Layout
+            panelMatrixTitle.Dock = DockStyle.Fill;
+            panelMatrixTitle.SendToBack();
+
+            Control[] sidebarButtons =
+            {
+    btnSidebarOpenProject,
+    btnSidebarSaveProjectAs,
+    btnSidebarOpenOIV,
+    btnSidebarExtractOIV,
+    btnSidebarBuildOIV,
+    btnCheckUpdates,
+    btnSidebarFeedback
+};
+
+            foreach (Control btn in sidebarButtons)
+            {
+                Point oldLocation = btn.Location;
+
+                btn.Parent = panelMatrixTitle;
+                btn.Location = oldLocation;
+                btn.BackColor = Color.Transparent;
+                btn.BringToFront();
+
+                if (btn is AnimatedGlowButton glowBtn)
+                    glowBtn.TransparentIdle = true;
+            }
 
             // WebView
             string webViewDataFolder = Path.Combine(
@@ -2994,9 +3321,45 @@ namespace MagicOGK_OIV_Builder
             txtDescription.TextChanged += Metadata_Changed;
             dropdownVersionTag.SelectedIndexChanged += Metadata_Changed;
 
+            LayoutSidebarButtons();
             UpdateWindowButtonsLayout();
             SetupMarquee();
-            SetupMatrixRain();
+            ApplyThemeColors();
+
+        }
+
+        //Button animations
+        private void AddPressAnimation(Control btn, float scale = 0.92f)
+        {
+            Size originalSize = btn.Size;
+            Point originalLocation = btn.Location;
+
+            void Shrink()
+            {
+                int newW = (int)(originalSize.Width * scale);
+                int newH = (int)(originalSize.Height * scale);
+
+                btn.Size = new Size(newW, newH);
+                btn.Location = new Point(
+                    originalLocation.X + (originalSize.Width - newW) / 2,
+                    originalLocation.Y + (originalSize.Height - newH) / 2
+                );
+            }
+
+            void Restore()
+            {
+                btn.Size = originalSize;
+                btn.Location = originalLocation;
+            }
+
+            btn.MouseDown += (s, e) =>
+            {
+                if (e.Button == MouseButtons.Left)
+                    Shrink();
+            };
+
+            btn.MouseUp += (s, e) => Restore();
+            btn.MouseLeave += (s, e) => Restore();
         }
 
         // ─────────────────── MARQUEE ANIMATION ───────────────────
@@ -3116,7 +3479,6 @@ namespace MagicOGK_OIV_Builder
                 _matrixHeadChar[i] = MatrixChars[MatrixRnd.Next(MatrixChars.Length)];
             }
 
-            panelMatrixTitle.Paint += MatrixTitlePaint;
 
             _matrixTimer = new System.Windows.Forms.Timer();
             _matrixTimer.Interval = 75;
@@ -3205,8 +3567,7 @@ namespace MagicOGK_OIV_Builder
         }
         private void PanelDrag_MouseUp(object sender, MouseEventArgs e) => isDragging = false;
 
-        // ─────────────────── SIDEBAR ───────────────────
-
+        // ─────────────────── BUILD SIDEBAR ───────────────────
         private const int SidebarWidth = 220;
 
         private int sidebarOpenX => 0;
@@ -3222,6 +3583,8 @@ namespace MagicOGK_OIV_Builder
             panelSidebar.Top = panelMarquee.Height;
             panelSidebar.Height = ClientSize.Height - panelMarquee.Height;
 
+            LayoutSidebarButtons();
+            ShowSidebarStaggered();
             sidebarTimer.Start();
         }
 
@@ -3717,31 +4080,24 @@ namespace MagicOGK_OIV_Builder
         private string BuildFinalOivTarget(XElement node, string source)
         {
             string nodeTarget = GetAttr(node, "target", "destination", "dest", "path");
+
+            // IMPORTANT:
+            // OpenIV <add> nodes usually store the install path as inner text:
+            // <add source="dlc.rpf">update\x64\dlcpacks\modname\dlc.rpf</add>
+            if (string.IsNullOrWhiteSpace(nodeTarget))
+            {
+                string innerText = node.Value?.Trim() ?? "";
+
+                if (!string.IsNullOrWhiteSpace(innerText) && !node.HasElements)
+                    nodeTarget = innerText;
+            }
+
             string archivePath = GetFullArchivePath(node);
 
             source = source.Replace("\\", "/").Trim('/');
             nodeTarget = nodeTarget.Replace("\\", "/").Trim('/');
             archivePath = archivePath.Replace("\\", "/").Trim('/');
 
-            // IMPORTANT:
-            // If this is a whole RPF install, the real path is the archive path itself.
-            // Example:
-            // <archive path="x64/audio/sfx/dlc_apartment/ptl_revolver.awc">
-            //     <add source="content/dlc_1.rpf" />
-            // </archive>
-            if (!string.IsNullOrWhiteSpace(archivePath) &&
-                archivePath.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase) &&
-                string.IsNullOrWhiteSpace(nodeTarget))
-            {
-                string sourceName = Path.GetFileName(source);
-
-                if (sourceName.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase))
-                    return archivePath;
-
-                return archivePath + "/" + sourceName;
-            }
-
-            // If the node itself has the actual path, use it
             if (!string.IsNullOrWhiteSpace(nodeTarget))
             {
                 if (!string.IsNullOrWhiteSpace(archivePath) &&
@@ -3753,9 +4109,15 @@ namespace MagicOGK_OIV_Builder
                 return nodeTarget;
             }
 
-            // Last fallback
             if (!string.IsNullOrWhiteSpace(archivePath))
-                return archivePath + "/" + Path.GetFileName(source);
+            {
+                string sourceName = Path.GetFileName(source);
+
+                if (sourceName.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase))
+                    return archivePath;
+
+                return archivePath + "/" + sourceName;
+            }
 
             return Path.GetFileName(source);
         }
@@ -3790,6 +4152,31 @@ namespace MagicOGK_OIV_Builder
 
             return node.Value.Trim();
         }
+        private void LayoutSidebarButtons()
+        {
+            int margin = 6;
+            int buttonWidth = panelSidebar.Width - (margin * 2);
+            int buttonHeight = 48;
+
+            Control[] buttons =
+            {
+        btnSidebarOpenProject,
+        btnSidebarSaveProjectAs,
+        btnSidebarOpenOIV,
+        btnSidebarExtractOIV,
+        btnSidebarBuildOIV,
+        btnCheckUpdates,
+        btnSidebarFeedback
+    };
+
+            foreach (Control btn in buttons)
+            {
+                btn.Width = buttonWidth;
+                btn.Height = buttonHeight;
+                btn.Left = margin;
+            }
+        }
+
         private void ReadOivAuthorAndWebsite(XElement metadata, out string author, out string website)
         {
             author = "";
@@ -3991,8 +4378,182 @@ namespace MagicOGK_OIV_Builder
 
             return btn;
         }
+        // SIDEBAR ANIMATION
+        private async void ShowSidebarStaggered()
+        {
+            sidebarStaggerCts?.Cancel();
+            sidebarStaggerCts = new CancellationTokenSource();
+            var token = sidebarStaggerCts.Token;
+
+            panelSidebar.Visible = true;
+            panelSidebar.BringToFront();
+
+            Control[] buttons =
+            {
+        btnSidebarOpenProject,
+        btnSidebarSaveProjectAs,
+        btnSidebarOpenOIV,
+        btnSidebarExtractOIV,
+        btnSidebarBuildOIV,
+        btnCheckUpdates,
+        btnSidebarFeedback
+    };
+
+            LayoutSidebarButtons();
+
+            int[] finalLeft = buttons.Select(b => b.Left).ToArray();
+
+            for (int i = 0; i < buttons.Length; i++)
+            {
+                buttons[i].Visible = false;
+                buttons[i].Left = finalLeft[i] - 25;
+            }
+
+            try
+            {
+                for (int i = 0; i < buttons.Length; i++)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    await Task.Delay(i == 0 ? 0 : 65, token);
+
+                    Control btn = buttons[i];
+                    btn.Visible = true;
+
+                    int startLeft = finalLeft[i] - 25;
+                    int endLeft = finalLeft[i];
+
+                    for (int step = 0; step <= 10; step++)
+                    {
+                        token.ThrowIfCancellationRequested();
+
+                        float t = step / 10f;
+                        float eased = 1f - (float)Math.Pow(1f - t, 3);
+
+                        btn.Left = startLeft + (int)((endLeft - startLeft) * eased);
+
+                        await Task.Delay(10, token);
+                    }
+
+                    btn.Left = endLeft;
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                // ignored
+            }
+        }
 
         // ─────────────────── CUSTOM POP-UP BOXES ───────────────────
+        private Form CreateBuildProgressDialog(out ProgressBar progressBar, out Label lblPercent)
+        {
+            Label lblStatus = new Label
+            {
+                Name = "lblStatus",
+                Text = "BUILDING OIV.",
+                ForeColor = Color.FromArgb(235, 170, 170),
+                Font = new Font("Syne", 11F, FontStyle.Bold),
+                Location = new Point(28, 62),
+                Size = new Size(380, 24),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+
+            Form dialog = new Form
+            {
+                Text = "Building OIV",
+                Size = new Size(440, 190),
+                StartPosition = FormStartPosition.Manual,
+                FormBorderStyle = FormBorderStyle.None,
+                BackColor = Color.FromArgb(16, 16, 16),
+                ShowInTaskbar = false,
+                TopMost = true
+            };
+
+            Panel titleBar = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 36,
+                BackColor = Color.FromArgb(24, 24, 24)
+            };
+
+            Label lblTitle = new Label
+            {
+                Text = "BUILDING OIV",
+                ForeColor = Color.FromArgb(220, 150, 150),
+                Font = new Font("Syne", 9F, FontStyle.Bold),
+                Dock = DockStyle.Fill,
+                TextAlign = ContentAlignment.MiddleLeft,
+                Padding = new Padding(14, 0, 0, 0)
+            };
+
+            titleBar.Controls.Add(lblTitle);
+
+            lblPercent = new Label
+            {
+                Text = "0%",
+                ForeColor = Color.FromArgb(235, 170, 170),
+                Font = new Font("Syne", 10F, FontStyle.Bold),
+                TextAlign = ContentAlignment.MiddleCenter,
+                Location = new Point(28, 126),
+                Size = new Size(380, 24)
+            };
+
+            progressBar = new ProgressBar
+            {
+                Location = new Point(28, 100),
+                Size = new Size(380, 22),
+                Minimum = 0,
+                Maximum = 100,
+                Value = 0,
+                Style = ProgressBarStyle.Continuous
+            };
+
+            dialog.Controls.Add(titleBar);
+            dialog.Controls.Add(lblStatus);
+            dialog.Controls.Add(lblPercent);
+            dialog.Controls.Add(progressBar);
+
+            dialog.Load += (s, e) =>
+            {
+                if (this.WindowState == FormWindowState.Minimized)
+                    return;
+
+                dialog.Location = new Point(
+                    this.Left + (this.Width - dialog.Width) / 2,
+                    this.Top + (this.Height - dialog.Height) / 2
+                );
+            };
+
+            Label? statusLabel = dialog.Controls["lblStatus"] as Label;
+
+            System.Windows.Forms.Timer dotTimer = new System.Windows.Forms.Timer();
+            dotTimer.Interval = 350;
+
+            int dots = 1;
+
+            dotTimer.Tick += (s, e) =>
+            {
+                if (statusLabel == null) return;
+
+                statusLabel.Text = "BUILDING OIV PACKAGE" + new string('.', dots);
+
+                dots++;
+
+                if (dots > 4)
+                    dots = 1;
+            };
+
+            dialog.Shown += (s, e) => dotTimer.Start();
+
+            dialog.FormClosed += (s, e) =>
+            {
+                dotTimer.Stop();
+                dotTimer.Dispose();
+            };
+
+            return dialog;
+        }
+
         private DialogResult ShowMagicConfirmBox(string message, string title)
         {
             using Form dialog = new Form
@@ -5796,20 +6357,10 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
 
         // ─────────────────── COLOR PICKER ───────────────────
 
-        private void panelColorPicker_Click(object sender, EventArgs e)
-        {
-            using var dlg = new ColorDialog { Color = panelColorPicker.BackColor };
-            if (dlg.ShowDialog() == DialogResult.OK)
-            {
-                panelColorPicker.BackColor = dlg.Color;
-                SyncUIToProject();
-                MarkDirty();
-            }
-        }
 
         // ─────────────────── BUILD OIV ───────────────────
 
-        private void btnBuildOIV_Click(object sender, EventArgs e)
+        private async void btnBuildOIV_Click(object sender, EventArgs e)
         {
             SyncUIToProject();
 
@@ -5834,17 +6385,45 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             };
             if (dlg.ShowDialog() != DialogResult.OK) return;
 
+            using Form progressDialog = CreateBuildProgressDialog(out ProgressBar progressBar, out Label lblPercent);
+
+            var progress = new Progress<int>(value =>
+            {
+                value = Math.Max(0, Math.Min(100, value));
+                progressBar.Value = value;
+                lblPercent.Text = $"{value}%";
+            });
+
             try
             {
-                OIVBuilder.Build(currentProject, dlg.FileName);
+                btnBuildOIV.Enabled = false;
+                btnSidebarBuildOIV.Enabled = false;
+
+                progressDialog.Show(this);
+                progressDialog.Refresh();
+
+                await Task.Run(() =>
+                {
+                    OIVBuilder.Build(currentProject, dlg.FileName, progress);
+                });
+
+                progressDialog.Close();
+
                 MarkClean();
-                MessageBox.Show($"OIV package built successfully!\n\n{dlg.FileName}",
-                    "Build Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                ShowMagicInfoBox($"OIV package built successfully!\n\n{dlg.FileName}", "Build Complete");
             }
             catch (Exception ex)
             {
+                progressDialog.Close();
+
                 MessageBox.Show("Build failed: " + ex.Message, "Build Error",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                btnBuildOIV.Enabled = true;
+                btnSidebarBuildOIV.Enabled = true;
             }
         }
 
@@ -5884,7 +6463,7 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
 
                 dropdownVersionTag.SelectedIndex = -1;
 
-                panelColorPicker.BackColor = Color.FromArgb(35, 54, 106); // default banner color
+                panelColorPicker.BackColor = Color.FromArgb(52, 38, 40); // default banner color
                 selectedPhotoPath = null;
                 btnAddPhoto.Text = "ADD";
                 panelPhotoPreview.Invalidate();
@@ -5957,9 +6536,13 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
 
         private void AddButtonHover(Button btn)
         {
-            var normal = btn.BackColor;
-            var bright = ControlPaint.Light(normal, 0.15f);
-            btn.MouseEnter += (s, e) => btn.BackColor = bright;
+            Color normal = Color.FromArgb(92, 18, 22);
+            Color hover = Color.FromArgb(125, 32, 38);
+
+            btn.BackColor = normal;
+            btn.ForeColor = Color.FromArgb(210, 150, 150);
+
+            btn.MouseEnter += (s, e) => btn.BackColor = hover;
             btn.MouseLeave += (s, e) => btn.BackColor = normal;
         }
 
@@ -6133,28 +6716,32 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             logo.Image = Properties.Resources.Magic_GTA5;
             logo.SizeMode = PictureBoxSizeMode.Zoom;
             logo.BackColor = Color.Transparent;
-            logo.Parent = panelSidebar;
+            logo.Parent = panelMatrixTitle;
             logo.Size = new Size(370, 170);
 
             int topZoneHeight = 120; // adjust this
 
             logo.Location = new Point(
-                (panelSidebar.Width - logo.Width) / 2,
-                (topZoneHeight - logo.Height) / 2
-            );
+                    (panelMatrixTitle.Width - logo.Width) / 2,
+                    (topZoneHeight - logo.Height) / 2
+             );
 
-            panelSidebar.Resize += (s, e) =>
+            panelMatrixTitle.Resize += (s, e) =>
             {
                 int topZoneHeight = 120;
 
                 logo.Location = new Point(
-                    (panelSidebar.Width - logo.Width) / 2,
+                    (panelMatrixTitle.Width - logo.Width) / 2,
                     (topZoneHeight - logo.Height) / 2
                 );
             };
 
-            panelSidebar.Controls.Add(logo);
-            logo.BringToFront();
+            panelMatrixTitle.Controls.Add(logo);
+
+            foreach (Control c in panelMatrixTitle.Controls)
+            {
+                c.BringToFront();
+            }
         }
 
     }

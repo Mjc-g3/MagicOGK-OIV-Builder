@@ -16,7 +16,7 @@ namespace MagicOGK_OIV_Builder
         {
             FormBorderStyle = FormBorderStyle.None;
             StartPosition = FormStartPosition.Manual;
-            Size = new Size(560, 330);
+            Size = new Size(560, 365);
             BackColor = Color.FromArgb(16, 16, 16);
             ShowInTaskbar = false;
             TopMost = true;
@@ -80,10 +80,11 @@ namespace MagicOGK_OIV_Builder
             close.Click += (s, e) => Close();
             main.Controls.Add(close);
 
-            Panel vehicles = CreateCard("🚗", "Vehicles", "Replace car model files", 24, 95);
-            Panel clothes = CreateCard("👕", "Clothes", "Story player clothing", 202, 95);
-            Panel weapons = CreateCard("🔫", "Weapons", "Replace weapon files", 380, 95);
-            Panel peds = CreateCard("👤", "Peds", "Replace NPC/player peds", 113, 210);
+            Panel vehicles = CreateCard("🚗", "Vehicles", "Replace car model files", 120, 105);
+            Panel clothes = CreateCard("👕", "Clothes", "Story player clothing", 300, 105);
+
+            Panel weapons = CreateCard("🔫", "Weapons", "Replace weapon files", 120, 220);
+            Panel peds = CreateCard("👤", "Peds", "Replace NPC/player peds", 300, 220);
 
             main.Controls.Add(vehicles);
             main.Controls.Add(clothes);
@@ -105,7 +106,7 @@ namespace MagicOGK_OIV_Builder
 
         private Panel CreateCard(string icon, string title, string desc, int x, int y)
         {
-            Panel card = new Panel
+            AnimatedGlowPanel card = new AnimatedGlowPanel
             {
                 Location = new Point(x, y),
                 Size = new Size(155, 92),
@@ -154,9 +155,6 @@ namespace MagicOGK_OIV_Builder
                 TextAlign = ContentAlignment.MiddleCenter,
                 BackColor = Color.Transparent
             };
-
-            card.MouseEnter += (s, e) => card.Invalidate();
-            card.MouseLeave += (s, e) => card.Invalidate();
 
             card.Controls.Add(iconLbl);
             card.Controls.Add(titleLbl);

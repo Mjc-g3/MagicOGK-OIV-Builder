@@ -16,6 +16,23 @@ namespace MagicOGK_OIV_Builder
 
         private void InitializeComponent()
         {
+            //buttons animated
+            btnReplaceMods = new AnimatedGlowButton();
+            btnSidebarOpenProject = new AnimatedGlowButton();
+            btnSidebarSaveProjectAs = new AnimatedGlowButton();
+            btnSidebarOpenOIV = new AnimatedGlowButton();
+            btnSidebarExtractOIV = new AnimatedGlowButton();
+            btnSidebarBuildOIV = new AnimatedGlowButton();
+            btnCheckUpdates = new AnimatedGlowButton();
+            btnSidebarFeedback = new AnimatedGlowButton();
+            btnAddPhoto = new AnimatedGlowButton();
+            btnOpenEditor = new AnimatedGlowButton();
+            btnBuildOIV = new AnimatedGlowButton();
+            btnAddFiles = new AnimatedGlowButton();
+            //panel animated
+            panelColorPicker = new AnimatedGlowPanel();
+
+            //rest
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(main));
             sidebarTimer = new System.Windows.Forms.Timer(components);
@@ -27,21 +44,13 @@ namespace MagicOGK_OIV_Builder
             button6 = new Button();
             button5 = new Button();
             panelLeft = new Panel();
-            btnReplaceMods = new Button();
-            panelEditorRight = new Panel();
             panelRight = new Panel();
             panelSidebar = new Panel();
-            panelMatrixTitle = new BufferedPanel();
-            btnSidebarOpenProject = new Button();
-            btnSidebarSaveProjectAs = new Button();
-            btnSidebarOpenOIV = new Button();
-            btnSidebarExtractOIV = new Button();
-            btnSidebarBuildOIV = new Button();
-            btnCheckUpdates = new Button();
-            btnSidebarFeedback = new Button();
+            panelMatrixTitle = new GalaxySidebarPanel();
+            panelEditorRight = new BufferedPanel();
             panelDropZone = new Panel();
             panelPhotoPreview = new Panel();
-            panelColorPicker = new Panel();
+            
             lblAuthor = new Label();
             lblModName = new Label();
             lblVersionTag = new Label();
@@ -55,12 +64,8 @@ namespace MagicOGK_OIV_Builder
             txtAuthor = new TextBox();
             txtModName = new TextBox();
             txtVersion = new TextBox();
-            txtDescription = new TextBox();
-            dropdownVersionTag = new ComboBox();
-            btnAddPhoto = new Button();
-            btnOpenEditor = new Button();
-            btnBuildOIV = new Button();
-            btnAddFiles = new Button();
+            txtDescription = new CustomScrollTextBox();
+            dropdownVersionTag = new CustomDropdown();
             webViewFileList = new Microsoft.Web.WebView2.WinForms.WebView2();
             panelDrag.SuspendLayout();
             panelLeft.SuspendLayout();
@@ -81,6 +86,7 @@ namespace MagicOGK_OIV_Builder
             panelDrag.Name = "panelDrag";
             panelDrag.Size = new Size(1030, 28);
             panelDrag.TabIndex = 4;
+            
             // 
             // btnHamburger
             // 
@@ -97,7 +103,8 @@ namespace MagicOGK_OIV_Builder
             btnHamburger.Text = "☰";
             btnHamburger.UseVisualStyleBackColor = false;
             btnHamburger.Click += btnHamburger_Click;
-            // 
+            
+            //
             // panelMarquee
             // 
             panelMarquee.BackColor = Color.Transparent;
@@ -504,17 +511,15 @@ namespace MagicOGK_OIV_Builder
             lblVersionTag.Font      = new Font("Syne", 8F, FontStyle.Bold);
             lblVersionTag.Location  = new Point(30, 150);
             lblVersionTag.AutoSize  = true;
-
+            
             dropdownVersionTag.BackColor     = Color.Black;
             dropdownVersionTag.ForeColor     = Color.FromArgb(200, 200, 200);
-            dropdownVersionTag.DropDownStyle = ComboBoxStyle.DropDownList;
-            dropdownVersionTag.FlatStyle     = FlatStyle.Flat;
             dropdownVersionTag.Size          = new Size(140, 24);
             dropdownVersionTag.Location      = new Point(30, 172);
             dropdownVersionTag.Font          = new Font("Syne", 9F);
             dropdownVersionTag.Items.AddRange(new object[] { "Test", "Alpha", "Beta", "Stable" });
             dropdownVersionTag.SelectedIndex = 3;
-
+            
             // ── Version ──
             lblVersion.Text      = "VERSION";
             lblVersion.ForeColor = Color.FromArgb(188, 143, 143);
@@ -536,7 +541,7 @@ namespace MagicOGK_OIV_Builder
             lblDescription.Font      = new Font("Syne", 8F, FontStyle.Bold);
             lblDescription.Location  = new Point(30, 212);
             lblDescription.AutoSize  = true;
-
+/*
             txtDescription.BackColor       = Color.Black;
             txtDescription.ForeColor       = Color.FromArgb(200, 200, 200);
             txtDescription.BorderStyle     = BorderStyle.FixedSingle;
@@ -545,8 +550,8 @@ namespace MagicOGK_OIV_Builder
             txtDescription.Size            = new Size(300, 75);
             txtDescription.Location        = new Point(30, 234);
             txtDescription.Font            = new Font("Syne", 9F);
-            txtDescription.ScrollBars      = ScrollBars.Vertical;
-
+            txtDescription.ScrollBars      = ScrollBars.None;
+*/
             // ── Photo preview ──
             lblPhotoLabel.Text      = "PHOTO PREVIEW";
             lblPhotoLabel.ForeColor = Color.FromArgb(188, 143, 143);
@@ -576,7 +581,6 @@ namespace MagicOGK_OIV_Builder
             lblColorLabel.AutoSize  = true;
 
             panelColorPicker.BackColor   = Color.FromArgb(160, 0, 0);
-            panelColorPicker.BorderStyle = BorderStyle.FixedSingle;
             panelColorPicker.Size        = new Size(145, 100);
             panelColorPicker.Location    = new Point(185, 347);
             panelColorPicker.Cursor      = Cursors.Hand;
@@ -660,7 +664,7 @@ namespace MagicOGK_OIV_Builder
             panelDropZone.BackColor   = Color.FromArgb(17, 17, 17);
             panelDropZone.BorderStyle = BorderStyle.FixedSingle;
             panelDropZone.Location    = new Point(30, 96);
-            panelDropZone.Size        = new Size(530, 120);
+            panelDropZone.Size        = new Size(600, 120);
             panelDropZone.AllowDrop   = true;
 
             lblNoFiles.Text      = "Drop mod files here\r\nSupports .yft .ytd .meta .xml .asi .dlc and more";
@@ -684,7 +688,7 @@ namespace MagicOGK_OIV_Builder
 
         // ── Field declarations ──────────────────────────────────────────────
         private BufferedPanel panelMarquee;
-        private BufferedPanel panelMatrixTitle;
+        private GalaxySidebarPanel panelMatrixTitle;
         private Panel       panelDrag;
         private Panel       panelLeft;
         private Panel       panelRight;
@@ -692,7 +696,7 @@ namespace MagicOGK_OIV_Builder
         private Panel       panelSidebar;
         private Panel       panelDropZone;
         private Panel       panelPhotoPreview;
-        private Panel       panelColorPicker;
+        private AnimatedGlowPanel panelColorPicker;
 
         private Label       lblAuthor;
         private Label       lblModName;
@@ -709,8 +713,8 @@ namespace MagicOGK_OIV_Builder
         private TextBox     txtAuthor;
         private TextBox     txtModName;
         private TextBox     txtVersion;
-        private TextBox     txtDescription;
-        private ComboBox    dropdownVersionTag;
+        private CustomScrollTextBox txtDescription;
+        private CustomDropdown dropdownVersionTag;
 
         private Button      button5;
         private Button      button6;
