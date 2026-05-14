@@ -8,6 +8,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
@@ -93,6 +94,9 @@ namespace MagicOGK_OIV_Builder
         private Panel? replaceWeaponScrollTrack = null;
         private Panel? replaceWeaponScrollThumb = null;
 
+        private AnimatedGlowButton btnSidebarNewProject;
+        private AnimatedGlowButton btnSidebarQuickSave;
+
         private bool draggingWeaponScrollbar = false;
         private int weaponScrollbarDragOffset = 0;
 
@@ -127,12 +131,20 @@ namespace MagicOGK_OIV_Builder
             SetupRightPanelControls();
             ApplyCleanLeftPanelLayout();
 
-            StyleSidebarBtn(btnSidebarOpenProject, "    📦    Open Project", 120);
-            StyleSidebarBtn(btnSidebarSaveProjectAs, "    📁    Save Project As", 178);
-            StyleSidebarBtn(btnSidebarOpenOIV, "    🔎    Open OIV", 236);
-            StyleSidebarBtn(btnSidebarExtractOIV, "    📤    Extract OIV", 294);
-            StyleSidebarBtn(btnSidebarBuildOIV, "    ⚒️    Build OIV", 352);
-            StyleSidebarBtn(btnCheckUpdates, "    ⚒️    Check for updates", 410);
+            btnSidebarNewProject = new AnimatedGlowButton();
+            panelSidebar.Controls.Add(btnSidebarNewProject);
+
+            btnSidebarQuickSave = new AnimatedGlowButton();
+            panelSidebar.Controls.Add(btnSidebarQuickSave);
+
+            StyleSidebarBtn(btnSidebarNewProject, "    ✨    New Project", 120);
+            StyleSidebarBtn(btnSidebarOpenProject, "    📦    Open Project", 178);
+            StyleSidebarBtn(btnSidebarQuickSave, "    💾    Quick Save", 236);
+            StyleSidebarBtn(btnSidebarSaveProjectAs, "    📁    Save Project As", 294);
+            StyleSidebarBtn(btnSidebarOpenOIV, "    🔎    Open OIV", 352);
+            StyleSidebarBtn(btnSidebarExtractOIV, "    📤    Extract OIV", 410);
+            StyleSidebarBtn(btnSidebarBuildOIV, "    ⚒️    Build OIV", 468);
+            StyleSidebarBtn(btnCheckUpdates, "    🔄    Check for updates", 526);
             StyleSidebarBtn(btnSidebarFeedback, "    📨    Feedback", 580);
 
             btnReplaceMods.Click += btnReplaceMods_Click;
@@ -721,7 +733,36 @@ namespace MagicOGK_OIV_Builder
             replaceMenu.Items.Add(replaceWeaponsItem);
             replaceMenu.Items.Add(replacePedsItem);
         }
+        private Form? activeOverlay;
 
+        private void ShowBlurOverlay()
+        {
+            if (activeOverlay != null)
+                return;
+
+            activeOverlay = new Form
+            {
+                FormBorderStyle = FormBorderStyle.None,
+                StartPosition = FormStartPosition.Manual,
+                ShowInTaskbar = false,
+                BackColor = Color.Black,
+                Opacity = 0.55,
+                Owner = this,
+                Bounds = this.Bounds
+            };
+
+            activeOverlay.Show(this);
+        }
+
+        private void HideBlurOverlay()
+        {
+            if (activeOverlay == null)
+                return;
+
+            activeOverlay.Close();
+            activeOverlay.Dispose();
+            activeOverlay = null;
+        }
         private void PositionReplaceScreen()
         {
             if (replaceScreenPanel == null)
@@ -740,6 +781,8 @@ namespace MagicOGK_OIV_Builder
         }
         private void btnReplaceMods_Click(object sender, EventArgs e)
         {
+            ShowBlurOverlay();
+
             ReplaceMenuForm menu = new ReplaceMenuForm();
 
             // CENTER OVER MAIN FORM
@@ -752,6 +795,11 @@ namespace MagicOGK_OIV_Builder
             menu.OnClothes = () => OpenReplaceClothesMenu();
             menu.OnWeapons = () => OpenReplaceWeaponsMenu();
             menu.OnPeds = () => OpenReplacePedsMenu();
+
+            menu.FormClosed += (s, args) =>
+            {
+                HideBlurOverlay();
+            };
 
             menu.Show(this);
         }
@@ -820,7 +868,7 @@ namespace MagicOGK_OIV_Builder
 
 
 
-            var back = new Button
+            var back = new AnimatedGlowButton
             {
                 Text = "← Back",
                 Size = new Size(100, 32),
@@ -847,7 +895,7 @@ namespace MagicOGK_OIV_Builder
                 Location = new Point(140, 68)
             };
 
-            var replaceBtn = new Button
+            var replaceBtn = new AnimatedGlowButton
             {
                 Text = "Replace Selected Vehicle",
                 Size = new Size(220, 36),
@@ -1141,21 +1189,16 @@ namespace MagicOGK_OIV_Builder
 
         private Button CreateSecondaryButton(string text)
         {
-            var btn = new Button
+            var btn = new AnimatedGlowButton
             {
                 Text = text,
                 Size = new Size(140, 36),
-                BackColor = Color.FromArgb(50, 50, 50),
-                ForeColor = Color.FromArgb(200, 200, 200),
-                FlatStyle = FlatStyle.Flat,
+                BackColor = Color.FromArgb(55, 0, 0),
+                ForeColor = Color.FromArgb(235, 165, 165),
                 Font = new Font("Syne", 8F, FontStyle.Bold),
-                TabStop = false
+                TabStop = false,
+                CornerRadius = 6
             };
-
-            btn.FlatAppearance.BorderColor = Color.FromArgb(80, 80, 80);
-            btn.FlatAppearance.BorderSize = 1;
-            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(65, 65, 65);
-            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(35, 35, 35);
 
             return btn;
         }
@@ -1261,7 +1304,7 @@ namespace MagicOGK_OIV_Builder
             int imgW = 140;
             int imgH = 80;
 
-            var card = new Panel
+            AnimatedGlowPanel card = new AnimatedGlowPanel
             {
                 Width = cardW,
                 Height = cardH,
@@ -1270,7 +1313,7 @@ namespace MagicOGK_OIV_Builder
                 Cursor = Cursors.Hand,
                 Tag = spawnName
             };
-
+            /*
             card.Paint += (s, e) =>
             {
                 bool isSelected = selectedReplaceVehicle == spawnName;
@@ -1304,7 +1347,7 @@ namespace MagicOGK_OIV_Builder
                 hoveredVehicle = null;
                 card.Invalidate();
             };
-
+            */
             void HookHover(Control c)
             {
                 c.MouseEnter += (s, e) =>
@@ -1532,14 +1575,13 @@ namespace MagicOGK_OIV_Builder
                 Location = new Point(140, 68)
             };
 
-            Button replaceBtn = new Button
+            AnimatedGlowButton replaceBtn = new AnimatedGlowButton
             {
                 Text = "Replace Selected Clothes",
                 Size = new Size(220, 36),
                 Location = new Point(24, 110),
                 BackColor = Color.FromArgb(90, 0, 0),
                 ForeColor = Color.FromArgb(240, 180, 180),
-                FlatStyle = FlatStyle.Flat,
                 Font = new Font("Syne", 8F, FontStyle.Bold)
             };
             replaceBtn.FlatAppearance.BorderColor = Color.FromArgb(140, 40, 40);
@@ -1606,7 +1648,7 @@ namespace MagicOGK_OIV_Builder
             int cardW = 190;
             int cardH = 210;
 
-            Panel card = new Panel
+            AnimatedGlowPanel card = new AnimatedGlowPanel
             {
                 Width = cardW,
                 Height = cardH,
@@ -1670,8 +1712,8 @@ namespace MagicOGK_OIV_Builder
             title.Click += (s, e) => ClickCard();
             subtitle.Click += (s, e) => ClickCard();
 
-            card.MouseEnter += (s, e) => card.Invalidate();
-            card.MouseLeave += (s, e) => card.Invalidate();
+            //card.MouseEnter += (s, e) => card.Invalidate();
+            //card.MouseLeave += (s, e) => card.Invalidate();
 
             card.Controls.Add(plus);
             card.Controls.Add(title);
@@ -1685,7 +1727,7 @@ namespace MagicOGK_OIV_Builder
             int cardW = 190;
             int cardH = 210;
 
-            Panel card = new Panel
+            AnimatedGlowPanel card = new AnimatedGlowPanel
             {
                 Width = cardW,
                 Height = cardH,
@@ -1762,7 +1804,7 @@ namespace MagicOGK_OIV_Builder
                 Size = new Size(cardW - 10, 18),
                 BackColor = Color.Transparent
             };
-
+            /*
             card.Paint += (s, e) =>
             {
                 bool selected = selectedClothesCharacter == characterId;
@@ -1778,7 +1820,7 @@ namespace MagicOGK_OIV_Builder
                 using Pen pen = new Pen(borderColor, thickness);
                 e.Graphics.DrawRectangle(pen, 0, 0, card.Width - 1, card.Height - 1);
             };
-
+            */
             void SelectCharacter()
             {
                 selectedClothesCharacter = characterId;
@@ -1798,8 +1840,8 @@ namespace MagicOGK_OIV_Builder
             name.Click += (s, e) => SelectCharacter();
             file.Click += (s, e) => SelectCharacter();
 
-            card.MouseEnter += (s, e) => card.Invalidate();
-            card.MouseLeave += (s, e) => card.Invalidate();
+            //card.MouseEnter += (s, e) => card.Invalidate();
+            //card.MouseLeave += (s, e) => card.Invalidate();
 
             card.Controls.Add(pic);
             card.Controls.Add(name);
@@ -2171,18 +2213,18 @@ namespace MagicOGK_OIV_Builder
             Label fileHint = CreatePedHintLabel("Allowed: .ydd, .ytd, .ymt, .yft, .ycd. You can select multiple files at once.", 22, 304);
             rightPanel.Controls.Add(fileHint);
 
-            Button replaceBtn = new Button
+            AnimatedGlowButton replaceBtn = new AnimatedGlowButton
             {
                 Text = "Replace Selected Ped",
                 Size = new Size(250, 42),
-                Location = new Point(22, 354),
+                Location = new Point(75, 354),
                 BackColor = Color.FromArgb(95, 0, 0),
                 ForeColor = Color.FromArgb(245, 190, 190),
                 FlatStyle = FlatStyle.Flat,
                 Font = new Font("Syne", 9F, FontStyle.Bold),
                 Cursor = Cursors.Hand
             };
-            replaceBtn.FlatAppearance.BorderColor = Color.FromArgb(190, 55, 55);
+            //replaceBtn.FlatAppearance.BorderColor = Color.FromArgb(190, 55, 55);
             replaceBtn.FlatAppearance.MouseOverBackColor = Color.FromArgb(125, 0, 0);
             replaceBtn.Click += (s, e) => ReplaceSelectedPed();
             rightPanel.Controls.Add(replaceBtn);
@@ -2193,7 +2235,7 @@ namespace MagicOGK_OIV_Builder
                 ForeColor = Color.FromArgb(255, 115, 125),
                 Font = new Font("Segoe UI", 9F, FontStyle.Bold),
                 AutoSize = true,
-                Location = new Point(290, 366)
+                Location = new Point(20, 405)
             };
             rightPanel.Controls.Add(lblSelectedPedReplaceType);
 
@@ -2331,7 +2373,7 @@ namespace MagicOGK_OIV_Builder
         {
             int cardW = 165;
             int cardH = 180;
-            Panel card = new Panel
+            AnimatedGlowPanel card = new AnimatedGlowPanel
             {
                 Size = new Size(cardW, cardH),
                 BackColor = Color.FromArgb(25, 25, 25),
@@ -2383,7 +2425,7 @@ namespace MagicOGK_OIV_Builder
                 BackColor = Color.Transparent,
                 Visible = typeId == "streamed"
             };
-
+            /*
             card.Paint += (s, e) =>
             {
                 bool selected = selectedPedReplaceType == typeId;
@@ -2395,7 +2437,7 @@ namespace MagicOGK_OIV_Builder
                 e.Graphics.DrawRectangle(p, 0, 0, card.Width - 1, card.Height - 1);
                 check.Visible = selected;
             };
-
+            */
             void SelectCard()
             {
                 selectedPedReplaceType = typeId;
@@ -2417,8 +2459,8 @@ namespace MagicOGK_OIV_Builder
             iconLbl.Click += (s, e) => SelectCard();
             nameLbl.Click += (s, e) => SelectCard();
             descLbl.Click += (s, e) => SelectCard();
-            card.MouseEnter += (s, e) => card.Invalidate();
-            card.MouseLeave += (s, e) => card.Invalidate();
+            //card.MouseEnter += (s, e) => card.Invalidate();
+            //card.MouseLeave += (s, e) => card.Invalidate();
 
             card.Controls.Add(iconLbl);
             card.Controls.Add(nameLbl);
@@ -2509,7 +2551,7 @@ namespace MagicOGK_OIV_Builder
                 Location = new Point(24, 22)
             };
 
-            Button back = new Button
+            AnimatedGlowButton back = new AnimatedGlowButton
             {
                 Text = "← Back",
                 Size = new Size(100, 32),
@@ -2531,7 +2573,7 @@ namespace MagicOGK_OIV_Builder
                 Location = new Point(140, 68)
             };
 
-            Button replaceBtn = new Button
+            AnimatedGlowButton replaceBtn = new AnimatedGlowButton
             {
                 Text = "Replace Selected Weapon",
                 Size = new Size(220, 36),
@@ -2784,7 +2826,7 @@ namespace MagicOGK_OIV_Builder
             int cardW = 160;
             int cardH = 105;
 
-            Panel card = new Panel
+            AnimatedGlowPanel card = new AnimatedGlowPanel
             {
                 Width = cardW,
                 Height = cardH,
@@ -2869,7 +2911,7 @@ namespace MagicOGK_OIV_Builder
                 Size = new Size(cardW - 10, 18),
                 BackColor = Color.Transparent
             };
-
+            /*
             card.Paint += (s, e) =>
             {
                 bool selected = selectedReplaceWeapon == spawnName;
@@ -2884,7 +2926,7 @@ namespace MagicOGK_OIV_Builder
 
             card.MouseEnter += (s, e) => card.BackColor = Color.FromArgb(25, 25, 25);
             card.MouseLeave += (s, e) => card.BackColor = Color.FromArgb(16, 16, 16);
-
+            */
             void SelectWeapon()
             {
                 selectedReplaceWeapon = spawnName;
@@ -3204,7 +3246,9 @@ namespace MagicOGK_OIV_Builder
             btnBuildOIV.Click += btnBuildOIV_Click;
             panelColorPicker.Click += panelColorPicker_Click;
 
+            btnSidebarNewProject.Click += btnSidebarNewProject_Click;
             btnSidebarOpenProject.Click += btnSidebarOpenProject_Click;
+            btnSidebarQuickSave.Click += btnSidebarQuickSave_Click;
             btnSidebarSaveProjectAs.Click += btnSidebarSaveProjectAs_Click;
             btnSidebarOpenOIV.Click += btnSidebarOpenOIV_Click;
             btnSidebarExtractOIV.Click += btnSidebarExtractOIV_Click;
@@ -3249,6 +3293,8 @@ namespace MagicOGK_OIV_Builder
             panelMatrixTitle.SendToBack();
 
             // Sidebar buttons transparrency
+            btnSidebarNewProject.TransparentIdle = true;
+            btnSidebarQuickSave.TransparentIdle = true;
             if (btnSidebarOpenProject is AnimatedGlowButton b1) b1.TransparentIdle = true;
             if (btnSidebarSaveProjectAs is AnimatedGlowButton b2) b2.TransparentIdle = true;
             if (btnSidebarOpenOIV is AnimatedGlowButton b3) b3.TransparentIdle = true;
@@ -3270,14 +3316,16 @@ namespace MagicOGK_OIV_Builder
 
             Control[] sidebarButtons =
             {
-    btnSidebarOpenProject,
-    btnSidebarSaveProjectAs,
-    btnSidebarOpenOIV,
-    btnSidebarExtractOIV,
-    btnSidebarBuildOIV,
-    btnCheckUpdates,
-    btnSidebarFeedback
-};
+                btnSidebarNewProject,
+                btnSidebarOpenProject,
+                btnSidebarQuickSave,
+                btnSidebarSaveProjectAs,
+                btnSidebarOpenOIV,
+                btnSidebarExtractOIV,
+                btnSidebarBuildOIV,
+                btnCheckUpdates,
+                btnSidebarFeedback
+            };
 
             foreach (Control btn in sidebarButtons)
             {
@@ -3606,6 +3654,33 @@ namespace MagicOGK_OIV_Builder
             btnHamburger.BringToFront();
         }
 
+
+        private void btnSidebarNewProject_Click(object sender, EventArgs e)
+        {
+            if (isDirty)
+            {
+                DialogResult result = MessageBox.Show(
+                    "You have unsaved changes. Start a new project anyway?",
+                    "Unsaved Changes",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning
+                );
+
+                if (result != DialogResult.Yes)
+                    return;
+            }
+
+            currentProject = new OIVProject();
+            selectedPhotoPath = null;
+
+            LoadProjectIntoUI();
+
+            if (editorExpanded)
+                BuildEditorPanel();
+
+            RenderFileList();
+            MarkClean();
+        }
         private void btnSidebarOpenProject_Click(object sender, EventArgs e)
         {
             if (!ConfirmDiscardOrSaveChanges())
@@ -3631,6 +3706,56 @@ namespace MagicOGK_OIV_Builder
             catch (Exception ex)
             {
                 MessageBox.Show("Failed to open project: " + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+        private void btnSidebarQuickSave_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                SyncUIToProject();
+
+                if (string.IsNullOrWhiteSpace(currentProjectPath))
+                {
+                    ShowMagicInfoBox(
+                        "This project has not been saved yet.\n\nPlease choose where to save the project file.",
+                        "Create Project File"
+                    );
+
+                    using var dlg = new SaveFileDialog
+                    {
+                        Title = "Save MagicOGK Project",
+                        Filter = "MagicOGK Project (*.mogk)|*.mogk|All Files (*.*)|*.*",
+                        FileName = string.IsNullOrWhiteSpace(currentProject.ModName)
+                            ? "MyMod.mogk"
+                            : currentProject.ModName + ".mogk"
+                    };
+
+                    if (dlg.ShowDialog(this) != DialogResult.OK)
+                        return;
+
+                    currentProjectPath = dlg.FileName;
+                }
+
+                File.WriteAllText(
+                    currentProjectPath,
+                    System.Text.Json.JsonSerializer.Serialize(
+                        currentProject,
+                        new System.Text.Json.JsonSerializerOptions { WriteIndented = true }
+                    )
+                );
+
+                MarkClean();
+
+                ShowMagicInfoBox("Project saved successfully.", "Quick Save");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Quick save failed:\n\n" + ex.Message,
+                    "Save Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
 
@@ -3898,6 +4023,9 @@ namespace MagicOGK_OIV_Builder
                 .ToList();
 
             List<string> reportLines = new();
+            List<string> metadataLines = new();
+
+            metadataLines.Add("Operation\tSourceInOiv\tLocalFile\tOriginalInstallPath");
 
             foreach (XElement node in installNodes)
             {
@@ -3940,12 +4068,36 @@ namespace MagicOGK_OIV_Builder
                 string localFilePath = Path.Combine(localFolder, fileName);
                 File.Copy(extractedFile, localFilePath, true);
 
-                reportLines.Add($"{localFolderName}/{fileName}  =>  {finalTarget}");
+                string localRelativeFile = $"{localFolderName}/{fileName}".Replace("\\", "/");
+
+                string operation = node.Name.LocalName;
+
+                reportLines.Add($"{localRelativeFile}  =>  {finalTarget}");
+
+                metadataLines.Add(
+                    $"{operation}\t{source.Replace("\\", "/")}\t{localRelativeFile}\t{finalTarget}"
+                );
             }
 
             File.WriteAllLines(
                 Path.Combine(outputFolder, "_original_install_paths.txt"),
-                reportLines
+                reportLines,
+                new UTF8Encoding(false)
+            );
+
+            File.WriteAllLines(
+                Path.Combine(outputFolder, "_oiv_file_metadata.tsv"),
+                metadataLines,
+                new UTF8Encoding(false)
+            );
+
+            string metadataFolder = Path.Combine(outputFolder, "_metadata");
+            Directory.CreateDirectory(metadataFolder);
+
+            File.Copy(
+                assemblyPath,
+                Path.Combine(metadataFolder, "assembly.xml"),
+                overwrite: true
             );
 
             Directory.Delete(tempFolder, true);
@@ -4872,9 +5024,9 @@ namespace MagicOGK_OIV_Builder
             panel.Controls.Add(lbl);
 
             AddPresetButton(panel, "dlcpacks", "update/x64/dlcpacks", 10, 30);
-            AddPresetButton(panel, "levels/gta5", "x64/levels/gta5", 104, 30);
-            AddPresetButton(panel, "common/data", "common/data", 198, 30);
-            AddPresetButton(panel, "scaleform", "update/update.rpf/x64/patch/data/cdimages/scaleform_generic.rpf", 292, 30);
+            AddPresetButton(panel, "levels/gta5", "x64/levels/gta5", 200, 30);
+            AddPresetButton(panel, "common/data", "common/data", 10, 65);
+            AddPresetButton(panel, "scaleform", "update/update.rpf/x64/patch/data/cdimages/scaleform_generic.rpf", 200, 65);
 
             return panel;
         }
@@ -4928,14 +5080,14 @@ namespace MagicOGK_OIV_Builder
             innerPanel.MouseDown += DragPopup;
             panel.MouseDown += DragPopup;
 
-            Button close = new Button
+            AnimatedGlowButton close = new AnimatedGlowButton
             {
                 Text = "X",
                 Size = new Size(30, 24),
                 Location = new Point(win.Width - 38, 6),
                 BackColor = Color.FromArgb(18, 18, 18),
                 ForeColor = Color.FromArgb(220, 120, 120),
-                FlatStyle = FlatStyle.Flat,
+                //FlatStyle = FlatStyle.Flat,
                 TabStop = false
             };
 
@@ -5070,15 +5222,15 @@ namespace MagicOGK_OIV_Builder
 
         private void AddPresetButton(Panel parent, string text, string path, int x, int y)
         {
-            var btn = new Button
+            AnimatedGlowButton btn = new AnimatedGlowButton
             {
                 Text = text,
                 Tag = path,
-                Size = new Size(86, 26),
+                Size = new Size(180, 26),
                 Location = new Point(x, y),
                 BackColor = Color.FromArgb(35, 10, 10),
                 ForeColor = Color.FromArgb(190, 135, 135),
-                FlatStyle = FlatStyle.Flat,
+                //FlatStyle = FlatStyle.Flat,
                 Font = new Font("Syne", 7F, FontStyle.Bold),
                 TabStop = false
             };

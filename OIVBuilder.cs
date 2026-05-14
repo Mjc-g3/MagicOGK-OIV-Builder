@@ -27,36 +27,56 @@ namespace MagicOGK_OIV_Builder
 
             try
             {
-                // ── content/ folder: all mod files copied here, flat ─────────
-                // Per spec: source attribute = filename inside content/, no subfolders needed.
+                /// ── content/ folder: files grouped by their resolved install path ─────────
+                // Example:
+                // content\update-x64-dlcpacks-mpgunrunning-dlc.rpf\dlc.rpf
+                // content\update-update.rpf-common-data\dlclist.xml
                 string contentDir = Path.Combine(tempDir, "content");
                 Directory.CreateDirectory(contentDir);
 
-                // Build a deduplication map: source file path → safe content filename
+                // source file path → relative path inside content/
                 var sourceToContentName = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
-                var usedNames           = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                var usedContentPaths = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
 
-                int copied = 0;
-                int totalFiles = project.Files.Count;
+                List<string> originalPathLines = new();
 
                 foreach (var file in project.Files)
                 {
-                    if (sourceToContentName.ContainsKey(file.SourcePath)) continue;
-                    string installPath = ResolveInstallPath(file, project);
+                    if (sourceToContentName.ContainsKey(file.SourcePath))
+                        continue;
 
-                    string name = MakeUniqueName(
-                        installPath.Replace("\\", "__").Replace("/", "__"),
-                        usedNames);
+                    string installPath = ResolveInstallPath(file, project)
+                        .Replace("/", "\\")
+                        .Trim('\\');
 
-                    usedNames.Add(name);
-                    sourceToContentName[file.SourcePath] = name;
-                    File.Copy(file.SourcePath, Path.Combine(contentDir, name), overwrite: true);
+                    string fileName = Path.GetFileName(installPath);
 
-                    copied++;
+                    string? installFolder = Path.GetDirectoryName(installPath);
 
-                    int percent = 5 + (int)((copied / (double)Math.Max(totalFiles, 1)) * 45);
-                    progress?.Report(percent);
+                    string contentFolderName = string.IsNullOrWhiteSpace(installFolder)
+                        ? "_root"
+                        : MakeFlatFolderName(installFolder);
+
+                    string contentRelativePath = Path.Combine(contentFolderName, fileName);
+
+                    contentRelativePath = MakeUniqueContentPath(contentRelativePath, usedContentPaths);
+                    usedContentPaths.Add(contentRelativePath);
+
+                    sourceToContentName[file.SourcePath] = contentRelativePath.Replace("\\", "/");
+
+                    string destination = Path.Combine(contentDir, contentRelativePath);
+                    Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
+
+                    File.Copy(file.SourcePath, destination, overwrite: true);
+
+                    originalPathLines.Add($"{contentRelativePath.Replace("\\", "/")}  =>  {installPath}");
                 }
+
+                File.WriteAllLines(
+                    Path.Combine(contentDir, "_original_install_paths.txt"),
+                    originalPathLines,
+                    new UTF8Encoding(false)
+                );
 
                 // ── icon.png in package root ──────────────────────────────────
                 // Spec: optional, must be exactly 128×128 px, named icon.png at root.
@@ -544,5 +564,39 @@ namespace MagicOGK_OIV_Builder
             string relative = fullPath.Substring(archivePath.Length).TrimStart('\\');
             return relative;
         }
+        private static string MakeFlatFolderName(string path)
+        {
+            path = path.Replace("\\", "/").Trim('/');
+
+            foreach (char c in Path.GetInvalidFileNameChars())
+                path = path.Replace(c, '-');
+
+            return path.Replace("/", "-");
+        }
+
+        private static string MakeUniqueContentPath(string relativePath, HashSet<string> used)
+        {
+            relativePath = relativePath.Replace("/", "\\");
+
+            if (!used.Contains(relativePath))
+                return relativePath;
+
+            string folder = Path.GetDirectoryName(relativePath) ?? "";
+            string file = Path.GetFileNameWithoutExtension(relativePath);
+            string ext = Path.GetExtension(relativePath);
+
+            int i = 2;
+            string candidate;
+
+            do
+            {
+                candidate = Path.Combine(folder, $"{file}_{i}{ext}");
+                i++;
+            }
+            while (used.Contains(candidate));
+
+            return candidate;
+        }
+
     }
 }

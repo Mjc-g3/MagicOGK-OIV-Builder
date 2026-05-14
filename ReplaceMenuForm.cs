@@ -77,7 +77,7 @@ namespace MagicOGK_OIV_Builder
                 Cursor = Cursors.Hand
             };
             close.FlatAppearance.BorderSize = 0;
-            close.Click += (s, e) => Close();
+            close.Click += (s, e) => AnimateDialogOut();
             main.Controls.Add(close);
 
             Panel vehicles = CreateCard("🚗", "Vehicles", "Replace car model files", 120, 105);
@@ -91,17 +91,24 @@ namespace MagicOGK_OIV_Builder
             main.Controls.Add(weapons);
             main.Controls.Add(peds);
 
-            vehicles.Click += (s, e) => { OnVehicles?.Invoke(); Close(); };
-            clothes.Click += (s, e) => { OnClothes?.Invoke(); Close(); };
-            weapons.Click += (s, e) => { OnWeapons?.Invoke(); Close(); };
-            peds.Click += (s, e) => { OnPeds?.Invoke(); Close(); };
+            vehicles.Click += (s, e) => { OnVehicles?.Invoke(); AnimateDialogOut(); };
+            clothes.Click += (s, e) => { OnClothes?.Invoke(); AnimateDialogOut(); };
+            weapons.Click += (s, e) => { OnWeapons?.Invoke(); AnimateDialogOut(); };
+            peds.Click += (s, e) => { OnPeds?.Invoke(); AnimateDialogOut(); };
 
-            HookChildClicks(vehicles, () => { OnVehicles?.Invoke(); Close(); });
-            HookChildClicks(clothes, () => { OnClothes?.Invoke(); Close(); });
-            HookChildClicks(weapons, () => { OnWeapons?.Invoke(); Close(); });
-            HookChildClicks(peds, () => { OnPeds?.Invoke(); Close(); });
+            HookChildClicks(vehicles, () => { OnVehicles?.Invoke(); AnimateDialogOut(); });
+            HookChildClicks(clothes, () => { OnClothes?.Invoke(); AnimateDialogOut(); });
+            HookChildClicks(weapons, () => { OnWeapons?.Invoke(); AnimateDialogOut(); });
+            HookChildClicks(peds, () => { OnPeds?.Invoke(); AnimateDialogOut(); });
 
-            this.Deactivate += (s, e) => this.Close();
+            this.Deactivate += (s, e) =>
+            {
+                if (!isClosingAnimated)
+                    AnimateDialogOut();
+            };
+
+            Shown += (s, e) => AnimateDialogIn();
+            TopMost = true;
         }
 
         private Panel CreateCard(string icon, string title, string desc, int x, int y)
@@ -170,6 +177,96 @@ namespace MagicOGK_OIV_Builder
                 c.Cursor = Cursors.Hand;
                 c.Click += (s, e) => action();
             }
+        }
+        //Animated transitions
+        private void AnimateDialogIn()
+        {
+            Opacity = 0;
+
+            int finalY = Location.Y;
+            Location = new Point(Location.X, finalY - 25);
+
+            var timer = new System.Windows.Forms.Timer();
+            timer.Interval = 20;
+
+            int step = 0;
+            int maxSteps = 14;
+
+            timer.Tick += (s, e) =>
+            {
+                step++;
+
+                double t = step / (double)maxSteps;
+                double eased = 1 - Math.Pow(1 - t, 3); // ease-out
+
+                Opacity = eased;
+                Location = new Point(Location.X, finalY - 25 + (int)(25 * eased));
+
+                if (step >= maxSteps)
+                {
+                    Opacity = 1;
+                    Location = new Point(Location.X, finalY);
+                    timer.Stop();
+                    timer.Dispose();
+                }
+            };
+
+            timer.Start();
+        }
+        private bool isClosingAnimated = false;
+
+        private void AnimateDialogOut(Action? onFinished = null)
+        {
+            if (isClosingAnimated)
+                return;
+
+            isClosingAnimated = true;
+
+            int startY = Location.Y;
+
+            var timer = new System.Windows.Forms.Timer();
+            timer.Interval = 15;
+
+            int step = 0;
+            int maxSteps = 12;
+
+            timer.Tick += (s, e) =>
+            {
+                step++;
+
+                double t = step / (double)maxSteps;
+                double eased = 1 - Math.Pow(1 - t, 3);
+
+                Opacity = 1.0 - eased;
+
+                Location = new Point(
+                    Location.X,
+                    startY - (int)(20 * eased)
+                );
+
+                if (step >= maxSteps)
+                {
+                    timer.Stop();
+                    timer.Dispose();
+
+                    onFinished?.Invoke();
+
+                    base.Close();
+                }
+            };
+
+            timer.Start();
+        }
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            if (!isClosingAnimated)
+            {
+                e.Cancel = true;
+                AnimateDialogOut();
+                return;
+            }
+
+            base.OnFormClosing(e);
         }
     }
 }
