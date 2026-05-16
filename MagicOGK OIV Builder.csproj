@@ -132,6 +132,8 @@
     <None Remove="Assets\weapons\weapon_unarmed.png" />
     <None Remove="Assets\weapons\weapon_vintagepistol.png" />
     <None Remove="Assets\weapons\weapon_wrench.png" />
+    <None Remove="Keys\gtav_ng_encrypt_luts.dat" />
+    <None Remove="Keys\gtav_ng_encrypt_tables.dat" />
   </ItemGroup>
 
   <ItemGroup>
@@ -472,6 +474,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="icon.ico" />
+    <Content Include="Keys\gtav_ng_encrypt_luts.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Keys\gtav_ng_encrypt_tables.dat">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

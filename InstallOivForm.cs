@@ -162,6 +162,21 @@ namespace MagicOGK_OIV_Builder
                 return;
             }
 
+            DialogResult confirm = MessageBox.Show(
+    "This will install the selected OIV package into your GTA V mods folder.\n\n" +
+    "RPF files will be copied to /mods first if needed, and backups will be created before modification.\n\n" +
+    "Continue?",
+    "Confirm OIV Install",
+    MessageBoxButtons.YesNo,
+    MessageBoxIcon.Warning
+);
+
+            if (confirm != DialogResult.Yes)
+            {
+                Log("Install cancelled by user.");
+                return;
+            }
+
             progressBar.Style = ProgressBarStyle.Marquee;
 
             MagicOivInstaller installer = new MagicOivInstaller();

@@ -20,6 +20,8 @@ namespace MagicOGK_OIV_Builder.Services
 
             try
             {
+                ValidateNoConflictingProcesses();
+
                 Log?.Invoke("Creating temp directory...");
                 Directory.CreateDirectory(tempDir);
 
@@ -50,6 +52,22 @@ namespace MagicOGK_OIV_Builder.Services
                 int looseCount = looseNodes?.Count ?? 0;
                 int archiveCount = archiveNodes?.Count ?? 0;
                 int totalCount = looseCount + archiveCount;
+
+                XmlNodeList unsupportedNodes = doc.SelectNodes(
+    "//content/*[not(self::add) and not(self::archive)] | //content/archive/*[not(self::add)]"
+);
+
+                if (unsupportedNodes != null && unsupportedNodes.Count > 0)
+                {
+                    Log?.Invoke($"WARNING: Found {unsupportedNodes.Count} unsupported OIV action(s).");
+
+                    foreach (XmlNode unsupported in unsupportedNodes)
+                    {
+                        Log?.Invoke("Unsupported action: <" + unsupported.Name + ">");
+                    }
+
+                    Log?.Invoke("Some parts of this OIV may not install yet.");
+                }
 
                 if (totalCount == 0)
                 {
@@ -139,6 +157,7 @@ namespace MagicOGK_OIV_Builder.Services
 
                 return true;
             }
+
             catch (Exception ex)
             {
                 Log?.Invoke("ERROR:");
@@ -182,13 +201,19 @@ namespace MagicOGK_OIV_Builder.Services
                 .Replace('/', Path.DirectorySeparatorChar)
                 .Replace('\\', Path.DirectorySeparatorChar);
 
-            string fullRpfPath = Path.Combine(
+            string originalRpfPath = Path.Combine(
     gta5Path,
-    "mods",
     cleanRpfRelativePath
 );
 
-            string originalRpfPath = Path.Combine(gta5Path, cleanRpfRelativePath);
+            string modsRpfPath = Path.Combine(
+                gta5Path,
+                "mods",
+                cleanRpfRelativePath
+            );
+
+            // Always write to mods folder, never original game RPF
+            string fullRpfPath = modsRpfPath;
 
             if (!File.Exists(fullRpfPath))
             {
@@ -197,9 +222,27 @@ namespace MagicOGK_OIV_Builder.Services
 
                 Directory.CreateDirectory(Path.GetDirectoryName(fullRpfPath)!);
 
-                Log?.Invoke("Mods RPF not found. Copying original RPF to mods folder...");
+                Log?.Invoke("Mods RPF not found.");
+                Log?.Invoke("Copying original RPF into mods folder first...");
+                Log?.Invoke("FROM: " + originalRpfPath);
+                Log?.Invoke("TO: " + fullRpfPath);
+
                 File.Copy(originalRpfPath, fullRpfPath, true);
             }
+            else
+            {
+                Log?.Invoke("Using existing mods RPF:");
+                Log?.Invoke(fullRpfPath);
+            }
+
+            if (!fullRpfPath.Contains(
+        Path.Combine(gta5Path, "mods"),
+        StringComparison.OrdinalIgnoreCase))
+            {
+                throw new Exception("Safety stop: attempted to write outside the mods folder.");
+            }
+
+            BackupRpf(gta5Path, rpfRelativePath);
 
             Log?.Invoke("Opening RPF:");
             Log?.Invoke(fullRpfPath);
@@ -271,13 +314,72 @@ namespace MagicOGK_OIV_Builder.Services
 
             GTA5Hash.Init();
 
-            if (GTA5Keys.PC_NG_ENCRYPT_TABLES == null ||
-                GTA5Keys.PC_NG_ENCRYPT_LUTs == null)
+            Log?.Invoke("CodeWalker initialized.");
+        }
+
+        //backup fucntion on .rpf writing
+        private void BackupRpf(string gta5Path, string rpfPath)
+        {
+            string sourcePath = Path.Combine(
+                gta5Path,
+                "mods",
+                rpfPath.Replace('/', Path.DirectorySeparatorChar)
+                       .Replace('\\', Path.DirectorySeparatorChar)
+            );
+
+            if (!File.Exists(sourcePath))
             {
-                throw new Exception("Encryption tables were not loaded from Keys folder.");
+                Log?.Invoke("Backup skipped, RPF does not exist yet:");
+                Log?.Invoke(sourcePath);
+                return;
             }
 
-            Log?.Invoke("CodeWalker initialized.");
+            string backupRoot = Path.Combine(
+                gta5Path,
+                "mods_backup",
+                "MagicOGK",
+                DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss")
+            );
+
+            string backupPath = Path.Combine(
+                backupRoot,
+                rpfPath.Replace('/', Path.DirectorySeparatorChar)
+                       .Replace('\\', Path.DirectorySeparatorChar)
+            );
+
+            Directory.CreateDirectory(Path.GetDirectoryName(backupPath)!);
+
+            File.Copy(sourcePath, backupPath, true);
+
+            Log?.Invoke("RPF backup created:");
+            Log?.Invoke(backupPath);
+        }
+
+        //Block .rpf reading/writing if game or OpenIV is running, to prevent corruption
+        private bool IsProcessRunning(string processName)
+        {
+            return System.Diagnostics.Process
+                .GetProcessesByName(processName)
+                .Length > 0;
+        }
+        private void ValidateNoConflictingProcesses()
+        {
+            string[] blockedProcesses =
+            {
+        "GTA5",
+        "PlayGTAV",
+        "OpenIV"
+    };
+
+            foreach (string process in blockedProcesses)
+            {
+                if (IsProcessRunning(process))
+                {
+                    throw new Exception(
+                        $"Please close {process} before installing mods."
+                    );
+                }
+            }
         }
     }
 }
