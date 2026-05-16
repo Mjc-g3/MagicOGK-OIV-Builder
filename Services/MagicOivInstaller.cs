@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
+using System.Text.Json;
 using System.Xml;
 using CodeWalker.GameFiles;
+using Microsoft.Win32;
 
 namespace MagicOGK_OIV_Builder.Services
 {
@@ -11,166 +14,446 @@ namespace MagicOGK_OIV_Builder.Services
     {
         public Action<string>? Log;
 
+        // Old/simple call still works.
         public bool Install(string oivPath, string gta5Path)
+        {
+            InstallSummary summary = Install(oivPath, gta5Path, dryRun: false, progress: null);
+            return summary.Errors == 0;
+        }
+
+        // New call with dry-run + progress + summary.
+        public InstallSummary Install(
+            string oivPath,
+            string gta5Path,
+            bool dryRun,
+            IProgress<int>? progress)
         {
             string tempDir = Path.Combine(
                 Path.GetTempPath(),
                 "MagicOGK_" + Guid.NewGuid().ToString("N")
             );
 
+            var summary = new InstallSummary
+            {
+                DryRun = dryRun,
+                Gta5Path = gta5Path,
+                OivPath = oivPath
+            };
+
+            var injectedTargets = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
             try
             {
-                ValidateNoConflictingProcesses();
+                progress?.Report(0);
+
+                ValidateInputPaths(oivPath, gta5Path, summary);
+
+                if (!dryRun)
+                    ValidateNoConflictingProcesses();
+
+                Log?.Invoke(dryRun ? "Starting dry-run preview..." : "Starting OIV install...");
 
                 Log?.Invoke("Creating temp directory...");
                 Directory.CreateDirectory(tempDir);
 
                 Log?.Invoke("Extracting OIV package...");
                 ZipFile.ExtractToDirectory(oivPath, tempDir);
+                progress?.Report(10);
 
-                string assemblyPath = Directory
+                string? assemblyPath = Directory
                     .GetFiles(tempDir, "assembly.xml", SearchOption.AllDirectories)
                     .FirstOrDefault();
 
                 if (assemblyPath == null)
                 {
-                    Log?.Invoke("assembly.xml was not found.");
-                    return false;
+                    AddIssue(summary, InstallErrorCategory.XmlError, "assembly.xml was not found.", oivPath);
+                    return summary;
                 }
+
+                summary.AssemblyPath = assemblyPath;
 
                 Log?.Invoke("assembly.xml located.");
                 Log?.Invoke(assemblyPath);
 
-                InitializeCodeWalker(gta5Path);
-
                 XmlDocument doc = new XmlDocument();
                 doc.Load(assemblyPath);
+                progress?.Report(20);
 
-                XmlNodeList looseNodes = doc.SelectNodes("//content/add[@source]");
-                XmlNodeList archiveNodes = doc.SelectNodes("//content/archive/add[@source]");
-
-                int looseCount = looseNodes?.Count ?? 0;
-                int archiveCount = archiveNodes?.Count ?? 0;
-                int totalCount = looseCount + archiveCount;
-
-                XmlNodeList unsupportedNodes = doc.SelectNodes(
-    "//content/*[not(self::add) and not(self::archive)] | //content/archive/*[not(self::add)]"
-);
-
-                if (unsupportedNodes != null && unsupportedNodes.Count > 0)
-                {
-                    Log?.Invoke($"WARNING: Found {unsupportedNodes.Count} unsupported OIV action(s).");
-
-                    foreach (XmlNode unsupported in unsupportedNodes)
-                    {
-                        Log?.Invoke("Unsupported action: <" + unsupported.Name + ">");
-                    }
-
-                    Log?.Invoke("Some parts of this OIV may not install yet.");
-                }
-
-                if (totalCount == 0)
-                {
-                    Log?.Invoke("No install operations found.");
-                    return false;
-                }
-
-                Log?.Invoke($"Found {totalCount} install operation(s).");
+                string modName = ReadPackageName(doc, oivPath);
+                summary.ModName = modName;
 
                 string contentDir = Path.Combine(
                     Path.GetDirectoryName(assemblyPath)!,
                     "content"
                 );
 
-                // ── Loose files, example: <content><add source="">target</add></content>
+                XmlNodeList looseNodes = doc.SelectNodes("//content/add[@source]")!;
+                XmlNodeList archiveNodes = doc.SelectNodes("//content/archive/add[@source]")!;
+
+                ValidateUnsupportedXmlActions(doc, summary);
+
+                int looseCount = looseNodes?.Count ?? 0;
+                int archiveCount = archiveNodes?.Count ?? 0;
+                int totalCount = looseCount + archiveCount;
+
+                if (totalCount == 0)
+                {
+                    AddIssue(summary, InstallErrorCategory.XmlError, "No install operations were found in assembly.xml.", assemblyPath);
+                    return summary;
+                }
+
+                summary.TotalOperations = totalCount;
+
+                Log?.Invoke($"Found {totalCount} install operation(s).");
+                progress?.Report(30);
+
+                if (!dryRun && archiveCount > 0)
+                    InitializeCodeWalker(gta5Path);
+
+                int completed = 0;
+
                 foreach (XmlNode node in looseNodes)
                 {
-                    string source = node.Attributes["source"]?.Value ?? "";
-                    string target = node.InnerText?.Trim() ?? "";
-
-                    Log?.Invoke($"SOURCE: {source}");
-                    Log?.Invoke($"TARGET: {target}");
-                    Log?.Invoke("");
-
-                    string sourcePath = Path.Combine(
-                        contentDir,
-                        source.Replace('/', Path.DirectorySeparatorChar)
-                              .Replace('\\', Path.DirectorySeparatorChar)
-                    );
-
-                    if (!File.Exists(sourcePath))
-                    {
-                        Log?.Invoke("Source file missing: " + sourcePath);
-                        continue;
-                    }
-
-                    string targetPath = Path.Combine(
-                        gta5Path,
-                        target.Replace('/', Path.DirectorySeparatorChar)
-                              .Replace('\\', Path.DirectorySeparatorChar)
-                    );
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
-                    File.Copy(sourcePath, targetPath, true);
-
-                    Log?.Invoke("Installed loose file:");
-                    Log?.Invoke(targetPath);
+                    completed++;
+                    InstallLooseNode(node, contentDir, gta5Path, dryRun, injectedTargets, summary);
+                    ReportOperationProgress(progress, completed, totalCount);
                 }
 
-                // ── RPF/archive files, example: <archive path="update/update.rpf"><add>...</add></archive>
                 foreach (XmlNode node in archiveNodes)
                 {
-                    string source = node.Attributes["source"]?.Value ?? "";
-                    string internalPath = node.InnerText?.Trim() ?? "";
-
-                    XmlNode archiveNode = node.ParentNode!;
-                    string rpfPath = archiveNode.Attributes?["path"]?.Value ?? "";
-
-                    Log?.Invoke($"SOURCE: {source}");
-                    Log?.Invoke($"RPF PATH: {rpfPath}");
-                    Log?.Invoke($"INTERNAL PATH: {internalPath}");
-                    Log?.Invoke("");
-
-                    string sourcePath = Path.Combine(
-                        contentDir,
-                        source.Replace('/', Path.DirectorySeparatorChar)
-                              .Replace('\\', Path.DirectorySeparatorChar)
-                    );
-
-                    if (!File.Exists(sourcePath))
-                    {
-                        Log?.Invoke("Source file missing: " + sourcePath);
-                        continue;
-                    }
-
-                    byte[] fileData = File.ReadAllBytes(sourcePath);
-
-                    Log?.Invoke("RPF file ready for injection:");
-                    Log?.Invoke(Path.Combine(gta5Path, rpfPath));
-                    Log?.Invoke("Internal: " + internalPath);
-
-                    // Actual RPF write comes next
-                    InstallFileIntoRpf(gta5Path, rpfPath, internalPath, fileData);
+                    completed++;
+                    InstallArchiveNode(node, contentDir, gta5Path, dryRun, injectedTargets, summary);
+                    ReportOperationProgress(progress, completed, totalCount);
                 }
 
-                Log?.Invoke("Package parse complete.");
+                if (!dryRun && summary.Errors == 0)
+                    SaveUninstallManifest(gta5Path, modName, summary);
+
+                progress?.Report(100);
+
+                Log?.Invoke(dryRun ? "Dry-run preview complete." : "Install complete.");
+                Log?.Invoke($"Files installed/planned: {summary.FilesInstalled}");
+                Log?.Invoke($"Skipped duplicates: {summary.SkippedDuplicates}");
+                Log?.Invoke($"Warnings: {summary.Warnings}");
+                Log?.Invoke($"Errors: {summary.Errors}");
+
+                return summary;
+            }
+            catch (Exception ex)
+            {
+                AddIssue(summary, CategorizeError(ex), ex.Message, "");
+                Log?.Invoke("ERROR:");
+                Log?.Invoke(ex.Message);
+                return summary;
+            }
+            finally
+            {
+                try
+                {
+                    if (Directory.Exists(tempDir))
+                        Directory.Delete(tempDir, true);
+                }
+                catch
+                {
+                    // Temp cleanup should never break install result.
+                }
+            }
+        }
+
+        public bool Uninstall(string gta5Path, string manifestPath, IProgress<int>? progress = null)
+        {
+            try
+            {
+                ValidateNoConflictingProcesses();
+
+                if (!File.Exists(manifestPath))
+                    throw new FileNotFoundException("Uninstall manifest not found.", manifestPath);
+
+                Log?.Invoke("Reading uninstall manifest...");
+
+                string json = File.ReadAllText(manifestPath);
+
+                UninstallManifest? manifest =
+                    System.Text.Json.JsonSerializer.Deserialize<UninstallManifest>(json);
+
+                if (manifest == null)
+                    throw new Exception("Could not read uninstall manifest.");
+
+                int total = manifest.InstalledFiles.Count;
+                int done = 0;
+
+                foreach (string relativeFile in manifest.InstalledFiles)
+                {
+                    string fullPath = Path.Combine(
+                        gta5Path,
+                        relativeFile.Replace('/', Path.DirectorySeparatorChar)
+                                    .Replace('\\', Path.DirectorySeparatorChar)
+                    );
+
+                    if (File.Exists(fullPath))
+                    {
+                        File.Delete(fullPath);
+                        Log?.Invoke("Deleted: " + fullPath);
+                    }
+                    else
+                    {
+                        Log?.Invoke("Skipped missing file: " + fullPath);
+                    }
+
+                    done++;
+
+                    if (total > 0)
+                        progress?.Report((int)((done / (double)total) * 100));
+                }
+
+                progress?.Report(100);
+                Log?.Invoke("Uninstall complete.");
 
                 return true;
             }
-
             catch (Exception ex)
             {
-                Log?.Invoke("ERROR:");
+                Log?.Invoke("UNINSTALL ERROR:");
                 Log?.Invoke(ex.Message);
                 return false;
             }
+        }
 
+        private void InstallLooseNode(
+            XmlNode node,
+            string contentDir,
+            string gta5Path,
+            bool dryRun,
+            HashSet<string> injectedTargets,
+            InstallSummary summary)
+        {
+            string source = node.Attributes?["source"]?.Value ?? "";
+            string target = node.InnerText?.Trim() ?? "";
+
+            Log?.Invoke($"SOURCE: {source}");
+            Log?.Invoke($"TARGET: {target}");
+            Log?.Invoke("");
+
+            if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(target))
+            {
+                AddIssue(summary, InstallErrorCategory.XmlError, "Loose file operation is missing source or target.", target);
+                return;
+            }
+
+            string duplicateKey = "loose:" + NormalizeGamePath(target);
+            if (AlreadyInjected(injectedTargets, duplicateKey))
+            {
+                summary.SkippedDuplicates++;
+                AddIssue(summary, InstallErrorCategory.DuplicateInjection, "Duplicate loose file injection skipped.", target, warningOnly: true);
+                return;
+            }
+
+            string sourcePath = Path.Combine(
+                contentDir,
+                source.Replace('/', Path.DirectorySeparatorChar)
+                      .Replace('\\', Path.DirectorySeparatorChar)
+            );
+
+            if (!File.Exists(sourcePath))
+            {
+                AddIssue(summary, InstallErrorCategory.FileError, "Source file missing: " + sourcePath, source);
+                return;
+            }
+
+            string targetPath = Path.Combine(
+                gta5Path,
+                target.Replace('/', Path.DirectorySeparatorChar)
+                      .Replace('\\', Path.DirectorySeparatorChar)
+            );
+
+            summary.FilesInstalled++;
+            summary.InstalledFiles.Add(targetPath);
+
+            if (dryRun)
+            {
+                Log?.Invoke("[DRY RUN] Would install loose file:");
+                Log?.Invoke(targetPath);
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
+            File.Copy(sourcePath, targetPath, true);
+
+            Log?.Invoke("Installed loose file:");
+            Log?.Invoke(targetPath);
+        }
+
+        private void InstallArchiveNode(
+            XmlNode node,
+            string contentDir,
+            string gta5Path,
+            bool dryRun,
+            HashSet<string> injectedTargets,
+            InstallSummary summary)
+        {
+            string source = node.Attributes?["source"]?.Value ?? "";
+            string internalPath = node.InnerText?.Trim() ?? "";
+
+            XmlNode archiveNode = node.ParentNode!;
+            string rpfPath = archiveNode.Attributes?["path"]?.Value ?? "";
+
+            Log?.Invoke($"SOURCE: {source}");
+            Log?.Invoke($"RPF PATH: {rpfPath}");
+            Log?.Invoke($"INTERNAL PATH: {internalPath}");
+            Log?.Invoke("");
+
+            if (string.IsNullOrWhiteSpace(source) ||
+                string.IsNullOrWhiteSpace(rpfPath) ||
+                string.IsNullOrWhiteSpace(internalPath))
+            {
+                AddIssue(summary, InstallErrorCategory.XmlError, "Archive operation is missing source, RPF path, or internal path.", rpfPath);
+                return;
+            }
+
+            string duplicateKey =
+                "rpf:" +
+                NormalizeGamePath(rpfPath) +
+                "::" +
+                NormalizeGamePath(internalPath);
+
+            if (AlreadyInjected(injectedTargets, duplicateKey))
+            {
+                summary.SkippedDuplicates++;
+                AddIssue(summary, InstallErrorCategory.DuplicateInjection, "Duplicate RPF file injection skipped.", duplicateKey, warningOnly: true);
+                return;
+            }
+
+            string sourcePath = Path.Combine(
+                contentDir,
+                source.Replace('/', Path.DirectorySeparatorChar)
+                      .Replace('\\', Path.DirectorySeparatorChar)
+            );
+
+            if (!File.Exists(sourcePath))
+            {
+                AddIssue(summary, InstallErrorCategory.FileError, "Source file missing: " + sourcePath, source);
+                return;
+            }
+
+            string targetRpfPath = Path.Combine(
+                gta5Path,
+                "mods",
+                rpfPath.Replace('/', Path.DirectorySeparatorChar)
+                       .Replace('\\', Path.DirectorySeparatorChar)
+            );
+
+            summary.FilesInstalled++;
+            summary.InstalledFiles.Add(targetRpfPath + "::" + internalPath);
+
+            if (!summary.ModifiedXmlFiles.Contains(targetRpfPath, StringComparer.OrdinalIgnoreCase))
+                summary.ModifiedXmlFiles.Add(targetRpfPath);
+
+            if (dryRun)
+            {
+                Log?.Invoke("[DRY RUN] Would inject file into RPF:");
+                Log?.Invoke(targetRpfPath);
+                Log?.Invoke("Internal: " + internalPath);
+                return;
+            }
+
+            byte[] fileData = File.ReadAllBytes(sourcePath);
+
+            Log?.Invoke("RPF file ready for injection:");
+            Log?.Invoke(targetRpfPath);
+            Log?.Invoke("Internal: " + internalPath);
+
+            InstallFileIntoRpf(gta5Path, rpfPath, internalPath, fileData);
+        }
+
+        private void ValidateUnsupportedXmlActions(XmlDocument doc, InstallSummary summary)
+        {
+            XmlNodeList unsupportedNodes = doc.SelectNodes(
+                "//content/*[not(self::add) and not(self::archive)] | //content/archive/*[not(self::add)]"
+            )!;
+
+            if (unsupportedNodes == null || unsupportedNodes.Count == 0)
+                return;
+
+            Log?.Invoke($"WARNING: Found {unsupportedNodes.Count} unsupported OIV action(s).");
+
+            foreach (XmlNode unsupported in unsupportedNodes)
+            {
+                string target = unsupported.InnerText?.Trim() ?? "";
+                string operation = unsupported.Name;
+
+                AddIssue(
+                    summary,
+                    InstallErrorCategory.UnsupportedOperation,
+                    "Unsupported OIV/XML action: <" + operation + ">",
+                    target,
+                    warningOnly: true
+                );
+
+                Log?.Invoke("Unsupported action: <" + operation + ">");
+            }
+
+            Log?.Invoke("Some parts of this OIV may not install yet.");
+        }
+
+        private void ValidateInputPaths(string oivPath, string gta5Path, InstallSummary summary)
+        {
+            if (string.IsNullOrWhiteSpace(oivPath) || !File.Exists(oivPath))
+            {
+                AddIssue(summary, InstallErrorCategory.FileError, "OIV file does not exist.", oivPath);
+                throw new FileNotFoundException("OIV file does not exist.", oivPath);
+            }
+
+            if (string.IsNullOrWhiteSpace(gta5Path) || !Directory.Exists(gta5Path))
+            {
+                AddIssue(summary, InstallErrorCategory.PathError, "GTA V path does not exist.", gta5Path);
+                throw new DirectoryNotFoundException("GTA V path does not exist: " + gta5Path);
+            }
+
+            string gtaExe = Path.Combine(gta5Path, "GTA5.exe");
+            if (!File.Exists(gtaExe))
+            {
+                AddIssue(summary, InstallErrorCategory.PathError, "GTA5.exe was not found in the selected GTA V folder.", gta5Path);
+                throw new FileNotFoundException("GTA5.exe was not found in the selected GTA V folder.", gtaExe);
+            }
+        }
+
+        private string ReadPackageName(XmlDocument doc, string oivPath)
+        {
+            string? name =
+                doc.SelectSingleNode("//metadata/name")?.InnerText?.Trim() ??
+                doc.SelectSingleNode("//name")?.InnerText?.Trim();
+
+            if (!string.IsNullOrWhiteSpace(name))
+                return MakeSafeFileName(name);
+
+            return MakeSafeFileName(Path.GetFileNameWithoutExtension(oivPath));
+        }
+
+        private string MakeSafeFileName(string value)
+        {
+            foreach (char c in Path.GetInvalidFileNameChars())
+                value = value.Replace(c, '_');
+
+            return string.IsNullOrWhiteSpace(value) ? "Unknown_Mod" : value;
+        }
+
+        private void ReportOperationProgress(IProgress<int>? progress, int completed, int total)
+        {
+            if (total <= 0)
+            {
+                progress?.Report(100);
+                return;
+            }
+
+            int percent = 30 + (int)Math.Round((completed / (double)total) * 65.0);
+            percent = Math.Max(30, Math.Min(95, percent));
+            progress?.Report(percent);
         }
 
         private bool TrySplitRpfTarget(
-    string target,
-    out string rpfPath,
-    out string internalPath)
+            string target,
+            out string rpfPath,
+            out string internalPath)
         {
             rpfPath = "";
             internalPath = "";
@@ -192,19 +475,19 @@ namespace MagicOGK_OIV_Builder.Services
         }
 
         private void InstallFileIntoRpf(
-    string gta5Path,
-    string rpfRelativePath,
-    string internalPath,
-    byte[] fileData)
+            string gta5Path,
+            string rpfRelativePath,
+            string internalPath,
+            byte[] fileData)
         {
             string cleanRpfRelativePath = rpfRelativePath
                 .Replace('/', Path.DirectorySeparatorChar)
                 .Replace('\\', Path.DirectorySeparatorChar);
 
             string originalRpfPath = Path.Combine(
-    gta5Path,
-    cleanRpfRelativePath
-);
+                gta5Path,
+                cleanRpfRelativePath
+            );
 
             string modsRpfPath = Path.Combine(
                 gta5Path,
@@ -235,9 +518,9 @@ namespace MagicOGK_OIV_Builder.Services
                 Log?.Invoke(fullRpfPath);
             }
 
-            if (!fullRpfPath.Contains(
-        Path.Combine(gta5Path, "mods"),
-        StringComparison.OrdinalIgnoreCase))
+            if (!fullRpfPath.StartsWith(
+                Path.Combine(gta5Path, "mods"),
+                StringComparison.OrdinalIgnoreCase))
             {
                 throw new Exception("Safety stop: attempted to write outside the mods folder.");
             }
@@ -250,9 +533,9 @@ namespace MagicOGK_OIV_Builder.Services
             RpfFile rpf = new RpfFile(fullRpfPath, cleanRpfRelativePath);
 
             rpf.ScanStructure(
-    msg => { },
-    msg => Log?.Invoke(msg)
-);
+                msg => { },
+                msg => Log?.Invoke(msg)
+            );
 
             Log?.Invoke("RPF loaded.");
 
@@ -274,7 +557,7 @@ namespace MagicOGK_OIV_Builder.Services
 
                 foreach (string part in parts)
                 {
-                    RpfDirectoryEntry nextDir = dir.Directories
+                    RpfDirectoryEntry? nextDir = dir.Directories
                         .FirstOrDefault(d =>
                             d.Name.Equals(part, StringComparison.OrdinalIgnoreCase));
 
@@ -317,7 +600,6 @@ namespace MagicOGK_OIV_Builder.Services
             Log?.Invoke("CodeWalker initialized.");
         }
 
-        //backup fucntion on .rpf writing
         private void BackupRpf(string gta5Path, string rpfPath)
         {
             string sourcePath = Path.Combine(
@@ -355,21 +637,21 @@ namespace MagicOGK_OIV_Builder.Services
             Log?.Invoke(backupPath);
         }
 
-        //Block .rpf reading/writing if game or OpenIV is running, to prevent corruption
         private bool IsProcessRunning(string processName)
         {
             return System.Diagnostics.Process
                 .GetProcessesByName(processName)
                 .Length > 0;
         }
+
         private void ValidateNoConflictingProcesses()
         {
             string[] blockedProcesses =
             {
-        "GTA5",
-        "PlayGTAV",
-        "OpenIV"
-    };
+                "GTA5",
+                "PlayGTAV",
+                "OpenIV"
+            };
 
             foreach (string process in blockedProcesses)
             {
@@ -380,6 +662,248 @@ namespace MagicOGK_OIV_Builder.Services
                     );
                 }
             }
+        }
+
+        private void AddIssue(
+            InstallSummary summary,
+            InstallErrorCategory category,
+            string message,
+            string targetPath,
+            bool warningOnly = false)
+        {
+            if (warningOnly)
+                summary.Warnings++;
+            else
+                summary.Errors++;
+
+            summary.Issues.Add(new InstallIssue
+            {
+                Category = category,
+                Message = message,
+                TargetPath = targetPath ?? ""
+            });
+
+            Log?.Invoke((warningOnly ? "WARNING: " : "ERROR: ") + message);
+
+            if (!string.IsNullOrWhiteSpace(targetPath))
+                Log?.Invoke("Target: " + targetPath);
+        }
+
+        private InstallErrorCategory CategorizeError(Exception ex)
+        {
+            string msg = ex.Message.ToLowerInvariant();
+
+            if (msg.Contains("rpf")) return InstallErrorCategory.RpfError;
+            if (msg.Contains("xml")) return InstallErrorCategory.XmlError;
+            if (msg.Contains("unauthorized") || msg.Contains("access denied")) return InstallErrorCategory.PermissionError;
+            if (msg.Contains("path")) return InstallErrorCategory.PathError;
+            if (msg.Contains("duplicate")) return InstallErrorCategory.DuplicateInjection;
+            if (ex is FileNotFoundException || ex is IOException) return InstallErrorCategory.FileError;
+            if (ex is XmlException) return InstallErrorCategory.XmlError;
+            if (ex is UnauthorizedAccessException) return InstallErrorCategory.PermissionError;
+
+            return InstallErrorCategory.Unknown;
+        }
+
+        private bool AlreadyInjected(HashSet<string> installedTargets, string targetPath)
+        {
+            string normalized = NormalizeGamePath(targetPath);
+            return !installedTargets.Add(normalized);
+        }
+
+        private string NormalizeGamePath(string path)
+        {
+            return (path ?? "")
+                .Replace("\\", "/")
+                .Trim()
+                .TrimStart('/')
+                .ToLowerInvariant();
+        }
+
+        private void SaveUninstallManifest(string gtaPath, string modName, InstallSummary summary)
+        {
+            var manifest = new UninstallManifest
+            {
+                ModName = modName,
+                InstalledFiles = summary.InstalledFiles,
+                ModifiedXmlFiles = summary.ModifiedXmlFiles
+            };
+
+            string dir = Path.Combine(gtaPath, "MagicOGK_UninstallLogs");
+            Directory.CreateDirectory(dir);
+
+            string path = Path.Combine(dir, modName + "_manifest.json");
+
+            string json = JsonSerializer.Serialize(
+                manifest,
+                new JsonSerializerOptions { WriteIndented = true });
+
+            File.WriteAllText(path, json);
+
+            Log?.Invoke("Uninstall manifest saved:");
+            Log?.Invoke(path);
+        }
+
+        public static string? DetectGtaVPath()
+        {
+            string[] registryKeys =
+            {
+                @"SOFTWARE\WOW6432Node\Rockstar Games\Grand Theft Auto V",
+                @"SOFTWARE\Rockstar Games\Grand Theft Auto V"
+            };
+
+            foreach (string keyPath in registryKeys)
+            {
+                using RegistryKey? key = Registry.LocalMachine.OpenSubKey(keyPath);
+                string? path = key?.GetValue("InstallFolder") as string;
+
+                if (!string.IsNullOrWhiteSpace(path) && Directory.Exists(path))
+                    return path;
+            }
+
+            string? steamPath = DetectSteamGtaPath();
+            if (!string.IsNullOrWhiteSpace(steamPath))
+                return steamPath;
+
+            string? epicPath = DetectEpicGtaPath();
+            if (!string.IsNullOrWhiteSpace(epicPath))
+                return epicPath;
+
+            return null;
+        }
+
+        private static string? DetectSteamGtaPath()
+        {
+            string steamKey = @"SOFTWARE\WOW6432Node\Valve\Steam";
+
+            using RegistryKey? key = Registry.LocalMachine.OpenSubKey(steamKey);
+            string? steamPath = key?.GetValue("InstallPath") as string;
+
+            if (string.IsNullOrWhiteSpace(steamPath))
+                return null;
+
+            string defaultPath = Path.Combine(
+                steamPath,
+                @"steamapps\common\Grand Theft Auto V");
+
+            if (Directory.Exists(defaultPath))
+                return defaultPath;
+
+            string libraryFile = Path.Combine(steamPath, @"steamapps\libraryfolders.vdf");
+            if (!File.Exists(libraryFile))
+                return null;
+
+            foreach (string line in File.ReadAllLines(libraryFile))
+            {
+                string trimmed = line.Trim();
+
+                if (!trimmed.Contains("\"path\""))
+                    continue;
+
+                string[] parts = trimmed.Split('"', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length < 4)
+                    continue;
+
+                string libraryPath = parts[3].Replace(@"\\", @"\");
+
+                string gtaPath = Path.Combine(
+                    libraryPath,
+                    @"steamapps\common\Grand Theft Auto V");
+
+                if (Directory.Exists(gtaPath))
+                    return gtaPath;
+            }
+
+            return null;
+        }
+
+        private static string? DetectEpicGtaPath()
+        {
+            string manifestsPath = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData),
+                @"Epic\EpicGamesLauncher\Data\Manifests"
+            );
+
+            if (!Directory.Exists(manifestsPath))
+                return null;
+
+            foreach (string file in Directory.GetFiles(manifestsPath, "*.item"))
+            {
+                string text = File.ReadAllText(file);
+
+                if (!text.Contains("Grand Theft Auto V", StringComparison.OrdinalIgnoreCase) &&
+                    !text.Contains("GTA", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                const string installLocationToken = "\"InstallLocation\"";
+                int tokenIndex = text.IndexOf(installLocationToken, StringComparison.OrdinalIgnoreCase);
+                if (tokenIndex < 0)
+                    continue;
+
+                int colonIndex = text.IndexOf(':', tokenIndex);
+                int firstQuote = text.IndexOf('"', colonIndex + 1);
+                int secondQuote = text.IndexOf('"', firstQuote + 1);
+
+                if (firstQuote < 0 || secondQuote < 0)
+                    continue;
+
+                string installPath = text.Substring(firstQuote + 1, secondQuote - firstQuote - 1)
+                    .Replace(@"\\", @"\");
+
+                if (Directory.Exists(installPath))
+                    return installPath;
+            }
+
+            return null;
+        }
+
+        public enum InstallErrorCategory
+        {
+            None,
+            RpfError,
+            XmlError,
+            FileError,
+            PathError,
+            UnsupportedOperation,
+            DuplicateInjection,
+            PermissionError,
+            Unknown
+        }
+
+        public class InstallIssue
+        {
+            public InstallErrorCategory Category { get; set; }
+            public string Message { get; set; } = "";
+            public string TargetPath { get; set; } = "";
+        }
+
+        public class InstallSummary
+        {
+            public bool DryRun { get; set; }
+            public string ModName { get; set; } = "";
+            public string OivPath { get; set; } = "";
+            public string Gta5Path { get; set; } = "";
+            public string AssemblyPath { get; set; } = "";
+            public int TotalOperations { get; set; }
+            public int FilesInstalled { get; set; }
+            public int XmlPatchesApplied { get; set; }
+            public int SkippedDuplicates { get; set; }
+            public int Warnings { get; set; }
+            public int Errors { get; set; }
+
+            public List<string> InstalledFiles { get; set; } = new();
+            public List<string> ModifiedXmlFiles { get; set; } = new();
+            public List<InstallIssue> Issues { get; set; } = new();
+
+            public bool Success => Errors == 0;
+        }
+
+        public class UninstallManifest
+        {
+            public DateTime InstalledAt { get; set; } = DateTime.Now;
+            public string ModName { get; set; } = "";
+            public List<string> InstalledFiles { get; set; } = new();
+            public List<string> ModifiedXmlFiles { get; set; } = new();
         }
     }
 }

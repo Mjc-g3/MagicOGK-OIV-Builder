@@ -17,7 +17,7 @@ namespace MagicOGK_OIV_Builder
         private void InitializeComponent()
         {
             //buttons animated
-            btnReplaceMods = new AnimatedGlowButton();
+            btnReplaceMods = new Button();
             btnSidebarOpenProject = new AnimatedGlowButton();
             btnSidebarSaveProjectAs = new AnimatedGlowButton();
             btnSidebarOpenOIV = new AnimatedGlowButton();
@@ -25,10 +25,10 @@ namespace MagicOGK_OIV_Builder
             btnSidebarBuildOIV = new AnimatedGlowButton();
             btnCheckUpdates = new AnimatedGlowButton();
             btnSidebarFeedback = new AnimatedGlowButton();
-            btnAddPhoto = new AnimatedGlowButton();
-            btnOpenEditor = new AnimatedGlowButton();
-            btnBuildOIV = new AnimatedGlowButton();
-            btnAddFiles = new AnimatedGlowButton();
+            btnAddPhoto = new Button();
+            btnOpenEditor = new Button();
+            btnBuildOIV = new Button();
+            btnAddFiles = new Button();
             //panel animated
             panelColorPicker = new AnimatedGlowPanel();
 
@@ -164,7 +164,7 @@ namespace MagicOGK_OIV_Builder
             // 
             // btnReplaceMods
             // 
-            btnReplaceMods.BackColor = Color.FromArgb(64, 0, 0);
+            btnReplaceMods.BackColor = ThemeRedButton;
             btnReplaceMods.FlatAppearance.BorderColor = Color.FromArgb(110, 40, 40);
             btnReplaceMods.FlatStyle = FlatStyle.Flat;
             btnReplaceMods.Font = new Font("Syne", 11F);
@@ -400,6 +400,7 @@ namespace MagicOGK_OIV_Builder
             btnAddPhoto.Name = "btnAddPhoto";
             btnAddPhoto.Size = new Size(75, 23);
             btnAddPhoto.TabIndex = 0;
+            BackColor = ThemeRedButton;
             // 
             // btnOpenEditor
             // 
@@ -407,6 +408,7 @@ namespace MagicOGK_OIV_Builder
             btnOpenEditor.Name = "btnOpenEditor";
             btnOpenEditor.Size = new Size(75, 23);
             btnOpenEditor.TabIndex = 0;
+            BackColor = ThemeRedButton;
             // 
             // btnBuildOIV
             // 
@@ -414,6 +416,7 @@ namespace MagicOGK_OIV_Builder
             btnBuildOIV.Name = "btnBuildOIV";
             btnBuildOIV.Size = new Size(75, 23);
             btnBuildOIV.TabIndex = 0;
+            BackColor = ThemeRedButton;
             // 
             // btnAddFiles
             // 

@@ -16,6 +16,7 @@ namespace MagicOGK_OIV_Builder
         private Button btnInstall;
         private ProgressBar progressBar;
         private TextBox txtLog;
+        private TextBox txtGtaPath;
 
         public InstallOivForm(string gta5Path)
         {
@@ -51,7 +52,7 @@ namespace MagicOGK_OIV_Builder
                 Location = new Point(24, 62)
             };
 
-            TextBox txtGtaPath = new TextBox
+            txtGtaPath = new TextBox
             {
                 Text = gta5Path,
                 ReadOnly = true,
@@ -106,6 +107,36 @@ namespace MagicOGK_OIV_Builder
             };
             btnInstall.FlatAppearance.BorderSize = 0;
             btnInstall.Click += BtnInstall_Click;
+
+            Button btnAutoDetectGtaPath = new Button
+            {
+                Text = "AUTO-DETECT",
+                Size = new Size(120, 28),
+                BackColor = Color.FromArgb(120, 18, 24),
+                ForeColor = Color.FromArgb(240, 190, 190),
+                FlatStyle = FlatStyle.Flat
+            };
+
+            btnAutoDetectGtaPath.FlatAppearance.BorderSize = 0;
+            btnAutoDetectGtaPath.Click += BtnAutoDetectGtaPath_Click;
+
+            Button btnUninstallOiv = new Button
+            {
+                Text = "UNINSTALL OIV",
+                Size = new Size(140, 28),
+                BackColor = Color.FromArgb(55, 0, 0),
+                ForeColor = Color.FromArgb(240, 190, 190),
+                FlatStyle = FlatStyle.Flat
+            };
+
+            btnUninstallOiv.FlatAppearance.BorderSize = 0;
+            btnUninstallOiv.Click += BtnUninstallOiv_Click;
+
+            btnAutoDetectGtaPath.Location = new Point(24, 112);
+            btnUninstallOiv.Location = new Point(435, 182);
+
+            Controls.Add(btnAutoDetectGtaPath);
+            Controls.Add(btnUninstallOiv);
 
             progressBar = new ProgressBar
             {
@@ -183,7 +214,7 @@ namespace MagicOGK_OIV_Builder
 
             installer.Log = Log;
 
-            bool result = installer.Install(selectedOivPath, gta5Path);
+            bool result = installer.Install(selectedOivPath, txtGtaPath.Text.Trim());
 
             progressBar.Style = ProgressBarStyle.Blocks;
 
@@ -196,7 +227,82 @@ namespace MagicOGK_OIV_Builder
                 Log("Installer validation failed.");
             }
         }
+        private void BtnAutoDetectGtaPath_Click(object sender, EventArgs e)
+        {
+            string? detectedPath = MagicOivInstaller.DetectGtaVPath();
 
+            if (string.IsNullOrWhiteSpace(detectedPath))
+            {
+                MessageBox.Show(
+                    "Could not auto-detect GTA V path.",
+                    "Auto-detect failed",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+
+                return;
+            }
+
+            txtGtaPath.Text = detectedPath;
+            Log("Auto-detected GTA V path: " + detectedPath);
+        }
+        private void BtnUninstallOiv_Click(object sender, EventArgs e)
+        {
+            string gamePath = txtGtaPath.Text.Trim();
+
+            if (string.IsNullOrWhiteSpace(gamePath) ||
+                !File.Exists(Path.Combine(gamePath, "GTA5.exe")))
+            {
+                MessageBox.Show(
+                    "Please select or auto-detect a valid GTA V folder first.",
+                    "Invalid GTA V Path",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning
+                );
+
+                return;
+            }
+
+            string manifestDir = Path.Combine(gamePath, "MagicOGK_UninstallLogs");
+
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Select uninstall manifest",
+                Filter = "MagicOGK Manifest (*.json)|*.json",
+                InitialDirectory = Directory.Exists(manifestDir) ? manifestDir : gamePath
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            DialogResult confirm = MessageBox.Show(
+                "This will uninstall files listed in the selected manifest.\n\nContinue?",
+                "Confirm Uninstall",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+            if (confirm != DialogResult.Yes)
+                return;
+
+            var installer = new MagicOivInstaller();
+            installer.Log = Log;
+
+            var progress = new Progress<int>(percent =>
+            {
+                progressBar.Style = ProgressBarStyle.Blocks;
+                progressBar.Value = Math.Max(0, Math.Min(100, percent));
+            });
+
+            bool ok = installer.Uninstall(gamePath, dlg.FileName, progress);
+
+            MessageBox.Show(
+                ok ? "Uninstall complete." : "Uninstall failed. Check the log.",
+                "MagicOGK",
+                MessageBoxButtons.OK,
+                ok ? MessageBoxIcon.Information : MessageBoxIcon.Error
+            );
+        }
         private void Log(string message)
         {
             txtLog.AppendText($"[{DateTime.Now:HH:mm:ss}] {message}{Environment.NewLine}");

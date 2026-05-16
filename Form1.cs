@@ -14,6 +14,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.Design;
 using System.Xml;
 using System.Xml.Linq;
+using MagicOGK_OIV_Builder.Services;
 using Microsoft.VisualBasic.Logging;
 using Microsoft.Web.WebView2.Core;
 using NetSparkleUpdater;
@@ -119,7 +120,7 @@ namespace MagicOGK_OIV_Builder
         private static readonly Color ThemeBg = Color.FromArgb(13, 13, 13);
         private static readonly Color ThemePanel = Color.FromArgb(18, 18, 18);
 
-        private static readonly Color ThemeRedButton = Color.FromArgb(92, 18, 22);
+        private static readonly Color ThemeRedButton = Color.FromArgb(120, 18, 24);
         private static readonly Color ThemeRedHover = Color.FromArgb(125, 32, 38);
 
         private static readonly Color ThemeText = Color.FromArgb(210, 150, 150);
@@ -138,7 +139,9 @@ namespace MagicOGK_OIV_Builder
 
             SetupLeftPanelControls();
             SetupRightPanelControls();
+            AddMainInstallerExtraButtons();
             ApplyCleanLeftPanelLayout();
+            ApplyThemeColors();
 
             btnSidebarNewProject = new AnimatedGlowButton();
             panelSidebar.Controls.Add(btnSidebarNewProject);
@@ -877,7 +880,7 @@ namespace MagicOGK_OIV_Builder
 
 
 
-            var back = new AnimatedGlowButton
+            var back = new Button
             {
                 Text = "← Back",
                 Size = new Size(100, 32),
@@ -904,7 +907,7 @@ namespace MagicOGK_OIV_Builder
                 Location = new Point(140, 68)
             };
 
-            var replaceBtn = new AnimatedGlowButton
+            var replaceBtn = new Button
             {
                 Text = "Replace Selected Vehicle",
                 Size = new Size(220, 36),
@@ -1198,7 +1201,7 @@ namespace MagicOGK_OIV_Builder
 
         private Button CreateSecondaryButton(string text)
         {
-            var btn = new AnimatedGlowButton
+            var btn = new Button
             {
                 Text = text,
                 Size = new Size(140, 36),
@@ -1206,7 +1209,6 @@ namespace MagicOGK_OIV_Builder
                 ForeColor = Color.FromArgb(235, 165, 165),
                 Font = new Font("Syne", 8F, FontStyle.Bold),
                 TabStop = false,
-                CornerRadius = 6
             };
 
             return btn;
@@ -1584,7 +1586,7 @@ namespace MagicOGK_OIV_Builder
                 Location = new Point(140, 68)
             };
 
-            AnimatedGlowButton replaceBtn = new AnimatedGlowButton
+            Button replaceBtn = new Button
             {
                 Text = "Replace Selected Clothes",
                 Size = new Size(220, 36),
@@ -2222,7 +2224,7 @@ namespace MagicOGK_OIV_Builder
             Label fileHint = CreatePedHintLabel("Allowed: .ydd, .ytd, .ymt, .yft, .ycd. You can select multiple files at once.", 22, 304);
             rightPanel.Controls.Add(fileHint);
 
-            AnimatedGlowButton replaceBtn = new AnimatedGlowButton
+            Button replaceBtn = new Button
             {
                 Text = "Replace Selected Ped",
                 Size = new Size(250, 42),
@@ -2560,7 +2562,7 @@ namespace MagicOGK_OIV_Builder
                 Location = new Point(24, 22)
             };
 
-            AnimatedGlowButton back = new AnimatedGlowButton
+            Button back = new Button
             {
                 Text = "← Back",
                 Size = new Size(100, 32),
@@ -2582,7 +2584,7 @@ namespace MagicOGK_OIV_Builder
                 Location = new Point(140, 68)
             };
 
-            AnimatedGlowButton replaceBtn = new AnimatedGlowButton
+            Button replaceBtn = new Button
             {
                 Text = "Replace Selected Weapon",
                 Size = new Size(220, 36),
@@ -3286,17 +3288,6 @@ namespace MagicOGK_OIV_Builder
             AddPressAnimation(btnAddPhoto);
             AddPressAnimation(btnReplaceMods);
 
-            // Button colors
-            ((AnimatedGlowButton)btnAddPhoto).TransparentIdle = false;
-            ((AnimatedGlowButton)btnOpenEditor).TransparentIdle = false;
-            ((AnimatedGlowButton)btnReplaceMods).TransparentIdle = false;
-            ((AnimatedGlowButton)btnBuildOIV).TransparentIdle = false;
-
-            btnAddPhoto.BackColor = Color.FromArgb(92, 0, 0);
-            btnOpenEditor.BackColor = Color.FromArgb(92, 0, 0);
-            btnReplaceMods.BackColor = Color.FromArgb(92, 0, 0);
-            btnBuildOIV.BackColor = Color.FromArgb(92, 0, 0);
-
             //Galaxy Sidebar Fill
             panelMatrixTitle.Dock = DockStyle.Fill;
             panelMatrixTitle.SendToBack();
@@ -3311,10 +3302,10 @@ namespace MagicOGK_OIV_Builder
             if (btnCheckUpdates is AnimatedGlowButton b5) b5.TransparentIdle = true;
             if (btnSidebarFeedback is AnimatedGlowButton b6) b6.TransparentIdle = true;
 
-            if (btnAddPhoto is AnimatedGlowButton b7) b7.TransparentIdle = false;
-            if (btnOpenEditor is AnimatedGlowButton b8) b8.TransparentIdle = false;
-            if (btnReplaceMods is AnimatedGlowButton b9) b9.TransparentIdle = false;
-            if (btnBuildOIV is AnimatedGlowButton b10) b10.TransparentIdle = false;
+            //if (btnAddPhoto is AnimatedGlowButton b7) b7.TransparentIdle = false;
+            //if (btnOpenEditor is AnimatedGlowButton b8) b8.TransparentIdle = false;
+            //if (btnReplaceMods is AnimatedGlowButton b9) b9.TransparentIdle = false;
+            //if (btnBuildOIV is AnimatedGlowButton b10) b10.TransparentIdle = false;
 
             // Photo preview paint
             panelPhotoPreview.Paint += PanelPhotoPreview_Paint;
@@ -5231,7 +5222,7 @@ namespace MagicOGK_OIV_Builder
 
         private void AddPresetButton(Panel parent, string text, string path, int x, int y)
         {
-            AnimatedGlowButton btn = new AnimatedGlowButton
+            Button btn = new Button
             {
                 Text = text,
                 Tag = path,
@@ -5239,7 +5230,7 @@ namespace MagicOGK_OIV_Builder
                 Location = new Point(x, y),
                 BackColor = Color.FromArgb(35, 10, 10),
                 ForeColor = Color.FromArgb(190, 135, 135),
-                //FlatStyle = FlatStyle.Flat,
+                FlatStyle = FlatStyle.Flat,
                 Font = new Font("Syne", 7F, FontStyle.Bold),
                 TabStop = false
             };
@@ -6434,140 +6425,186 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             if (dlg.ShowDialog() != DialogResult.OK)
                 return;
 
-            string selectedPath = dlg.SelectedPath;
-            string gtaExe = Path.Combine(selectedPath, "GTA5.exe");
+            SetGta5Path(dlg.SelectedPath);
+        }
 
-            txtGta5Path.Text = selectedPath;
+        private void BtnAutoDetectGtaPath_Click(object sender, EventArgs e)
+        {
+            string? detectedPath = MagicOivInstaller.DetectGtaVPath();
 
-            if (!File.Exists(gtaExe))
+            if (string.IsNullOrWhiteSpace(detectedPath))
             {
+                lblGta5PathStatus.Text = "Could not auto-detect GTA V path";
+                lblGta5PathStatus.ForeColor = Color.FromArgb(220, 70, 70);
+                return;
+            }
+
+            SetGta5Path(detectedPath);
+        }
+
+        private void SetGta5Path(string path)
+        {
+            txtGta5Path.Text = path;
+
+            if (!File.Exists(Path.Combine(path, "GTA5.exe")))
+            {
+                gta5InstallPath = "";
                 lblGta5PathStatus.Text = "GTA5.exe was not found in this folder";
                 lblGta5PathStatus.ForeColor = Color.FromArgb(220, 70, 70);
                 return;
             }
 
-            gta5InstallPath = selectedPath;
-
+            gta5InstallPath = path;
             lblGta5PathStatus.Text = "GTA5 directory located!";
             lblGta5PathStatus.ForeColor = Color.FromArgb(80, 210, 100);
         }
-        private void BtnInstallOiv_Click(object sender, EventArgs e)
+
+        private async void BtnInstallOiv_Click(object sender, EventArgs e)
         {
             if (string.IsNullOrWhiteSpace(gta5InstallPath) ||
                 !File.Exists(Path.Combine(gta5InstallPath, "GTA5.exe")))
             {
-                MessageBox.Show("Please select your GTA V directory first.");
+                ShowMagicInfoBox("Please select your GTA V directory first.", "Missing GTA V Path");
                 return;
             }
 
-            using var form = new InstallOivForm(gta5InstallPath);
-            form.ShowDialog(this);
-        }
-        private void InstallOivPackage(string oivPath, string gamePath)
-        {
-            string tempDir = Path.Combine(
-                Path.GetTempPath(),
-                "MagicOGK_OIV_" + Guid.NewGuid().ToString("N")
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Select OIV package to install",
+                Filter = "OIV Package (*.oiv)|*.oiv"
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            using Form progressDialog = CreateBuildProgressDialog(
+                out ProgressBar progressBar,
+                out Label lblPercent
             );
+
+            var progress = new Progress<int>(value =>
+            {
+                value = Math.Max(0, Math.Min(100, value));
+                progressBar.Value = value;
+                lblPercent.Text = $"{value}%";
+            });
 
             try
             {
-                Directory.CreateDirectory(tempDir);
-                ZipFile.ExtractToDirectory(oivPath, tempDir);
+                progressDialog.Show(this);
+                progressDialog.Refresh();
 
-                string assemblyPath = Directory
-                    .GetFiles(tempDir, "assembly.xml", SearchOption.AllDirectories)
-                    .FirstOrDefault();
+                var installer = new MagicOivInstaller();
+                installer.Log = msg => Debug.WriteLine("[OIV INSTALL] " + msg);
 
-                if (assemblyPath == null)
-                {
-                    MessageBox.Show(
-                        "This .oiv does not contain assembly.xml.",
-                        "Invalid OIV",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
-                    );
-                    return;
-                }
-
-                XmlDocument doc = new XmlDocument();
-                doc.Load(assemblyPath);
-
-                string contentRoot = Path.Combine(Path.GetDirectoryName(assemblyPath), "content");
-
-                if (!Directory.Exists(contentRoot))
-                {
-                    MessageBox.Show(
-                        "This .oiv does not contain a content folder.",
-                        "Invalid OIV",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Error
-                    );
-                    return;
-                }
-
-                int installedFiles = 0;
-                int skippedRpfTargets = 0;
-
-                XmlNodeList nodes = doc.SelectNodes("//*[@source and @target]");
-
-                foreach (XmlNode node in nodes)
-                {
-                    string source = node.Attributes["source"]?.Value ?? "";
-                    string target = node.Attributes["target"]?.Value ?? "";
-
-                    if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(target))
-                        continue;
-
-                    string sourcePath = Path.Combine(contentRoot, source.Replace('/', Path.DirectorySeparatorChar));
-
-                    if (!File.Exists(sourcePath))
-                        continue;
-
-                    target = target.Replace("\\", "/").TrimStart('/');
-
-                    // RPF editing is not safe to fake with File.Copy.
-                    // These need CodeWalker/OpenIV-style RPF writing later.
-                    if (target.Contains(".rpf/", StringComparison.OrdinalIgnoreCase))
-                    {
-                        skippedRpfTargets++;
-                        continue;
-                    }
-
-                    string finalPath = Path.Combine(gamePath, target.Replace('/', Path.DirectorySeparatorChar));
-
-                    Directory.CreateDirectory(Path.GetDirectoryName(finalPath));
-
-                    File.Copy(sourcePath, finalPath, true);
-                    installedFiles++;
-                }
-
-                MessageBox.Show(
-                    $"Install finished.\n\nInstalled loose files: {installedFiles}\nSkipped RPF targets: {skippedRpfTargets}\n\nRPF install support will be added next.",
-                    "Install OIV",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
+                MagicOivInstaller.InstallSummary summary = await Task.Run(() =>
+                    installer.Install(dlg.FileName, gta5InstallPath, dryRun: false, progress)
                 );
+
+                progressDialog.Close();
+
+                ShowInstallSummaryBox(summary, false);
             }
             catch (Exception ex)
             {
+                progressDialog.Close();
+
                 MessageBox.Show(
-                    "Failed to install OIV:\n\n" + ex.Message,
+                    "Install failed:\n\n" + ex.Message,
                     "Install Error",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
             }
-            finally
+        }
+
+        private async void BtnUninstallOiv_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(gta5InstallPath) ||
+                !File.Exists(Path.Combine(gta5InstallPath, "GTA5.exe")))
             {
-                try
-                {
-                    if (Directory.Exists(tempDir))
-                        Directory.Delete(tempDir, true);
-                }
-                catch { }
+                ShowMagicInfoBox("Please select your GTA V directory first.", "Missing GTA V Path");
+                return;
+            }
+
+            string manifestDir = Path.Combine(gta5InstallPath, "MagicOGK_UninstallLogs");
+
+            using var dlg = new OpenFileDialog
+            {
+                Title = "Select uninstall manifest",
+                Filter = "MagicOGK Manifest (*.json)|*.json",
+                InitialDirectory = Directory.Exists(manifestDir) ? manifestDir : gta5InstallPath
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            DialogResult confirm = ShowMagicConfirmBox(
+                "This will uninstall files listed in the selected manifest.\n\nContinue?",
+                "Uninstall OIV"
+            );
+
+            if (confirm != DialogResult.OK)
+                return;
+
+            using Form progressDialog = CreateBuildProgressDialog(
+                out ProgressBar progressBar,
+                out Label lblPercent
+            );
+
+            var progress = new Progress<int>(value =>
+            {
+                value = Math.Max(0, Math.Min(100, value));
+                progressBar.Value = value;
+                lblPercent.Text = $"{value}%";
+            });
+
+            try
+            {
+                progressDialog.Show(this);
+                progressDialog.Refresh();
+
+                var installer = new MagicOivInstaller();
+                installer.Log = msg => Debug.WriteLine("[OIV UNINSTALL] " + msg);
+
+                bool ok = await Task.Run(() =>
+                    installer.Uninstall(gta5InstallPath, dlg.FileName, progress)
+                );
+
+                progressDialog.Close();
+
+                ShowMagicInfoBox(
+                    ok ? "Uninstall complete." : "Uninstall failed. Check debug log.",
+                    "Uninstall OIV"
+                );
+            }
+            catch (Exception ex)
+            {
+                progressDialog.Close();
+
+                MessageBox.Show(
+                    "Uninstall failed:\n\n" + ex.Message,
+                    "Uninstall Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
             }
         }
+
+        private void ShowInstallSummaryBox(MagicOivInstaller.InstallSummary summary, bool dryRun)
+        {
+            string title = dryRun ? "Dry Run Preview" : "Install Complete";
+
+            string message =
+                $"Files installed: {summary.FilesInstalled}\n" +
+                $"XML patches applied: {summary.XmlPatchesApplied}\n" +
+                $"Skipped duplicates: {summary.SkippedDuplicates}\n" +
+                $"Warnings: {summary.Warnings}\n" +
+                $"Errors: {summary.Errors}";
+
+            ShowMagicInfoBox(message, title);
+        }
+
 
         // ─────────────────── FILE ADDING ───────────────────
         private void btnAddFiles_Click(object sender, EventArgs e)
@@ -7014,6 +7051,47 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             button5.Location = new Point(panelDrag.ClientSize.Width - button5.Width - rightMargin, topMargin);
             button6.Location = new Point(button5.Left - button6.Width - spacing, topMargin);
             button7.Location = new Point(button6.Left - button7.Width - spacing, topMargin);
+        }
+
+        private void AddMainInstallerExtraButtons()
+        {
+            Button btnAutoDetect = new Button
+            {
+                Name = "btnAutoDetectGtaPath",
+                Text = "AUTO-DETECT",
+                Size = new Size(130, 29),
+                Location = new Point(panelRight.Width - 170, 110),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                BackColor = ThemeRedButton,
+                ForeColor = ThemeText,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 8F, FontStyle.Regular)
+            };
+
+            btnAutoDetect.FlatAppearance.BorderSize = 0;
+            btnAutoDetect.Click += BtnAutoDetectGtaPath_Click;
+
+            Button btnUninstall = new Button
+            {
+                Name = "btnUninstallOiv",
+                Text = "UNINSTALL",
+                Size = new Size(130, 29),
+                Location = new Point(panelRight.Width - 170, 146),
+                Anchor = AnchorStyles.Top | AnchorStyles.Right,
+                BackColor = ThemeRedButton,
+                ForeColor = ThemeText,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 8F, FontStyle.Regular)
+            };
+
+            btnUninstall.FlatAppearance.BorderSize = 0;
+            btnUninstall.Click += BtnUninstallOiv_Click;
+
+            panelRight.Controls.Add(btnAutoDetect);
+            panelRight.Controls.Add(btnUninstall);
+
+            btnAutoDetect.BringToFront();
+            btnUninstall.BringToFront();
         }
 
         // -- sidebar logo
