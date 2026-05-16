@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
+using System.Xml;
 using System.Xml.Linq;
 using Microsoft.VisualBasic.Logging;
 using Microsoft.Web.WebView2.Core;
@@ -105,6 +106,14 @@ namespace MagicOGK_OIV_Builder
         private SparkleUpdater? _sparkle;
 
         private CancellationTokenSource sidebarStaggerCts;
+
+        private TextBox txtGta5Path;
+        private Label lblGta5PathStatus;
+        private string gta5InstallPath = "";
+
+        private const int InstallOivAreaHeight = 92;
+        private const int PackageFilesTopOriginal = 52;
+        private const int PackageFilesTopWithInstaller = PackageFilesTopOriginal + InstallOivAreaHeight;
 
         //colors
         private static readonly Color ThemeBg = Color.FromArgb(13, 13, 13);
@@ -6413,8 +6422,154 @@ function sendPath(id,val){window.chrome.webview.postMessage('path:'+JSON.stringi
             webViewFileList.CoreWebView2.NavigateToString(sb.ToString());
         }
 
-        // ─────────────────── FILE ADDING ───────────────────
+        // OIV INSTALLER
 
+        private void BtnSelectGtaDirectory_Click(object sender, EventArgs e)
+        {
+            using var dlg = new FolderBrowserDialog
+            {
+                Description = "Select your GTA V install folder"
+            };
+
+            if (dlg.ShowDialog() != DialogResult.OK)
+                return;
+
+            string selectedPath = dlg.SelectedPath;
+            string gtaExe = Path.Combine(selectedPath, "GTA5.exe");
+
+            txtGta5Path.Text = selectedPath;
+
+            if (!File.Exists(gtaExe))
+            {
+                lblGta5PathStatus.Text = "GTA5.exe was not found in this folder";
+                lblGta5PathStatus.ForeColor = Color.FromArgb(220, 70, 70);
+                return;
+            }
+
+            gta5InstallPath = selectedPath;
+
+            lblGta5PathStatus.Text = "GTA5 directory located!";
+            lblGta5PathStatus.ForeColor = Color.FromArgb(80, 210, 100);
+        }
+        private void BtnInstallOiv_Click(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(gta5InstallPath) ||
+                !File.Exists(Path.Combine(gta5InstallPath, "GTA5.exe")))
+            {
+                MessageBox.Show("Please select your GTA V directory first.");
+                return;
+            }
+
+            using var form = new InstallOivForm(gta5InstallPath);
+            form.ShowDialog(this);
+        }
+        private void InstallOivPackage(string oivPath, string gamePath)
+        {
+            string tempDir = Path.Combine(
+                Path.GetTempPath(),
+                "MagicOGK_OIV_" + Guid.NewGuid().ToString("N")
+            );
+
+            try
+            {
+                Directory.CreateDirectory(tempDir);
+                ZipFile.ExtractToDirectory(oivPath, tempDir);
+
+                string assemblyPath = Directory
+                    .GetFiles(tempDir, "assembly.xml", SearchOption.AllDirectories)
+                    .FirstOrDefault();
+
+                if (assemblyPath == null)
+                {
+                    MessageBox.Show(
+                        "This .oiv does not contain assembly.xml.",
+                        "Invalid OIV",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                    return;
+                }
+
+                XmlDocument doc = new XmlDocument();
+                doc.Load(assemblyPath);
+
+                string contentRoot = Path.Combine(Path.GetDirectoryName(assemblyPath), "content");
+
+                if (!Directory.Exists(contentRoot))
+                {
+                    MessageBox.Show(
+                        "This .oiv does not contain a content folder.",
+                        "Invalid OIV",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error
+                    );
+                    return;
+                }
+
+                int installedFiles = 0;
+                int skippedRpfTargets = 0;
+
+                XmlNodeList nodes = doc.SelectNodes("//*[@source and @target]");
+
+                foreach (XmlNode node in nodes)
+                {
+                    string source = node.Attributes["source"]?.Value ?? "";
+                    string target = node.Attributes["target"]?.Value ?? "";
+
+                    if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(target))
+                        continue;
+
+                    string sourcePath = Path.Combine(contentRoot, source.Replace('/', Path.DirectorySeparatorChar));
+
+                    if (!File.Exists(sourcePath))
+                        continue;
+
+                    target = target.Replace("\\", "/").TrimStart('/');
+
+                    // RPF editing is not safe to fake with File.Copy.
+                    // These need CodeWalker/OpenIV-style RPF writing later.
+                    if (target.Contains(".rpf/", StringComparison.OrdinalIgnoreCase))
+                    {
+                        skippedRpfTargets++;
+                        continue;
+                    }
+
+                    string finalPath = Path.Combine(gamePath, target.Replace('/', Path.DirectorySeparatorChar));
+
+                    Directory.CreateDirectory(Path.GetDirectoryName(finalPath));
+
+                    File.Copy(sourcePath, finalPath, true);
+                    installedFiles++;
+                }
+
+                MessageBox.Show(
+                    $"Install finished.\n\nInstalled loose files: {installedFiles}\nSkipped RPF targets: {skippedRpfTargets}\n\nRPF install support will be added next.",
+                    "Install OIV",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(
+                    "Failed to install OIV:\n\n" + ex.Message,
+                    "Install Error",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Error
+                );
+            }
+            finally
+            {
+                try
+                {
+                    if (Directory.Exists(tempDir))
+                        Directory.Delete(tempDir, true);
+                }
+                catch { }
+            }
+        }
+
+        // ─────────────────── FILE ADDING ───────────────────
         private void btnAddFiles_Click(object sender, EventArgs e)
         {
             using var dlg = new OpenFileDialog

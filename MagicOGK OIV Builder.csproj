@@ -2764,4 +2764,14 @@
     <Folder Include="Assets\vehicles\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\project-references\CodeWalkerProjects-master\CodeWalker.Core\CodeWalker.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="CodeWalker.Core">
+      <HintPath>..\..\project-references\CodeWalkerProjects-master\CodeWalker.Core\bin\Debug\netstandard2.0\CodeWalker.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
 </Project>

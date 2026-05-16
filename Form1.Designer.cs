@@ -632,54 +632,140 @@ namespace MagicOGK_OIV_Builder
             var panelRightTop = new Panel
             {
                 BackColor = Color.FromArgb(13, 13, 13),
-                Dock      = DockStyle.Top,
-                Height    = 240,
-                Padding   = new Padding(30, 20, 30, 10)
+                Dock = DockStyle.Top,
+                Height = 350,
+                Padding = new Padding(30, 20, 30, 10)
             };
 
+            // INSTALL OIV label
+            Label lblInstallOiv = new Label
+            {
+                Text = "OIV INSTALLER",
+                ForeColor = Color.FromArgb(255, 170, 170),
+                Font = new Font("Syne", 11F, FontStyle.Bold),
+                Location = new Point(30, 20),
+                AutoSize = true
+            };
+
+            Label lblInstallHint = new Label
+            {
+                Text = "Install a built .oiv package directly to your GTA V folder",
+                ForeColor = Color.FromArgb(130, 80, 80),
+                Font = new Font("Syne", 8F),
+                Location = new Point(30, 50),
+                AutoSize = true
+            };
+
+            txtGta5Path = new TextBox
+            {
+                Text = "",
+                PlaceholderText = "Please select your GTA5 directory...",
+                Location = new Point(30, 75),
+                Size = new Size(460, 40),
+                BackColor = Color.FromArgb(24, 24, 24),
+                ForeColor = Color.FromArgb(220, 170, 170),
+                BorderStyle = BorderStyle.FixedSingle,
+                ReadOnly = true,
+                Cursor = Cursors.Hand,
+                Font = new Font("Syne", 8F)
+            };
+
+            txtGta5Path.Click += BtnSelectGtaDirectory_Click;
+            
+            Button btnSelectGtaDirectory = new Button
+            {
+                Text = "SELECT DIR",
+                Size = new Size(130, 30),
+                Location = new Point(500, 73),
+                BackColor = Color.FromArgb(120, 18, 24),
+                ForeColor = Color.FromArgb(255, 185, 185),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 8F),
+                Cursor = Cursors.Hand
+            };
+
+            btnSelectGtaDirectory.FlatAppearance.BorderSize = 0;
+
+            btnSelectGtaDirectory.Click += BtnSelectGtaDirectory_Click;
+
+            lblGta5PathStatus = new Label
+            {
+                Text = "Please select your GTA5 directory",
+                Location = new Point(30, 98),
+                AutoSize = true,
+                ForeColor = Color.FromArgb(220, 70, 70),
+                Font = new Font("Syne", 8F, FontStyle.Bold)
+            };
+
+            Button btnInstallOiv = new Button
+            {
+                Text = "INSTALL OIV",
+                Size = new Size(130, 30),
+                Location = new Point(500, 35),
+                BackColor = Color.FromArgb(120, 18, 24),
+                ForeColor = Color.FromArgb(255, 185, 185),
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Syne", 8F),
+                Cursor = Cursors.Hand
+            };
+
+            btnInstallOiv.FlatAppearance.BorderSize = 0;
+            btnInstallOiv.Click += BtnInstallOiv_Click;
+
             // PACKAGE FILES label
-            lblPackageFiles.Text      = "PACKAGE FILES";
+            lblPackageFiles.Text = "PACKAGE FILES";
             lblPackageFiles.ForeColor = Color.FromArgb(188, 143, 143);
-            lblPackageFiles.Font      = new Font("Syne", 11F, FontStyle.Bold);
-            lblPackageFiles.Location  = new Point(30, 20);
-            lblPackageFiles.AutoSize  = true;
+            lblPackageFiles.Font = new Font("Syne", 11F, FontStyle.Bold);
+            lblPackageFiles.Location = new Point(30, 125);
+            lblPackageFiles.AutoSize = true;
 
             // Add Files button
             btnAddFiles.BackColor = Color.FromArgb(139, 30, 30);
             btnAddFiles.ForeColor = Color.FromArgb(240, 192, 192);
             btnAddFiles.FlatStyle = FlatStyle.Flat;
             btnAddFiles.FlatAppearance.BorderColor = Color.FromArgb(139, 58, 58);
-            btnAddFiles.Text     = "+ Add Files";
-            btnAddFiles.Size     = new Size(105, 30);
-            btnAddFiles.Location = new Point(30, 55);
-            btnAddFiles.Font     = new Font("Syne", 9F);
+            btnAddFiles.Text = "+ Add Files";
+            btnAddFiles.Size = new Size(105, 30);
+            btnAddFiles.Location = new Point(30, 160);
+            btnAddFiles.Font = new Font("Syne", 9F);
 
-            lblAddFilesHint.Text      = "or drag & drop files below";
+            lblAddFilesHint.Text = "or drag & drop files below";
             lblAddFilesHint.ForeColor = Color.FromArgb(90, 90, 90);
-            lblAddFilesHint.AutoSize  = true;
-            lblAddFilesHint.Location  = new Point(145, 63);
-            lblAddFilesHint.Font      = new Font("Syne", 8F);
+            lblAddFilesHint.AutoSize = true;
+            lblAddFilesHint.Location = new Point(145, 168);
+            lblAddFilesHint.Font = new Font("Syne", 8F);
 
             // Drop zone
-            panelDropZone.BackColor   = Color.FromArgb(17, 17, 17);
+            panelDropZone.BackColor = Color.FromArgb(17, 17, 17);
             panelDropZone.BorderStyle = BorderStyle.FixedSingle;
-            panelDropZone.Location    = new Point(30, 96);
-            panelDropZone.Size        = new Size(600, 120);
-            panelDropZone.AllowDrop   = true;
+            panelDropZone.Location = new Point(30, 205);
+            panelDropZone.Size = new Size(600, 120);
+            panelDropZone.AllowDrop = true;
 
-            lblNoFiles.Text      = "Drop mod files here\r\nSupports .yft .ytd .meta .xml .asi .dlc and more";
+            lblNoFiles.Text = "Drop mod files here\r\nSupports .yft .ytd .meta .xml .asi .dlc and more";
             lblNoFiles.ForeColor = Color.FromArgb(90, 90, 90);
             lblNoFiles.TextAlign = ContentAlignment.MiddleCenter;
-            lblNoFiles.Dock      = DockStyle.Fill;
-            lblNoFiles.Font      = new Font("Syne", 9F);
+            lblNoFiles.Dock = DockStyle.Fill;
+            lblNoFiles.Font = new Font("Syne", 9F);
 
+            panelDropZone.Controls.Clear();
             panelDropZone.Controls.Add(lblNoFiles);
 
-            panelRightTop.Controls.AddRange(new Control[] {
-                lblPackageFiles, btnAddFiles, lblAddFilesHint, panelDropZone
+            panelRightTop.Controls.AddRange(new Control[]
+            {
+                lblInstallOiv,
+                lblInstallHint,
+                txtGta5Path,
+                btnSelectGtaDirectory,
+                lblGta5PathStatus,
+                btnInstallOiv,
+                lblPackageFiles,
+                btnAddFiles,
+                lblAddFilesHint,
+                panelDropZone
             });
 
-            // WebView fills the rest
+            // WebView fills everything BELOW panelRightTop
             webViewFileList.Dock = DockStyle.Fill;
 
             panelRight.Controls.Add(webViewFileList);
