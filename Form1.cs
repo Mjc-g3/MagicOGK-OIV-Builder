@@ -3079,23 +3079,6 @@ namespace MagicOGK_OIV_Builder
                 SendMessage(this.Handle, WM_NCLBUTTONDOWN, HTCAPTION, 0);
             }
         }
-        // Auto -updater
-        private void StartUpdateCheck()
-        {
-            if (_sparkle != null)
-                return;
-
-            _sparkle = new SparkleUpdater(
-                AppCastUrl,
-                new Ed25519Checker(SecurityMode.Unsafe)
-            )
-            {
-                UIFactory = new NetSparkleUpdater.UI.WinForms.UIFactory(this.Icon),
-                RelaunchAfterUpdate = true
-            };
-
-            _sparkle.StartLoop(true);
-        }
         //Check for updates manually
         private async void btnCheckUpdates_Click(object sender, EventArgs e)
         {
@@ -3228,8 +3211,6 @@ namespace MagicOGK_OIV_Builder
 
         private async void Form1_Load(object sender, EventArgs e)
         {
-            StartUpdateCheck();
-
             using (var splash = new SplashForm())
             {
                 splash.ShowDialog(this);
