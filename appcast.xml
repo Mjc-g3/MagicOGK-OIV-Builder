@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+<rss version="2.0" xmlns:sparkle="https://raw.githubusercontent.com/Mjc-g3/MagicOGK-OIV-Builder/master/appcast.xml">
 	<channel>
 		<title>MagicOGK Updates</title>
 
