@@ -1,20 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<rss version="2.0" xmlns:sparkle="https://raw.githubusercontent.com/Mjc-g3/MagicOGK-OIV-Builder/master/appcast.xml">
-	<channel>
-		<title>MagicOGK Updates</title>
+<rss version="2.0"
+     xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
 
-		<item>
-			<title>Version 1.6.0</title>
-			<sparkle:version>1.6.0</sparkle:version>
-			<sparkle:shortVersionString>1.6.0</sparkle:shortVersionString>
+  <channel>
+    <title>MagicOGK Updates</title>
 
-			<enclosure
-			url="https://files.gta5-mods.com/uploads/magicogk-oiv-builder-simple-modern-oiv-packaging-for-gta-5/a892d2-MagicOGK-OIV-Builder-Setup-1.6.0.zip"
-			sparkle:version="1.6.0"
-			sparkle:shortVersionString="1.6.0"
-			length="12345678"
-			 type="application/octet-stream" />
-		</item>
+    <item>
+      <title>Version 1.6.0</title>
 
-	</channel>
+      <sparkle:version>1.6.0</sparkle:version>
+      <sparkle:shortVersionString>1.6.0</sparkle:shortVersionString>
+
+      <enclosure
+        url="https://files.gta5-mods.com/uploads/magicogk-oiv-builder-simple-modern-oiv-packaging-for-gta-5/a892d2-MagicOGK-OIV-Builder-Setup-1.6.0.zip"
+        sparkle:version="1.6.0"
+        sparkle:shortVersionString="1.6.0"
+        length="12345678"
+        type="application/octet-stream" />
+
+    </item>
+  </channel>
 </rss>
