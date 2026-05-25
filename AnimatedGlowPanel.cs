@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -10,8 +11,21 @@ public class AnimatedGlowPanel : Panel
     private float targetGlareX = -300;
     private float hoverAmount = 0f;
     private float targetHoverAmount = 0f;
+    private int _cornerRadius = 4;
 
-    public int CornerRadius { get; set; } = 4;
+    [DefaultValue(4)]
+    public int CornerRadius
+    {
+        get => _cornerRadius;
+        set
+        {
+            if (_cornerRadius != value)
+            {
+                _cornerRadius = value;
+                Invalidate();
+            }
+        }
+    }
 
     public AnimatedGlowPanel()
     {

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -537,7 +538,21 @@ namespace MagicOGK_OIV_Builder
         public class CustomDropdown : Control
         {
             public List<object> Items { get; } = new();
-            public int SelectedIndex { get; set; } = -1;
+            private int _selectedIndex = -1;
+
+            [DefaultValue(-1)]
+            public int SelectedIndex
+            {
+                get => _selectedIndex;
+                set
+                {
+                    if (_selectedIndex != value)
+                    {
+                        _selectedIndex = value;
+                        Invalidate();
+                    }
+                }
+            }
             public object? SelectedItem => SelectedIndex >= 0 && SelectedIndex < Items.Count ? Items[SelectedIndex] : null;
 
             public event EventHandler? SelectedIndexChanged;
@@ -626,6 +641,8 @@ namespace MagicOGK_OIV_Builder
                 set => innerTextBox.Text = value;
             }
 
+            [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+            [DefaultValue("")]
             public string PlaceholderText
             {
                 get => innerTextBox.PlaceholderText;
