@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -11,10 +12,37 @@ public class AnimatedGlowButton : Button
     private float targetGlareX = -300;
     private float hoverAmount = 0f;
     private float targetHoverAmount = 0f;
+    private bool _transparentIdle = false;
+    private int _cornerRadius = 6;
 
-    public bool TransparentIdle { get; set; } = false;
+    [DefaultValue(false)]
+    public bool TransparentIdle
+    {
+        get => _transparentIdle;
+        set
+        {
+            if (_transparentIdle != value)
+            {
+                _transparentIdle = value;
+                Invalidate();
+            }
+        }
+    }
 
-    public int CornerRadius { get; set; } = 6;
+    [DefaultValue(6)]
+    public int CornerRadius
+    {
+        get => _cornerRadius;
+        set
+        {
+            if (_cornerRadius != value)
+            {
+                _cornerRadius = value;
+                Invalidate();
+                UpdateRegion();
+            }
+        }
+    }
 
     public AnimatedGlowButton()
     {
