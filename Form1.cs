@@ -3825,78 +3825,44 @@ namespace MagicOGK_OIV_Builder
                 loading.Close();
             }
         }
-        private async void btnSidebarExtractOIV_Click(object sender, EventArgs e)
+        private void btnSidebarExtractOIV_Click(object sender, EventArgs e)
         {
-            DialogResult modeChoice = ShowMagicExtractChoiceBox();
+            var form = new ExtractOivForm();
+            form.Show(this);
 
-            if (modeChoice == DialogResult.Cancel)
-                return;
-
-            bool useNestedFolders = modeChoice == DialogResult.Yes;
-
-            using var openDlg = new OpenFileDialog
+            form.ExtractRequested += async (oivPath, outputPath, useNestedFolders) =>
             {
-                Title = "Extract OIV Package",
-                Filter = "OpenIV Package (*.oiv)|*.oiv"
-            };
+                string outputFolder = System.IO.Path.Combine(outputPath, System.IO.Path.GetFileNameWithoutExtension(oivPath) + "_extracted");
+                form.Log($"Starting extraction: {System.IO.Path.GetFileName(oivPath)}");
 
-            if (openDlg.ShowDialog() != DialogResult.OK)
-                return;
+                using LoadingForm loading = new LoadingForm("Extracting OIV package...");
+                loading.StartPosition = FormStartPosition.Manual;
+                loading.Location = new Point(form.Left + (form.Width - loading.Width) / 2, form.Top + (form.Height - loading.Height) / 2);
 
-            using var folderDlg = new FolderBrowserDialog
-            {
-                Description = "Choose where to extract the OIV"
-            };
-
-            if (folderDlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            using LoadingForm loading = new LoadingForm("Extracting OIV package...");
-
-            loading.StartPosition = FormStartPosition.Manual;
-            loading.Location = new Point(
-                this.Left + (this.Width - loading.Width) / 2,
-                this.Top + (this.Height - loading.Height) / 2
-            );
-
-            try
-            {
-                loading.Show(this);
-                loading.Refresh();
-
-                string oivPath = openDlg.FileName;
-                string outputFolder = Path.Combine(
-                    folderDlg.SelectedPath,
-                    Path.GetFileNameWithoutExtension(oivPath) + "_extracted"
-                );
-
-                await Task.Run(() =>
+                try
                 {
-                    ExtractOiv(oivPath, outputFolder, useNestedFolders);
-                });
+                    loading.Show(form);
+                    loading.Refresh();
 
-                MessageBox.Show(
-                    "OIV extracted successfully.",
-                    "Extract Complete",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
+                    await System.Threading.Tasks.Task.Run(() =>
+                    {
+                        ExtractOiv(oivPath, outputFolder, useNestedFolders, form.Log);
+                    });
 
-                Process.Start("explorer.exe", outputFolder);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Extract failed:\n\n" + ex.Message,
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
-            }
-            finally
-            {
-                loading.Close();
-            }
+                    form.Log("Extraction complete!");
+                    MessageBox.Show(form, "OIV extracted successfully.", "Extract Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    System.Diagnostics.Process.Start("explorer.exe", outputFolder);
+                }
+                catch (Exception ex)
+                {
+                    form.Log($"Error: {ex.Message}");
+                    MessageBox.Show(form, "Extract failed:\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    loading.Close();
+                }
+            };
         }
         private DialogResult ShowMagicExtractChoiceBox()
         {
@@ -3990,8 +3956,10 @@ namespace MagicOGK_OIV_Builder
 
             return dialog.ShowDialog(this);
         }
-        private void ExtractOiv(string oivPath, string outputFolder, bool useNestedFolders)
+        private void ExtractOiv(string oivPath, string outputFolder, bool useNestedFolders, Action<string>? log = null)
         {
+            log ??= _ => { };
+
             string tempFolder = Path.Combine(
                 Path.GetTempPath(),
                 "MagicOGK_ExtractOIV_" + Guid.NewGuid().ToString("N")
@@ -4000,6 +3968,7 @@ namespace MagicOGK_OIV_Builder
             Directory.CreateDirectory(tempFolder);
             Directory.CreateDirectory(outputFolder);
 
+            log($"Extracting OIV to temp directory...");
             ZipFile.ExtractToDirectory(oivPath, tempFolder);
 
             string? assemblyPath = Directory
@@ -4020,11 +3989,14 @@ namespace MagicOGK_OIV_Builder
                 })
                 .ToList();
 
+            log($"Found {installNodes.Count} file entries in assembly.xml");
+
             List<string> reportLines = new();
             List<string> metadataLines = new();
 
             metadataLines.Add("Operation\tSourceInOiv\tLocalFile\tOriginalInstallPath");
 
+            int extractedCount = 0;
             foreach (XElement node in installNodes)
             {
                 string source = GetAttr(node, "source", "src", "file");
@@ -4075,6 +4047,9 @@ namespace MagicOGK_OIV_Builder
                 metadataLines.Add(
                     $"{operation}\t{source.Replace("\\", "/")}\t{localRelativeFile}\t{finalTarget}"
                 );
+
+                extractedCount++;
+                log($"Extracted [{extractedCount}/{installNodes.Count}]: {localRelativeFile}");
             }
 
             File.WriteAllLines(
