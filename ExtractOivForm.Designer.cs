@@ -45,6 +45,7 @@ namespace MagicOGK_OIV_Builder
             lblOutput = new Label();
             panelTitleBar = new Panel();
             lblTitle = new Label();
+            btnMinimize = new Button();
             btnClose = new Button();
             toolTip = new ToolTip(components);
             chkNestedFolders = new CheckBox();
@@ -239,6 +240,7 @@ namespace MagicOGK_OIV_Builder
             //
             panelTitleBar.BackColor = Color.FromArgb(10, 10, 10);
             panelTitleBar.Controls.Add(lblTitle);
+            panelTitleBar.Controls.Add(btnMinimize);
             panelTitleBar.Controls.Add(btnClose);
             panelTitleBar.Dock = DockStyle.Top;
             panelTitleBar.Location = new Point(0, 0);
@@ -257,13 +259,31 @@ namespace MagicOGK_OIV_Builder
             lblTitle.Location = new Point(0, 0);
             lblTitle.Name = "lblTitle";
             lblTitle.Padding = new Padding(12, 0, 0, 0);
-            lblTitle.Size = new Size(537, 32);
+            lblTitle.Size = new Size(492, 32);
             lblTitle.TabIndex = 0;
             lblTitle.Text = "EXTRACT OIV";
             lblTitle.TextAlign = ContentAlignment.MiddleLeft;
             lblTitle.MouseDown += lblTitle_MouseDown;
             lblTitle.MouseMove += lblTitle_MouseMove;
             lblTitle.MouseUp += lblTitle_MouseUp;
+            //
+            // btnMinimize
+            //
+            btnMinimize.BackColor = Color.Transparent;
+            btnMinimize.Dock = DockStyle.Right;
+            btnMinimize.FlatAppearance.BorderSize = 0;
+            btnMinimize.FlatStyle = FlatStyle.Flat;
+            btnMinimize.Font = new Font("Segoe UI", 12F);
+            btnMinimize.ForeColor = Color.FromArgb(210, 150, 150);
+            btnMinimize.Location = new Point(492, 0);
+            btnMinimize.Name = "btnMinimize";
+            btnMinimize.Size = new Size(45, 32);
+            btnMinimize.TabIndex = 2;
+            btnMinimize.Text = "−";
+            btnMinimize.UseVisualStyleBackColor = false;
+            btnMinimize.Click += btnMinimize_Click;
+            btnMinimize.MouseEnter += btnMinimize_MouseEnter;
+            btnMinimize.MouseLeave += btnMinimize_MouseLeave;
             //
             // btnClose
             //
@@ -346,6 +366,7 @@ namespace MagicOGK_OIV_Builder
         private System.Windows.Forms.Label lblOutput;
         private System.Windows.Forms.Panel panelTitleBar;
         private System.Windows.Forms.Label lblTitle;
+        private System.Windows.Forms.Button btnMinimize;
         private System.Windows.Forms.Button btnClose;
         private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.CheckBox chkNestedFolders;
