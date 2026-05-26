@@ -55,9 +55,9 @@ namespace MagicOGK_OIV_Builder
             dragDropPanel.SuspendLayout();
             panelTitleBar.SuspendLayout();
             SuspendLayout();
-            // 
+            //
             // borderPanel
-            // 
+            //
             borderPanel.BackColor = Color.FromArgb(180, 70, 70);
             borderPanel.Controls.Add(mainPanel);
             borderPanel.Dock = DockStyle.Fill;
@@ -66,9 +66,9 @@ namespace MagicOGK_OIV_Builder
             borderPanel.Padding = new Padding(1);
             borderPanel.Size = new Size(584, 712);
             borderPanel.TabIndex = 0;
-            // 
+            //
             // mainPanel
-            // 
+            //
             mainPanel.BackColor = Color.FromArgb(16, 16, 16);
             mainPanel.Controls.Add(contentPanel);
             mainPanel.Controls.Add(panelTitleBar);
@@ -77,9 +77,9 @@ namespace MagicOGK_OIV_Builder
             mainPanel.Name = "mainPanel";
             mainPanel.Size = new Size(582, 710);
             mainPanel.TabIndex = 0;
-            // 
+            //
             // contentPanel
-            // 
+            //
             contentPanel.Controls.Add(centerPanel);
             contentPanel.Dock = DockStyle.Fill;
             contentPanel.Location = new Point(0, 32);
@@ -87,9 +87,9 @@ namespace MagicOGK_OIV_Builder
             contentPanel.Padding = new Padding(24);
             contentPanel.Size = new Size(582, 678);
             contentPanel.TabIndex = 1;
-            // 
+            //
             // centerPanel
-            // 
+            //
             centerPanel.Anchor = AnchorStyles.None;
             centerPanel.Controls.Add(txtLog);
             centerPanel.Controls.Add(lblLog);
@@ -104,18 +104,18 @@ namespace MagicOGK_OIV_Builder
             centerPanel.Name = "centerPanel";
             centerPanel.Size = new Size(540, 640);
             centerPanel.TabIndex = 0;
-            // 
+            //
             // txtLog
-            // 
+            //
             txtLog.BackColor = Color.FromArgb(35, 35, 35);
             txtLog.Font = new Font("Consolas", 8.5F);
             txtLog.Location = new Point(0, 350);
             txtLog.Name = "txtLog";
             txtLog.Size = new Size(540, 295);
             txtLog.TabIndex = 8;
-            // 
+            //
             // lblLog
-            // 
+            //
             lblLog.AutoSize = true;
             lblLog.Font = new Font("Microsoft Sans Serif", 8F, FontStyle.Bold);
             lblLog.ForeColor = Color.FromArgb(210, 150, 150);
@@ -124,9 +124,9 @@ namespace MagicOGK_OIV_Builder
             lblLog.Size = new Size(32, 13);
             lblLog.TabIndex = 7;
             lblLog.Text = "LOG";
-            // 
+            //
             // btnExtract
-            // 
+            //
             btnExtract.BackColor = Color.FromArgb(92, 0, 0);
             btnExtract.FlatStyle = FlatStyle.Flat;
             btnExtract.ForeColor = Color.FromArgb(235, 165, 165);
@@ -137,9 +137,9 @@ namespace MagicOGK_OIV_Builder
             btnExtract.Text = "EXTRACT OIV";
             btnExtract.UseVisualStyleBackColor = false;
             btnExtract.Click += btnExtract_Click;
-            // 
+            //
             // dragDropPanel
-            // 
+            //
             dragDropPanel.AllowDrop = true;
             dragDropPanel.BackColor = Color.FromArgb(18, 18, 18);
             dragDropPanel.BorderStyle = BorderStyle.FixedSingle;
@@ -151,9 +151,9 @@ namespace MagicOGK_OIV_Builder
             dragDropPanel.TabIndex = 5;
             dragDropPanel.DragDrop += dragDropPanel_DragDrop;
             dragDropPanel.DragEnter += dragDropPanel_DragEnter;
-            // 
+            //
             // lblDragDropHint
-            // 
+            //
             lblDragDropHint.BackColor = Color.Transparent;
             lblDragDropHint.Dock = DockStyle.Fill;
             lblDragDropHint.Font = new Font("Microsoft Sans Serif", 10F, FontStyle.Bold);
@@ -164,9 +164,9 @@ namespace MagicOGK_OIV_Builder
             lblDragDropHint.TabIndex = 0;
             lblDragDropHint.Text = "Drag && Drop OIV Package Here";
             lblDragDropHint.TextAlign = ContentAlignment.MiddleCenter;
-            // 
+            //
             // rbFlat
-            // 
+            //
             rbFlat.AutoSize = true;
             rbFlat.BackColor = Color.Transparent;
             rbFlat.Font = new Font("Microsoft Sans Serif", 9F, FontStyle.Bold);
@@ -179,9 +179,9 @@ namespace MagicOGK_OIV_Builder
             toolTip.SetToolTip(rbFlat, "Creates one folder per install path");
             rbFlat.UseVisualStyleBackColor = false;
             rbFlat.CheckedChanged += rbFlat_CheckedChanged;
-            // 
+            //
             // rbNested
-            // 
+            //
             rbNested.AutoSize = true;
             rbNested.BackColor = Color.Transparent;
             rbNested.Checked = true;
@@ -196,9 +196,9 @@ namespace MagicOGK_OIV_Builder
             toolTip.SetToolTip(rbNested, "Keeps the real folder structure");
             rbNested.UseVisualStyleBackColor = false;
             rbNested.CheckedChanged += rbNested_CheckedChanged;
-            // 
+            //
             // btnBrowseOutput
-            // 
+            //
             btnBrowseOutput.BackColor = Color.FromArgb(92, 0, 0);
             btnBrowseOutput.FlatStyle = FlatStyle.Flat;
             btnBrowseOutput.ForeColor = Color.FromArgb(235, 165, 165);
@@ -209,9 +209,10 @@ namespace MagicOGK_OIV_Builder
             btnBrowseOutput.Text = "BROWSE";
             btnBrowseOutput.UseVisualStyleBackColor = false;
             btnBrowseOutput.Click += btnBrowseOutput_Click;
-            // 
+            //
             // txtOutputPath
-            // 
+            //
+            txtOutputPath.AllowDrop = true;
             txtOutputPath.BackColor = Color.Black;
             txtOutputPath.BorderStyle = BorderStyle.FixedSingle;
             txtOutputPath.Font = new Font("Segoe UI", 9F);
@@ -220,10 +221,11 @@ namespace MagicOGK_OIV_Builder
             txtOutputPath.Name = "txtOutputPath";
             txtOutputPath.Size = new Size(420, 23);
             txtOutputPath.TabIndex = 1;
-            txtOutputPath.TextChanged += txtOutputPath_TextChanged;
-            // 
+            txtOutputPath.DragDrop += txtOutputPath_DragDrop;
+            txtOutputPath.DragEnter += txtOutputPath_DragEnter;
+            //
             // lblOutput
-            // 
+            //
             lblOutput.AutoSize = true;
             lblOutput.Font = new Font("Microsoft Sans Serif", 8F, FontStyle.Bold);
             lblOutput.ForeColor = Color.FromArgb(210, 150, 150);
@@ -232,9 +234,9 @@ namespace MagicOGK_OIV_Builder
             lblOutput.Size = new Size(134, 13);
             lblOutput.TabIndex = 0;
             lblOutput.Text = "OUTPUT DIRECTORY";
-            // 
+            //
             // panelTitleBar
-            // 
+            //
             panelTitleBar.BackColor = Color.FromArgb(10, 10, 10);
             panelTitleBar.Controls.Add(lblTitle);
             panelTitleBar.Controls.Add(btnClose);
@@ -246,9 +248,9 @@ namespace MagicOGK_OIV_Builder
             panelTitleBar.MouseDown += panelTitleBar_MouseDown;
             panelTitleBar.MouseMove += panelTitleBar_MouseMove;
             panelTitleBar.MouseUp += panelTitleBar_MouseUp;
-            // 
+            //
             // lblTitle
-            // 
+            //
             lblTitle.Dock = DockStyle.Fill;
             lblTitle.Font = new Font("Microsoft Sans Serif", 9F, FontStyle.Bold);
             lblTitle.ForeColor = Color.FromArgb(210, 150, 150);
@@ -262,9 +264,9 @@ namespace MagicOGK_OIV_Builder
             lblTitle.MouseDown += lblTitle_MouseDown;
             lblTitle.MouseMove += lblTitle_MouseMove;
             lblTitle.MouseUp += lblTitle_MouseUp;
-            // 
+            //
             // btnClose
-            // 
+            //
             btnClose.BackColor = Color.Transparent;
             btnClose.Dock = DockStyle.Right;
             btnClose.FlatAppearance.BorderSize = 0;
@@ -280,15 +282,15 @@ namespace MagicOGK_OIV_Builder
             btnClose.Click += btnClose_Click;
             btnClose.MouseEnter += btnClose_MouseEnter;
             btnClose.MouseLeave += btnClose_MouseLeave;
-            // 
+            //
             // toolTip
-            // 
+            //
             toolTip.AutoPopDelay = 5000;
             toolTip.InitialDelay = 500;
             toolTip.ReshowDelay = 500;
-            // 
+            //
             // chkNestedFolders
-            // 
+            //
             chkNestedFolders.AutoSize = true;
             chkNestedFolders.Checked = true;
             chkNestedFolders.CheckState = CheckState.Checked;
@@ -298,9 +300,9 @@ namespace MagicOGK_OIV_Builder
             chkNestedFolders.TabIndex = 0;
             chkNestedFolders.UseVisualStyleBackColor = true;
             chkNestedFolders.Visible = false;
-            // 
+            //
             // ExtractOivForm
-            // 
+            //
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(16, 16, 16);

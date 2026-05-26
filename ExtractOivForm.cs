@@ -18,24 +18,31 @@ namespace MagicOGK_OIV_Builder
         const int WM_NCLBUTTONDOWN = 0xA1;
         const int HTCAPTION = 0x2;
 
+        private const string CONFIG_FILE = "settings.ini";
+
         public event Action<string, string, bool>? ExtractRequested;
 
         private bool isDragging = false;
         private Point dragStartPoint;
 
         public string? OutputPath => txtOutputPath?.Text;
-        public bool UseNestedFolders => chkNestedFolders?.Checked ?? true;
+        public bool UseNestedFolders => rbNested.Checked;
 
         public ExtractOivForm()
         {
             InitializeComponent();
             LoadConfig();
             Shown += ExtractOivForm_Shown;
+            FormClosing += ExtractOivForm_FormClosing;
+        }
+
+        private void ExtractOivForm_FormClosing(object? sender, FormClosingEventArgs e)
+        {
+            SaveConfig();
         }
 
         private void ExtractOivForm_Shown(object? sender, EventArgs e)
         {
-            // 初始化居中位置
             if (contentPanel != null && centerPanel != null)
             {
                 centerPanel.Location = new Point(
@@ -115,27 +122,45 @@ namespace MagicOGK_OIV_Builder
             }
         }
 
-        private void txtOutputPath_TextChanged(object? sender, EventArgs e)
+        private void txtOutputPath_DragEnter(object? sender, DragEventArgs e)
         {
-            SaveConfig();
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy;
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void txtOutputPath_DragDrop(object? sender, DragEventArgs e)
+        {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                string[] files = (string[])e.Data.GetData(DataFormats.FileDrop)!;
+                if (files.Length == 1)
+                {
+                    string path = files[0];
+                    if (File.Exists(path))
+                    {
+                        path = Path.GetDirectoryName(path)!;
+                    }
+                    if (Directory.Exists(path))
+                    {
+                        txtOutputPath.Text = path;
+                        Log($"Output path set to: {path}");
+                    }
+                }
+            }
         }
 
         private void rbNested_CheckedChanged(object? sender, EventArgs e)
         {
-            if (rbNested.Checked)
-            {
-                chkNestedFolders.Checked = true;
-                SaveConfig();
-            }
         }
 
         private void rbFlat_CheckedChanged(object? sender, EventArgs e)
         {
-            if (rbFlat.Checked)
-            {
-                chkNestedFolders.Checked = false;
-                SaveConfig();
-            }
         }
 
         private void dragDropPanel_DragEnter(object? sender, DragEventArgs e)
@@ -188,7 +213,6 @@ namespace MagicOGK_OIV_Builder
             }
 
             Log($"Selected OIV: {Path.GetFileName(oivPath)}");
-            SaveConfig();
             ExtractRequested?.Invoke(oivPath, OutputPath, UseNestedFolders);
         }
 
@@ -205,14 +229,17 @@ namespace MagicOGK_OIV_Builder
             txtLog.ScrollToCaret();
         }
 
+        private string GetConfigPath() => Path.Combine(AppDomain.CurrentDomain.BaseDirectory, CONFIG_FILE);
+
         private void SaveConfig()
         {
             try
             {
-                string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "extract_config.ini");
+                string configPath = GetConfigPath();
                 using var writer = new StreamWriter(configPath);
+                writer.WriteLine("[setting]");
                 writer.WriteLine($"OutputPath={txtOutputPath.Text}");
-                writer.WriteLine($"UseNestedFolders={chkNestedFolders.Checked}");
+                writer.WriteLine($"Mode={(rbNested.Checked ? "nested" : "flat")}");
             }
             catch { }
         }
@@ -221,7 +248,7 @@ namespace MagicOGK_OIV_Builder
         {
             try
             {
-                string configPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "extract_config.ini");
+                string configPath = GetConfigPath();
                 if (File.Exists(configPath))
                 {
                     string[] lines = File.ReadAllLines(configPath);
@@ -229,12 +256,11 @@ namespace MagicOGK_OIV_Builder
                     {
                         if (line.StartsWith("OutputPath="))
                             txtOutputPath.Text = line.Substring("OutputPath=".Length);
-                        else if (line.StartsWith("UseNestedFolders="))
+                        else if (line.StartsWith("Mode="))
                         {
-                            bool nested = bool.Parse(line.Substring("UseNestedFolders=".Length));
-                            chkNestedFolders.Checked = nested;
-                            rbNested.Checked = nested;
-                            rbFlat.Checked = !nested;
+                            string mode = line.Substring("Mode=".Length).Trim();
+                            rbNested.Checked = (mode == "nested");
+                            rbFlat.Checked = (mode == "flat");
                         }
                     }
                 }
