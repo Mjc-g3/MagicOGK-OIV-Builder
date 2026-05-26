@@ -90,6 +90,23 @@ namespace MagicOGK_OIV_Builder
             panelTitleBar_MouseUp(sender, e);
         }
 
+        private void btnMinimize_Click(object? sender, EventArgs e)
+        {
+            WindowState = FormWindowState.Minimized;
+        }
+
+        private void btnMinimize_MouseEnter(object? sender, EventArgs e)
+        {
+            if (btnMinimize != null)
+                btnMinimize.BackColor = Color.FromArgb(50, 50, 50);
+        }
+
+        private void btnMinimize_MouseLeave(object? sender, EventArgs e)
+        {
+            if (btnMinimize != null)
+                btnMinimize.BackColor = Color.Transparent;
+        }
+
         private void btnClose_Click(object? sender, EventArgs e)
         {
             Close();
