@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -537,7 +538,21 @@ namespace MagicOGK_OIV_Builder
         public class CustomDropdown : Control
         {
             public List<object> Items { get; } = new();
-            public int SelectedIndex { get; set; } = -1;
+            private int _selectedIndex = -1;
+
+            [DefaultValue(-1)]
+            public int SelectedIndex
+            {
+                get => _selectedIndex;
+                set
+                {
+                    if (_selectedIndex != value)
+                    {
+                        _selectedIndex = value;
+                        Invalidate();
+                    }
+                }
+            }
             public object? SelectedItem => SelectedIndex >= 0 && SelectedIndex < Items.Count ? Items[SelectedIndex] : null;
 
             public event EventHandler? SelectedIndexChanged;
@@ -610,118 +625,6 @@ namespace MagicOGK_OIV_Builder
 
                 using var arrowBrush = new SolidBrush(Color.FromArgb(230, 170, 170));
                 e.Graphics.FillPolygon(arrowBrush, arrow);
-            }
-        }
-
-        // ────────────────── CUSTOM SCROLLBAR+TEXTBOX ───────────────────
-        public class CustomScrollTextBox : UserControl
-        {
-            private readonly TextBox innerTextBox;
-            private readonly Panel scrollTrack;
-            private readonly Panel scrollThumb;
-
-            public override string Text
-            {
-                get => innerTextBox.Text;
-                set => innerTextBox.Text = value;
-            }
-
-            public string PlaceholderText
-            {
-                get => innerTextBox.PlaceholderText;
-                set => innerTextBox.PlaceholderText = value;
-            }
-
-            public CustomScrollTextBox()
-            {
-                BackColor = Color.FromArgb(35, 35, 35);
-
-                innerTextBox = new TextBox
-                {
-                    Multiline = true,
-                    BorderStyle = BorderStyle.None,
-                    ScrollBars = ScrollBars.None,
-                    BackColor = Color.FromArgb(35, 35, 35),
-                    ForeColor = Color.FromArgb(220, 180, 180),
-                    Location = new Point(6, 6),
-                    Width = Width - 20,
-                    Height = Height - 12
-                };
-
-                scrollTrack = new Panel
-                {
-                    Width = 8,
-                    Dock = DockStyle.Right,
-                    BackColor = Color.FromArgb(45, 45, 45)
-                };
-
-                scrollThumb = new Panel
-                {
-                    Width = 6,
-                    Height = 28,
-                    Left = 1,
-                    Top = 4,
-                    BackColor = Color.FromArgb(180, 120, 120)
-                };
-
-                scrollTrack.Controls.Add(scrollThumb);
-                Controls.Add(innerTextBox);
-                Controls.Add(scrollTrack);
-
-                innerTextBox.TextChanged += (s, e) =>
-                {
-                    UpdateThumb();
-                    OnTextChanged(e);
-                };
-
-                innerTextBox.MouseWheel += ScrollText;
-                MouseWheel += ScrollText;
-
-                Resize += (s, e) =>
-                {
-                    innerTextBox.Width = Width - 20;
-                    innerTextBox.Height = Height - 12;
-                    UpdateThumb();
-                };
-            }
-
-            private void ScrollText(object? sender, MouseEventArgs e)
-            {
-                int lines = e.Delta > 0 ? -3 : 3;
-
-                int index = innerTextBox.GetFirstCharIndexFromLine(
-                    Math.Max(0, innerTextBox.GetLineFromCharIndex(innerTextBox.GetFirstCharIndexOfCurrentLine()) + lines)
-                );
-
-                if (index >= 0)
-                {
-                    innerTextBox.SelectionStart = index;
-                    innerTextBox.ScrollToCaret();
-                }
-
-                UpdateThumb();
-            }
-
-            private void UpdateThumb()
-            {
-                int lineCount = Math.Max(1, innerTextBox.Lines.Length);
-                int visibleLines = Math.Max(1, innerTextBox.Height / innerTextBox.Font.Height);
-
-                if (lineCount <= visibleLines)
-                {
-                    scrollThumb.Visible = false;
-                    return;
-                }
-
-                scrollThumb.Visible = true;
-
-                float ratio = visibleLines / (float)lineCount;
-                scrollThumb.Height = Math.Max(24, (int)(scrollTrack.Height * ratio));
-
-                int currentLine = innerTextBox.GetLineFromCharIndex(innerTextBox.SelectionStart);
-                float scrollRatio = currentLine / (float)Math.Max(1, lineCount - visibleLines);
-
-                scrollThumb.Top = 4 + (int)((scrollTrack.Height - scrollThumb.Height - 8) * scrollRatio);
             }
         }
 
@@ -3808,78 +3711,44 @@ namespace MagicOGK_OIV_Builder
                 loading.Close();
             }
         }
-        private async void btnSidebarExtractOIV_Click(object sender, EventArgs e)
+        private void btnSidebarExtractOIV_Click(object sender, EventArgs e)
         {
-            DialogResult modeChoice = ShowMagicExtractChoiceBox();
+            var form = new ExtractOivForm();
+            form.Show(this);
 
-            if (modeChoice == DialogResult.Cancel)
-                return;
-
-            bool useNestedFolders = modeChoice == DialogResult.Yes;
-
-            using var openDlg = new OpenFileDialog
+            form.ExtractRequested += async (oivPath, outputPath, useNestedFolders) =>
             {
-                Title = "Extract OIV Package",
-                Filter = "OpenIV Package (*.oiv)|*.oiv"
-            };
+                string outputFolder = System.IO.Path.Combine(outputPath, System.IO.Path.GetFileNameWithoutExtension(oivPath) + "_extracted");
+                form.Log($"Starting extraction: {System.IO.Path.GetFileName(oivPath)}");
 
-            if (openDlg.ShowDialog() != DialogResult.OK)
-                return;
+                using LoadingForm loading = new LoadingForm("Extracting OIV package...");
+                loading.StartPosition = FormStartPosition.Manual;
+                loading.Location = new Point(form.Left + (form.Width - loading.Width) / 2, form.Top + (form.Height - loading.Height) / 2);
 
-            using var folderDlg = new FolderBrowserDialog
-            {
-                Description = "Choose where to extract the OIV"
-            };
-
-            if (folderDlg.ShowDialog() != DialogResult.OK)
-                return;
-
-            using LoadingForm loading = new LoadingForm("Extracting OIV package...");
-
-            loading.StartPosition = FormStartPosition.Manual;
-            loading.Location = new Point(
-                this.Left + (this.Width - loading.Width) / 2,
-                this.Top + (this.Height - loading.Height) / 2
-            );
-
-            try
-            {
-                loading.Show(this);
-                loading.Refresh();
-
-                string oivPath = openDlg.FileName;
-                string outputFolder = Path.Combine(
-                    folderDlg.SelectedPath,
-                    Path.GetFileNameWithoutExtension(oivPath) + "_extracted"
-                );
-
-                await Task.Run(() =>
+                try
                 {
-                    ExtractOiv(oivPath, outputFolder, useNestedFolders);
-                });
+                    loading.Show(form);
+                    loading.Refresh();
 
-                MessageBox.Show(
-                    "OIV extracted successfully.",
-                    "Extract Complete",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information
-                );
+                    await System.Threading.Tasks.Task.Run(() =>
+                    {
+                        ExtractOiv(oivPath, outputFolder, useNestedFolders, form.Log);
+                    });
 
-                Process.Start("explorer.exe", outputFolder);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(
-                    "Extract failed:\n\n" + ex.Message,
-                    "Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
-            }
-            finally
-            {
-                loading.Close();
-            }
+                    form.Log("Extraction complete!");
+                    MessageBox.Show(form, "OIV extracted successfully.", "Extract Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    System.Diagnostics.Process.Start("explorer.exe", outputFolder);
+                }
+                catch (Exception ex)
+                {
+                    form.Log($"Error: {ex.Message}");
+                    MessageBox.Show(form, "Extract failed:\n\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    loading.Close();
+                }
+            };
         }
         private DialogResult ShowMagicExtractChoiceBox()
         {
@@ -3973,8 +3842,10 @@ namespace MagicOGK_OIV_Builder
 
             return dialog.ShowDialog(this);
         }
-        private void ExtractOiv(string oivPath, string outputFolder, bool useNestedFolders)
+        private void ExtractOiv(string oivPath, string outputFolder, bool useNestedFolders, Action<string>? log = null)
         {
+            log ??= _ => { };
+
             string tempFolder = Path.Combine(
                 Path.GetTempPath(),
                 "MagicOGK_ExtractOIV_" + Guid.NewGuid().ToString("N")
@@ -3983,6 +3854,7 @@ namespace MagicOGK_OIV_Builder
             Directory.CreateDirectory(tempFolder);
             Directory.CreateDirectory(outputFolder);
 
+            log($"Extracting OIV to temp directory...");
             ZipFile.ExtractToDirectory(oivPath, tempFolder);
 
             string? assemblyPath = Directory
@@ -4003,11 +3875,14 @@ namespace MagicOGK_OIV_Builder
                 })
                 .ToList();
 
+            log($"Found {installNodes.Count} file entries in assembly.xml");
+
             List<string> reportLines = new();
             List<string> metadataLines = new();
 
             metadataLines.Add("Operation\tSourceInOiv\tLocalFile\tOriginalInstallPath");
 
+            int extractedCount = 0;
             foreach (XElement node in installNodes)
             {
                 string source = GetAttr(node, "source", "src", "file");
@@ -4058,6 +3933,9 @@ namespace MagicOGK_OIV_Builder
                 metadataLines.Add(
                     $"{operation}\t{source.Replace("\\", "/")}\t{localRelativeFile}\t{finalTarget}"
                 );
+
+                extractedCount++;
+                log($"Extracted [{extractedCount}/{installNodes.Count}]: {localRelativeFile}");
             }
 
             File.WriteAllLines(

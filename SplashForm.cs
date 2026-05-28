@@ -10,10 +10,35 @@ namespace MagicOGK_OIV_Builder
 {
     public partial class SplashForm : Form
     {
+        private bool skipRequested = false;
+
         public SplashForm()
         {
             InitializeComponent();
             this.Shown += SplashForm_Shown;
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == Keys.Space && !skipRequested)
+            {
+                skipRequested = true;
+                SkipSplash();
+                return true;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void SkipSplash()
+        {
+            if (webViewBackground?.CoreWebView2 != null)
+            {
+                try
+                {
+                    webViewBackground.CoreWebView2.ExecuteScriptAsync("finishSplash();");
+                }
+                catch { }
+            }
         }
 
         private async void SplashForm_Shown(object sender, EventArgs e)
@@ -458,6 +483,14 @@ function typeLoop() {
         setTimeout(typeLoop, deletingSpeed);
     }
 }
+
+// Keyboard skip handler
+document.addEventListener('keydown', function(e) {
+    if (e.code === 'Space' && !splashFinished) {
+        e.preventDefault();
+        finishSplash();
+    }
+});
 
 // Start
 setProgress(0);
