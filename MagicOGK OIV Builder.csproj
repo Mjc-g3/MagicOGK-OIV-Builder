@@ -9,8 +9,16 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Platforms>AnyCPU;x64</Platforms>
     <ApplicationIcon>icon.ico</ApplicationIcon>
-    <AssemblyVersion>1.6.0</AssemblyVersion>
-    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+	  
+	  
+                <AssemblyVersion>1.6.1</AssemblyVersion>
+		        <Version>1.6.1</Version>
+		        <AssemblyVersion>1.6.1.0</AssemblyVersion>
+		        <FileVersion>1.6.1.0</FileVersion>
+		        <InformationalVersion>1.6.1</InformationalVersion>
+	  
+	  
   </PropertyGroup>
 
   <ItemGroup>

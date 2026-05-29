@@ -1,11 +1,11 @@
 #define MyAppName "MagicOGK OIV Builder"
-#define MyAppVersion "1.6.0"
-#define MyAppPublisher "MagicOGK"
+#define MyAppVersion "1.6.1"
+#define MyAppPublisher "Mgc-g3"
 #define MyAppExeName "MagicOGK OIV Builder.exe"
 #define PublishDir "C:\Users\elias\source\builds\Magic-OIV-Builder-Latest"
 
 [Setup]
-AppId={{4A8EC6A6-7BDF-4E15-8228-D805C725CB28}
+AppId={{7E5DC545-049A-4526-B087-CDF6F37D97EB}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}
