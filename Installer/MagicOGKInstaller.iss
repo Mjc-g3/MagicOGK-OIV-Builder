@@ -5,7 +5,7 @@
 #define PublishDir "C:\Users\elias\source\builds\Magic-OIV-Builder-Latest"
 
 [Setup]
-AppId={{7E5DC545-049A-4526-B087-CDF6F37D97EB}}
+AppId={{8C7EC0E7-108E-4A3D-A47C-3456F9594053}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 AppPublisher={#MyAppPublisher}

@@ -12,11 +12,11 @@
 	<SatelliteResourceLanguages>en</SatelliteResourceLanguages>
 	  
 	  
-                <AssemblyVersion>1.6.1</AssemblyVersion>
-		        <Version>1.6.1</Version>
-		        <AssemblyVersion>1.6.1.0</AssemblyVersion>
-		        <FileVersion>1.6.1.0</FileVersion>
-		        <InformationalVersion>1.6.1</InformationalVersion>
+                <AssemblyVersion>1.6.2</AssemblyVersion>
+		        <Version>1.6.2</Version>
+		        <AssemblyVersion>1.6.2.0</AssemblyVersion>
+		        <FileVersion>1.6.2.0</FileVersion>
+		        <InformationalVersion>1.6.2</InformationalVersion>
 	  
 	  
   </PropertyGroup>

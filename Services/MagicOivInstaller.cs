@@ -89,12 +89,18 @@ namespace MagicOGK_OIV_Builder.Services
 
                 XmlNodeList looseNodes = doc.SelectNodes("//content/add[@source]")!;
                 XmlNodeList archiveNodes = doc.SelectNodes("//content/archive/add[@source]")!;
+                XmlNodeList xmlPatchNodes = doc.SelectNodes("//content/archive/xml/add")!;
+                XmlNodeList archiveDeleteNodes = doc.SelectNodes("//content/archive/delete")!;
 
                 ValidateUnsupportedXmlActions(doc, summary);
 
                 int looseCount = looseNodes?.Count ?? 0;
                 int archiveCount = archiveNodes?.Count ?? 0;
-                int totalCount = looseCount + archiveCount;
+                int xmlPatchCount = xmlPatchNodes?.Count ?? 0;
+                int archiveDeleteCount = archiveDeleteNodes?.Count ?? 0;
+
+                int totalCount = looseCount + archiveCount + xmlPatchCount + archiveDeleteCount;
+                summary.TotalOperations = totalCount;
 
                 if (totalCount == 0)
                 {
@@ -123,6 +129,19 @@ namespace MagicOGK_OIV_Builder.Services
                 {
                     completed++;
                     InstallArchiveNode(node, contentDir, gta5Path, dryRun, injectedTargets, summary);
+                    ReportOperationProgress(progress, completed, totalCount);
+                }
+
+                foreach (XmlNode node in xmlPatchNodes)
+                {
+                    completed++;
+                    InstallXmlPatchNode(node, gta5Path, dryRun, injectedTargets, summary);
+                    ReportOperationProgress(progress, completed, summary.TotalOperations);
+                }
+                foreach (XmlNode node in archiveDeleteNodes)
+                {
+                    completed++;
+                    InstallArchiveDeleteNode(node, gta5Path, dryRun, injectedTargets, summary);
                     ReportOperationProgress(progress, completed, totalCount);
                 }
 
@@ -302,6 +321,15 @@ namespace MagicOGK_OIV_Builder.Services
             Log?.Invoke($"INTERNAL PATH: {internalPath}");
             Log?.Invoke("");
 
+            bool sourceIsRpf = source.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase);
+            bool targetIsRpf = internalPath.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase);
+
+            if (sourceIsRpf && targetIsRpf)
+            {
+                InstallWholeRpfFile(node, contentDir, gta5Path, dryRun, injectedTargets, summary);
+                return;
+            }
+
             if (string.IsNullOrWhiteSpace(source) ||
                 string.IsNullOrWhiteSpace(rpfPath) ||
                 string.IsNullOrWhiteSpace(internalPath))
@@ -365,10 +393,158 @@ namespace MagicOGK_OIV_Builder.Services
             InstallFileIntoRpf(gta5Path, rpfPath, internalPath, fileData);
         }
 
+        private void InstallArchiveDeleteNode(
+    XmlNode node,
+    string gta5Path,
+    bool dryRun,
+    HashSet<string> injectedTargets,
+    InstallSummary summary)
+        {
+            string internalPath = node.InnerText?.Trim() ?? "";
+
+            XmlNode archiveNode = node.ParentNode!;
+            string rpfPath = archiveNode.Attributes?["path"]?.Value ?? "";
+
+            if (string.IsNullOrWhiteSpace(rpfPath) ||
+                string.IsNullOrWhiteSpace(internalPath))
+            {
+                AddIssue(summary, InstallErrorCategory.XmlError,
+                    "Archive delete operation is missing RPF path or internal path.", rpfPath);
+                return;
+            }
+
+            string duplicateKey =
+                "delete-rpf:" +
+                NormalizeGamePath(rpfPath) +
+                "::" +
+                NormalizeGamePath(internalPath);
+
+            if (AlreadyInjected(injectedTargets, duplicateKey))
+            {
+                summary.SkippedDuplicates++;
+                AddIssue(summary, InstallErrorCategory.DuplicateInjection,
+                    "Duplicate RPF delete skipped.", duplicateKey, warningOnly: true);
+                return;
+            }
+
+            if (dryRun)
+            {
+                Log?.Invoke("[DRY RUN] Would delete file from RPF:");
+                Log?.Invoke(rpfPath);
+                Log?.Invoke("Internal: " + internalPath);
+                return;
+            }
+
+            DeleteFileFromRpf(gta5Path, rpfPath, internalPath);
+        }
+
+        private void InstallWholeRpfFile(
+    XmlNode node,
+    string contentDir,
+    string gta5Path,
+    bool dryRun,
+    HashSet<string> injectedTargets,
+    InstallSummary summary)
+        {
+            string source = node.Attributes?["source"]?.Value ?? "";
+            string target = node.InnerText?.Trim() ?? "";
+
+            if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(target))
+            {
+                AddIssue(summary, InstallErrorCategory.XmlError,
+                    "Whole RPF operation is missing source or target.", target);
+                return;
+            }
+
+            string duplicateKey = "whole-rpf:" + NormalizeGamePath(target);
+
+            if (AlreadyInjected(injectedTargets, duplicateKey))
+            {
+                summary.SkippedDuplicates++;
+                AddIssue(summary, InstallErrorCategory.DuplicateInjection,
+                    "Duplicate whole RPF replacement skipped.", target, warningOnly: true);
+                return;
+            }
+
+            string sourcePath = Path.Combine(
+                contentDir,
+                source.Replace('/', Path.DirectorySeparatorChar)
+                      .Replace('\\', Path.DirectorySeparatorChar)
+            );
+
+            if (!File.Exists(sourcePath))
+            {
+                AddIssue(summary, InstallErrorCategory.FileError,
+                    "Source RPF file missing: " + sourcePath, source);
+                return;
+            }
+
+            string targetPath = Path.Combine(
+                gta5Path,
+                "mods",
+                target.Replace('/', Path.DirectorySeparatorChar)
+                      .Replace('\\', Path.DirectorySeparatorChar)
+            );
+
+            summary.FilesInstalled++;
+            summary.InstalledFiles.Add(targetPath);
+
+            if (dryRun)
+            {
+                Log?.Invoke("[DRY RUN] Would copy/replace whole RPF:");
+                Log?.Invoke("FROM: " + sourcePath);
+                Log?.Invoke("TO: " + targetPath);
+                return;
+            }
+
+            Directory.CreateDirectory(Path.GetDirectoryName(targetPath)!);
+
+            if (File.Exists(targetPath))
+            {
+                BackupWholeFile(gta5Path, target);
+            }
+
+            File.Copy(sourcePath, targetPath, true);
+
+            Log?.Invoke("Whole RPF copied/replaced:");
+            Log?.Invoke(targetPath);
+        }
+        private void BackupWholeFile(string gta5Path, string relativePath)
+        {
+            string sourcePath = Path.Combine(
+                gta5Path,
+                "mods",
+                relativePath.Replace('/', Path.DirectorySeparatorChar)
+                            .Replace('\\', Path.DirectorySeparatorChar)
+            );
+
+            if (!File.Exists(sourcePath))
+                return;
+
+            string backupRoot = Path.Combine(
+                gta5Path,
+                "mods_backup",
+                "MagicOGK",
+                DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss")
+            );
+
+            string backupPath = Path.Combine(
+                backupRoot,
+                relativePath.Replace('/', Path.DirectorySeparatorChar)
+                            .Replace('\\', Path.DirectorySeparatorChar)
+            );
+
+            Directory.CreateDirectory(Path.GetDirectoryName(backupPath)!);
+            File.Copy(sourcePath, backupPath, true);
+
+            Log?.Invoke("Whole RPF backup created:");
+            Log?.Invoke(backupPath);
+        }
+
         private void ValidateUnsupportedXmlActions(XmlDocument doc, InstallSummary summary)
         {
             XmlNodeList unsupportedNodes = doc.SelectNodes(
-                "//content/*[not(self::add) and not(self::archive)] | //content/archive/*[not(self::add)]"
+                "//content/*[not(self::add) and not(self::archive)] | //content/archive/*[not(self::add) and not(self::xml) and not(self::delete)]"
             )!;
 
             if (unsupportedNodes == null || unsupportedNodes.Count == 0)
@@ -580,6 +756,84 @@ namespace MagicOGK_OIV_Builder.Services
 
             Log?.Invoke("RPF file injected successfully.");
             Log?.Invoke("Close and reopen OpenIV if the file does not appear immediately.");
+        }
+
+        private void DeleteFileFromRpf(
+    string gta5Path,
+    string rpfRelativePath,
+    string internalPath)
+        {
+            string cleanRpfRelativePath = rpfRelativePath
+                .Replace('/', Path.DirectorySeparatorChar)
+                .Replace('\\', Path.DirectorySeparatorChar);
+
+            string originalRpfPath = Path.Combine(gta5Path, cleanRpfRelativePath);
+
+            string modsRpfPath = Path.Combine(
+                gta5Path,
+                "mods",
+                cleanRpfRelativePath
+            );
+
+            if (!File.Exists(modsRpfPath))
+            {
+                if (!File.Exists(originalRpfPath))
+                    throw new Exception("Original RPF not found: " + originalRpfPath);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(modsRpfPath)!);
+
+                Log?.Invoke("Mods RPF not found.");
+                Log?.Invoke("Copying original RPF into mods folder before delete...");
+                File.Copy(originalRpfPath, modsRpfPath, true);
+            }
+
+            BackupRpf(gta5Path, rpfRelativePath);
+
+            RpfFile rpf = new RpfFile(modsRpfPath, cleanRpfRelativePath);
+
+            rpf.ScanStructure(
+                msg => { },
+                msg => Log?.Invoke(msg)
+            );
+
+            string normalizedInternalPath = internalPath.Replace("\\", "/");
+            string fileName = Path.GetFileName(normalizedInternalPath);
+
+            string folderPath = Path.GetDirectoryName(normalizedInternalPath)?
+                .Replace("\\", "/") ?? "";
+
+            RpfDirectoryEntry dir = rpf.Root;
+
+            foreach (string part in folderPath.Split('/', StringSplitOptions.RemoveEmptyEntries))
+            {
+                RpfDirectoryEntry? nextDir = dir.Directories
+                    .FirstOrDefault(d =>
+                        d.Name.Equals(part, StringComparison.OrdinalIgnoreCase));
+
+                if (nextDir == null)
+                {
+                    Log?.Invoke("Delete skipped. Directory not found inside RPF: " + part);
+                    return;
+                }
+
+                dir = nextDir;
+            }
+
+            RpfFileEntry? file = dir.Files
+                .FirstOrDefault(f =>
+                    f.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
+
+            if (file == null)
+            {
+                Log?.Invoke("Delete skipped. File not found inside RPF:");
+                Log?.Invoke(normalizedInternalPath);
+                return;
+            }
+
+            RpfFile.DeleteEntry(file);
+
+            Log?.Invoke("Deleted file from RPF:");
+            Log?.Invoke(normalizedInternalPath);
         }
 
         private void InitializeCodeWalker(string gta5Path)
@@ -855,6 +1109,148 @@ namespace MagicOGK_OIV_Builder.Services
             }
 
             return null;
+        }
+
+        private void InstallXmlPatchNode(
+    XmlNode addNode,
+    string gta5Path,
+    bool dryRun,
+    HashSet<string> injectedTargets,
+    InstallSummary summary)
+        {
+            XmlNode xmlNode = addNode.ParentNode!;
+            XmlNode archiveNode = xmlNode.ParentNode!;
+
+            string rpfPath = archiveNode.Attributes?["path"]?.Value ?? "";
+            string xmlInternalPath = xmlNode.Attributes?["path"]?.Value ?? "";
+            string xpath = addNode.Attributes?["xpath"]?.Value ?? "";
+            string append = addNode.Attributes?["append"]?.Value ?? "Last";
+
+            if (string.IsNullOrWhiteSpace(rpfPath) ||
+                string.IsNullOrWhiteSpace(xmlInternalPath) ||
+                string.IsNullOrWhiteSpace(xpath))
+            {
+                AddIssue(summary, InstallErrorCategory.XmlError,
+                    "XML patch is missing archive path, XML path, or xpath.", rpfPath);
+                return;
+            }
+
+            string patchKey =
+                "xml:" + NormalizeGamePath(rpfPath) + "::" +
+                NormalizeGamePath(xmlInternalPath) + "::" +
+                xpath + "::" + addNode.InnerXml;
+
+            if (AlreadyInjected(injectedTargets, patchKey))
+            {
+                summary.SkippedDuplicates++;
+                AddIssue(summary, InstallErrorCategory.DuplicateInjection,
+                    "Duplicate XML patch skipped.", patchKey, warningOnly: true);
+                return;
+            }
+
+            summary.XmlPatchesApplied++;
+
+            if (dryRun)
+            {
+                Log?.Invoke("[DRY RUN] Would patch XML:");
+                Log?.Invoke($"{rpfPath}::{xmlInternalPath}");
+                Log?.Invoke(addNode.InnerXml);
+                return;
+            }
+
+            PatchXmlInsideRpf(gta5Path, rpfPath, xmlInternalPath, xpath, append, addNode);
+        }
+        private void PatchXmlInsideRpf(
+    string gta5Path,
+    string rpfRelativePath,
+    string xmlInternalPath,
+    string xpath,
+    string append,
+    XmlNode addNode)
+        {
+            string cleanRpfRelativePath = rpfRelativePath
+                .Replace('/', Path.DirectorySeparatorChar)
+                .Replace('\\', Path.DirectorySeparatorChar);
+
+            string originalRpfPath = Path.Combine(gta5Path, cleanRpfRelativePath);
+            string modsRpfPath = Path.Combine(gta5Path, "mods", cleanRpfRelativePath);
+
+            if (!File.Exists(modsRpfPath))
+            {
+                if (!File.Exists(originalRpfPath))
+                    throw new Exception("Original RPF not found: " + originalRpfPath);
+
+                Directory.CreateDirectory(Path.GetDirectoryName(modsRpfPath)!);
+                File.Copy(originalRpfPath, modsRpfPath, true);
+            }
+
+            BackupRpf(gta5Path, rpfRelativePath);
+
+            RpfFile rpf = new RpfFile(modsRpfPath, cleanRpfRelativePath);
+            rpf.ScanStructure(msg => { }, msg => Log?.Invoke(msg));
+
+            string normalizedXmlPath = xmlInternalPath.Replace("\\", "/");
+            string fileName = Path.GetFileName(normalizedXmlPath);
+            string folderPath = Path.GetDirectoryName(normalizedXmlPath)?.Replace("\\", "/") ?? "";
+
+            RpfDirectoryEntry dir = rpf.Root;
+
+            foreach (string part in folderPath.Split('/', StringSplitOptions.RemoveEmptyEntries))
+            {
+                RpfDirectoryEntry? nextDir = dir.Directories
+                    .FirstOrDefault(d => d.Name.Equals(part, StringComparison.OrdinalIgnoreCase));
+
+                if (nextDir == null)
+                    throw new Exception("Directory not found inside RPF: " + part);
+
+                dir = nextDir;
+            }
+
+            RpfFileEntry? xmlEntry = dir.Files
+                .FirstOrDefault(f => f.Name.Equals(fileName, StringComparison.OrdinalIgnoreCase));
+
+            if (xmlEntry == null)
+                throw new Exception("XML file not found inside RPF: " + normalizedXmlPath);
+
+            byte[] xmlBytes = rpf.ExtractFile(xmlEntry);
+            string xmlText = System.Text.Encoding.UTF8.GetString(xmlBytes);
+
+            XmlDocument xmlDoc = new XmlDocument();
+            xmlDoc.LoadXml(xmlText);
+
+            XmlNode? target = xmlDoc.SelectSingleNode(xpath);
+            if (target == null)
+                throw new Exception("XPath target not found: " + xpath);
+
+            foreach (XmlNode child in addNode.ChildNodes)
+            {
+                XmlNode imported = xmlDoc.ImportNode(child, true);
+
+                bool alreadyExists = target.ChildNodes
+                    .Cast<XmlNode>()
+                    .Any(x => x.OuterXml == imported.OuterXml);
+
+                if (alreadyExists)
+                {
+                    Log?.Invoke("XML entry already exists, skipped:");
+                    Log?.Invoke(imported.OuterXml);
+                    continue;
+                }
+
+                if (append.Equals("First", StringComparison.OrdinalIgnoreCase))
+                    target.PrependChild(imported);
+                else
+                    target.AppendChild(imported);
+
+                Log?.Invoke("XML entry added:");
+                Log?.Invoke(imported.OuterXml);
+            }
+
+            byte[] newXmlBytes = System.Text.Encoding.UTF8.GetBytes(xmlDoc.OuterXml);
+            RpfFile.CreateFile(dir, fileName, newXmlBytes, true);
+
+            Log?.Invoke("XML patched successfully:");
+            Log?.Invoke($"{rpfRelativePath}::{xmlInternalPath}");
         }
 
         public enum InstallErrorCategory
