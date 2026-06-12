@@ -5589,10 +5589,10 @@ namespace MagicOGK_OIV_Builder
                     Location = new Point(48, 48),
                     Font = new Font("Syne", 7F)
                 };
-                typeBox.Items.AddRange(new object[] { "Content", "Replace", "XML Edit" });
-                typeBox.SelectedIndex = file.Type switch { "replace" => 1, "xmledit" => 2, _ => 0 };
+                typeBox.Items.AddRange(new object[] { "Content", "Replace", "XML Edit", "Delete" });
+                typeBox.SelectedIndex = file.Type switch { "replace" => 1, "xmledit" => 2, "delete" => 3, _ => 0 };
                 typeBox.SelectedIndexChanged += (s, ev) =>
-                    file.Type = typeBox.SelectedIndex switch { 1 => "replace", 2 => "xmledit", _ => "content" };
+                    file.Type = typeBox.SelectedIndex switch { 1 => "replace", 2 => "xmledit", 3 => "delete", _ => "content" };
                 editorPropPanel.Controls.Add(typeBox);
 
                 // Full resolved path preview

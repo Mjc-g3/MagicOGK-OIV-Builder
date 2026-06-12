@@ -113,7 +113,7 @@ namespace MagicOGK_OIV_Builder.Services
                 Log?.Invoke($"Found {totalCount} install operation(s).");
                 progress?.Report(30);
 
-                if (!dryRun && archiveCount > 0)
+                if (!dryRun && (archiveCount > 0 || xmlPatchCount > 0 || archiveDeleteCount > 0))
                     InitializeCodeWalker(gta5Path);
 
                 int completed = 0;

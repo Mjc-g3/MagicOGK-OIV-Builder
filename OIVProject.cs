@@ -9,7 +9,7 @@ namespace MagicOGK_OIV_Builder
         public string SourcePath { get; set; } = string.Empty;
         // SubPath is the path inside the parent folder (usually empty — file sits directly in folder)
         public string SubPath    { get; set; } = string.Empty;
-        public string Type       { get; set; } = "content";  // content | replace | xmledit
+        public string Type       { get; set; } = "content";  // content | replace | xmledit | delete
         // Which OIVFolder node this file is placed under (null = unassigned / loose)
         public int?   FolderId   { get; set; } = null;
 

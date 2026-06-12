@@ -42,6 +42,9 @@ namespace MagicOGK_OIV_Builder
 
                 foreach (var file in project.Files)
                 {
+                    if (file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
                     if (sourceToContentName.ContainsKey(file.SourcePath))
                         continue;
 
@@ -246,11 +249,21 @@ namespace MagicOGK_OIV_Builder
             // Step 4: Write loose files (no RPF in path)
             foreach (var file in looseFiles)
             {
-                string contentName = sourceToContentName[file.SourcePath];
                 string installPath = resolved[file];
-                var add = AppendElem(doc, content, "add");
-                add.SetAttribute("source", contentName);
-                add.InnerText = installPath;
+
+                if (file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                {
+                    var delete = AppendElem(doc, content, "delete");
+                    delete.InnerText = installPath;
+                }
+                else
+                {
+                    string contentName = sourceToContentName[file.SourcePath];
+
+                    var add = AppendElem(doc, content, "add");
+                    add.SetAttribute("source", contentName);
+                    add.InnerText = installPath;
+                }
             }
 
             // Step 5: dlclist.xml inline XML edits
@@ -259,12 +272,10 @@ namespace MagicOGK_OIV_Builder
             var dlcFolders = project.Folders.Where(f => f.AddToDlcList).ToList();
             if (dlcFolders.Count > 0)
             {
-                // Check whether update.rpf is already in the tree; if not add it
-                // We always emit a separate block for dlclist edits to keep it clean
                 var updateRpf = AppendElem(doc, content, "archive");
-                updateRpf.SetAttribute("path",             @"update\update.rpf");
+                updateRpf.SetAttribute("path", @"update\update.rpf");
                 updateRpf.SetAttribute("createIfNotExist", "False");
-                updateRpf.SetAttribute("type",             "RPF7");
+                updateRpf.SetAttribute("type", "RPF7");
 
                 var xmlNode = AppendElem(doc, updateRpf, "xml");
                 xmlNode.SetAttribute("path", @"common\data\dlclist.xml");
@@ -274,9 +285,78 @@ namespace MagicOGK_OIV_Builder
                     string dlcEntry = $"dlcpacks:/{folder.Name}/";
                     var addNode = AppendElem(doc, xmlNode, "add");
                     addNode.SetAttribute("append", "Last");
-                    addNode.SetAttribute("xpath",  "/SMandatoryPacksData/Paths");
+                    addNode.SetAttribute("xpath", "/SMandatoryPacksData/Paths");
                     AppendElem(doc, addNode, "Item").InnerText = dlcEntry;
                 }
+            }
+            WriteAutoContentXmlRegistrations(doc, content, project);
+        }
+
+        private static void WriteAutoContentXmlRegistrations(
+    XmlDocument doc,
+    XmlElement content,
+    OIVProject project)
+        {
+            var writtenEntries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var folder in project.Folders.Where(f => f.IsRpf))
+            {
+                OIVFolder? parentArchive = FindNearestParentArchive(folder, project);
+
+                if (parentArchive == null)
+                    continue;
+
+                string childArchivePath = BuildFullFolderPath(folder, project);
+                string parentArchivePath = BuildFullFolderPath(parentArchive, project);
+
+                string relativeArchivePath = MakeRelativePathInsideArchive(
+                    childArchivePath,
+                    parentArchivePath
+                );
+
+                if (string.IsNullOrWhiteSpace(relativeArchivePath))
+                    continue;
+
+                string dlcName = GetDlcNameFromArchivePath(parentArchivePath);
+
+                if (string.IsNullOrWhiteSpace(dlcName))
+                    continue;
+
+                string contentXmlFilename = BuildContentXmlRpfReference(
+                    dlcName,
+                    relativeArchivePath
+                );
+
+                string duplicateKey = parentArchivePath + "::" + contentXmlFilename;
+
+                if (!writtenEntries.Add(duplicateKey))
+                    continue;
+
+                var archiveNode = AppendElem(doc, content, "archive");
+                archiveNode.SetAttribute("path", parentArchivePath);
+                archiveNode.SetAttribute("createIfNotExist", "False");
+                archiveNode.SetAttribute("type", "RPF7");
+
+                var xmlNode = AppendElem(doc, archiveNode, "xml");
+                xmlNode.SetAttribute("path", "content.xml");
+
+                var addNode = AppendElem(doc, xmlNode, "add");
+                addNode.SetAttribute("append", "Last");
+                addNode.SetAttribute("xpath", "/CDataFileMgr__ContentsOfDataFileXml/dataFiles");
+
+                var item = AppendElem(doc, addNode, "Item");
+
+                AppendElem(doc, item, "filename").InnerText = contentXmlFilename;
+                AppendElem(doc, item, "fileType").InnerText = "RPF_FILE";
+
+                var overlay = AppendElem(doc, item, "overlay");
+                overlay.SetAttribute("value", "true");
+
+                var disabled = AppendElem(doc, item, "disabled");
+                disabled.SetAttribute("value", "true");
+
+                var persistent = AppendElem(doc, item, "persistent");
+                persistent.SetAttribute("value", "true");
             }
         }
 
@@ -483,13 +563,22 @@ namespace MagicOGK_OIV_Builder
                     // Files directly inside this archive (or subfolders under it) must be relative to THIS archive
                     foreach (var file in filesHere)
                     {
-                        string contentName = sourceToContentName[file.SourcePath];
                         string fullPath = resolved[file];
                         string insideThisArchive = MakeRelativePathInsideArchive(fullPath, fullArchivePath);
 
-                        var add = AppendElem(doc, arc, "add");
-                        add.SetAttribute("source", contentName);
-                        add.InnerText = insideThisArchive;
+                        if (file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var delete = AppendElem(doc, arc, "delete");
+                            delete.InnerText = insideThisArchive;
+                        }
+                        else
+                        {
+                            string contentName = sourceToContentName[file.SourcePath];
+
+                            var add = AppendElem(doc, arc, "add");
+                            add.SetAttribute("source", contentName);
+                            add.InnerText = insideThisArchive;
+                        }
                     }
 
                     // Recurse into child folders, now inside this archive
@@ -509,16 +598,24 @@ namespace MagicOGK_OIV_Builder
                     // - if we ARE inside an archive, files use path relative to the current archive
                     foreach (var file in filesHere)
                     {
-                        string contentName = sourceToContentName[file.SourcePath];
+                        string contentNameLocal = sourceToContentName[file.SourcePath];
                         string fullPath = resolved[file];
 
                         string xmlPath = currentArchiveGamePath == null
                             ? fullPath
                             : MakeRelativePathInsideArchive(fullPath, currentArchiveGamePath);
 
-                        var add = AppendElem(doc, parent, "add");
-                        add.SetAttribute("source", contentName);
-                        add.InnerText = xmlPath;
+                        if (file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                        {
+                            var delete = AppendElem(doc, parent, "delete");
+                            delete.InnerText = xmlPath;
+                        }
+                        else
+                        {
+                            var add = AppendElem(doc, parent, "add");
+                            add.SetAttribute("source", contentNameLocal);
+                            add.InnerText = xmlPath;
+                        }
                     }
 
                     // Child folders stay in same archive context
@@ -556,6 +653,56 @@ namespace MagicOGK_OIV_Builder
         //   fullPath     = update\update.rpf\common\data\dlclist.xml
         //   archivePath  = update\update.rpf
         //   result       = common\data\dlclist.xml
+
+        private static OIVFolder? FindNearestParentArchive(
+    OIVFolder folder,
+    OIVProject project)
+        {
+            int? cur = folder.ParentId;
+
+            while (cur.HasValue)
+            {
+                OIVFolder? parent = project.Folders
+                    .FirstOrDefault(f => f.Id == cur.Value);
+
+                if (parent == null)
+                    return null;
+
+                if (parent.IsRpf)
+                    return parent;
+
+                cur = parent.ParentId;
+            }
+
+            return null;
+        }
+
+        private static string GetDlcNameFromArchivePath(string archivePath)
+        {
+            string normalized = archivePath.Replace("/", "\\");
+            string[] parts = normalized.Split('\\', StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < parts.Length - 1; i++)
+            {
+                if (parts[i].Equals("dlcpacks", StringComparison.OrdinalIgnoreCase))
+                    return parts[i + 1];
+            }
+
+            return "";
+        }
+
+        private static string BuildContentXmlRpfReference(
+            string dlcName,
+            string relativeArchivePath)
+        {
+            string path = relativeArchivePath.Replace("\\", "/");
+
+            if (path.StartsWith("x64/", StringComparison.OrdinalIgnoreCase))
+                path = "%PLATFORM%/" + path.Substring(4);
+
+            return $"dlc_{dlcName}:/{path}";
+        }
+
         private static string MakeRelativePathInsideArchive(string fullPath, string archivePath)
         {
             if (!fullPath.StartsWith(archivePath, StringComparison.OrdinalIgnoreCase))
