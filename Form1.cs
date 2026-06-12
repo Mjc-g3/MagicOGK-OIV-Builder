@@ -1186,7 +1186,7 @@ namespace MagicOGK_OIV_Builder
                     CreateVehicleReplaceCard(
                         v.name,
                         v.spawn,
-                        GetVehicleImagePath(v.img)
+                        v.img
                     )
                 );
             }
@@ -1208,6 +1208,25 @@ namespace MagicOGK_OIV_Builder
             }
 
             return string.Empty;
+        }
+
+        private async void LoadVehiclePreviewAsync(PictureBox pic, string imageName)
+        {
+            try
+            {
+                string url =
+                    $"https://raw.githubusercontent.com/Mjc-g3/MagicOGK-OIV-Builder/master/remote-assets/vehicles/{imageName}.png";
+
+                using var http = new HttpClient();
+                byte[] data = await http.GetByteArrayAsync(url);
+
+                using var ms = new MemoryStream(data);
+                pic.Image = Image.FromStream(ms);
+            }
+            catch
+            {
+                pic.Invalidate(); // keeps your "No image" paint fallback
+            }
         }
 
         private Panel CreateVehicleReplaceCard(string displayName, string spawnName, string imagePath)
@@ -1289,29 +1308,27 @@ namespace MagicOGK_OIV_Builder
                 BorderStyle = BorderStyle.None
             };
 
-            if (!string.IsNullOrWhiteSpace(imagePath) && File.Exists(imagePath))
+            pic.Paint += (s, e) =>
             {
-                pic.Image = Image.FromFile(imagePath);
-            }
-            else
-            {
-                pic.Paint += (s, e) =>
-                {
-                    using var brush = new SolidBrush(Color.FromArgb(100, 60, 60));
-                    using var font = new Font("Segoe UI", 8F, FontStyle.Bold);
+                if (pic.Image != null)
+                    return;
 
-                    string text = "No image";
-                    SizeF size = e.Graphics.MeasureString(text, font);
+                using var brush = new SolidBrush(Color.FromArgb(100, 60, 60));
+                using var font = new Font("Segoe UI", 8F, FontStyle.Bold);
 
-                    e.Graphics.DrawString(
-                        text,
-                        font,
-                        brush,
-                        (pic.Width - size.Width) / 2,
-                        (pic.Height - size.Height) / 2
-                    );
-                };
-            }
+                string text = "Loading...";
+                SizeF size = e.Graphics.MeasureString(text, font);
+
+                e.Graphics.DrawString(
+                    text,
+                    font,
+                    brush,
+                    (pic.Width - size.Width) / 2,
+                    (pic.Height - size.Height) / 2
+                );
+            };
+
+            LoadVehiclePreviewAsync(pic, imagePath);
 
             var name = new Label
             {
@@ -4209,6 +4226,7 @@ namespace MagicOGK_OIV_Builder
             XElement? linkNode = authorNode.Descendants()
                 .FirstOrDefault(x =>
                     x.Name.LocalName.Equals("web", StringComparison.OrdinalIgnoreCase) ||
+                    x.Name.LocalName.Equals("webPage", StringComparison.OrdinalIgnoreCase) ||
                     x.Name.LocalName.Equals("website", StringComparison.OrdinalIgnoreCase) ||
                     x.Name.LocalName.Equals("url", StringComparison.OrdinalIgnoreCase) ||
                     x.Name.LocalName.Equals("link", StringComparison.OrdinalIgnoreCase));

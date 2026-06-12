@@ -28,459 +28,470 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Remove="Assets\characters\franklin.png" />
-    <None Remove="Assets\characters\michael.png" />
-    <None Remove="Assets\characters\trevor.png" />
-    <None Remove="Assets\weapons\gadget_parachute.png" />
-    <None Remove="Assets\weapons\weapon_acidpackage.png" />
-    <None Remove="Assets\weapons\weapon_advancedrifle.png" />
-    <None Remove="Assets\weapons\weapon_appistol.png" />
-    <None Remove="Assets\weapons\weapon_assaultrifle.png" />
-    <None Remove="Assets\weapons\weapon_assaultrifle_mk2.png" />
-    <None Remove="Assets\weapons\weapon_assaultshotgun.png" />
-    <None Remove="Assets\weapons\weapon_assaultsmg.png" />
-    <None Remove="Assets\weapons\weapon_autoshotgun.png" />
-    <None Remove="Assets\weapons\weapon_ball.png" />
-    <None Remove="Assets\weapons\weapon_bat.png" />
-    <None Remove="Assets\weapons\weapon_battleaxe.png" />
-    <None Remove="Assets\weapons\weapon_bottle.png" />
-    <None Remove="Assets\weapons\weapon_bullpuprifle.png" />
-    <None Remove="Assets\weapons\weapon_bullpuprifle_mk2.png" />
-    <None Remove="Assets\weapons\weapon_bullpupshotgun.png" />
-    <None Remove="Assets\weapons\weapon_bzgas.png" />
-    <None Remove="Assets\weapons\weapon_candycane.png" />
-    <None Remove="Assets\weapons\weapon_carbinerifle.png" />
-    <None Remove="Assets\weapons\weapon_carbinerifle_mk2.png" />
-    <None Remove="Assets\weapons\weapon_combatmg.png" />
-    <None Remove="Assets\weapons\weapon_combatmg_mk2.png" />
-    <None Remove="Assets\weapons\weapon_combatpdw.png" />
-    <None Remove="Assets\weapons\weapon_combatpistol.png" />
-    <None Remove="Assets\weapons\weapon_combatshotgun.png" />
-    <None Remove="Assets\weapons\weapon_compactlauncher.png" />
-    <None Remove="Assets\weapons\weapon_compactrifle.png" />
-    <None Remove="Assets\weapons\weapon_crowbar.png" />
-    <None Remove="Assets\weapons\weapon_dagger.png" />
-    <None Remove="Assets\weapons\weapon_dbshotgun.png" />
-    <None Remove="Assets\weapons\weapon_doubleaction.png" />
-    <None Remove="Assets\weapons\weapon_emplauncher.png" />
-    <None Remove="Assets\weapons\weapon_fertilizercan.png" />
-    <None Remove="Assets\weapons\weapon_fireextinguisher.png" />
-    <None Remove="Assets\weapons\weapon_firework.png" />
-    <None Remove="Assets\weapons\weapon_flare.png" />
-    <None Remove="Assets\weapons\weapon_flaregun.png" />
-    <None Remove="Assets\weapons\weapon_flashlight.png" />
-    <None Remove="Assets\weapons\weapon_gadgetpistol.png" />
-    <None Remove="Assets\weapons\weapon_golfclub.png" />
-    <None Remove="Assets\weapons\weapon_grenade.png" />
-    <None Remove="Assets\weapons\weapon_grenadelauncher.png" />
-    <None Remove="Assets\weapons\weapon_grenadelauncher_smoke.png" />
-    <None Remove="Assets\weapons\weapon_gusenberg.png" />
-    <None Remove="Assets\weapons\weapon_hammer.png" />
-    <None Remove="Assets\weapons\weapon_hatchet.png" />
-    <None Remove="Assets\weapons\weapon_hazardcan.png" />
-    <None Remove="Assets\weapons\weapon_heavypistol.png" />
-    <None Remove="Assets\weapons\weapon_heavyrifle.png" />
-    <None Remove="Assets\weapons\weapon_heavyshotgun.png" />
-    <None Remove="Assets\weapons\weapon_heavysniper.png" />
-    <None Remove="Assets\weapons\weapon_heavysniper_mk2.png" />
-    <None Remove="Assets\weapons\weapon_hominglauncher.png" />
-    <None Remove="Assets\weapons\weapon_knife.png" />
-    <None Remove="Assets\weapons\weapon_knuckle.png" />
-    <None Remove="Assets\weapons\weapon_machete.png" />
-    <None Remove="Assets\weapons\weapon_machinepistol.png" />
-    <None Remove="Assets\weapons\weapon_marksmanpistol.png" />
-    <None Remove="Assets\weapons\weapon_marksmanrifle.png" />
-    <None Remove="Assets\weapons\weapon_marksmanrifle_mk2.png" />
-    <None Remove="Assets\weapons\weapon_mg.png" />
-    <None Remove="Assets\weapons\weapon_microsmg.png" />
-    <None Remove="Assets\weapons\weapon_militaryrifle.png" />
-    <None Remove="Assets\weapons\weapon_minigun.png" />
-    <None Remove="Assets\weapons\weapon_minismg.png" />
-    <None Remove="Assets\weapons\weapon_molotov.png" />
-    <None Remove="Assets\weapons\weapon_musket.png" />
-    <None Remove="Assets\weapons\weapon_navyrevolver.png" />
-    <None Remove="Assets\weapons\weapon_nightstick.png" />
-    <None Remove="Assets\weapons\weapon_parachute.png" />
-    <None Remove="Assets\weapons\weapon_petrolcan.png" />
-    <None Remove="Assets\weapons\weapon_pipebomb.png" />
-    <None Remove="Assets\weapons\weapon_pistol.png" />
-    <None Remove="Assets\weapons\weapon_pistol50.png" />
-    <None Remove="Assets\weapons\weapon_pistolxm3.png" />
-    <None Remove="Assets\weapons\weapon_pistol_mk2.png" />
-    <None Remove="Assets\weapons\weapon_poolcue.png" />
-    <None Remove="Assets\weapons\weapon_precisionrifle.png" />
-    <None Remove="Assets\weapons\weapon_proxmine.png" />
-    <None Remove="Assets\weapons\weapon_pumpshotgun.png" />
-    <None Remove="Assets\weapons\weapon_pumpshotgun_mk2.png" />
-    <None Remove="Assets\weapons\weapon_railgun.png" />
-    <None Remove="Assets\weapons\weapon_railgunxm3.png" />
-    <None Remove="Assets\weapons\weapon_raycarbine.png" />
-    <None Remove="Assets\weapons\weapon_rayminigun.png" />
-    <None Remove="Assets\weapons\weapon_raypistol.png" />
-    <None Remove="Assets\weapons\weapon_revolver.png" />
-    <None Remove="Assets\weapons\weapon_revolver_mk2.png" />
-    <None Remove="Assets\weapons\weapon_rpg.png" />
-    <None Remove="Assets\weapons\weapon_sawnoffshotgun.png" />
-    <None Remove="Assets\weapons\weapon_smg.png" />
-    <None Remove="Assets\weapons\weapon_smg_mk2.png" />
-    <None Remove="Assets\weapons\weapon_smokegrenade.png" />
-    <None Remove="Assets\weapons\weapon_sniperrifle.png" />
-    <None Remove="Assets\weapons\weapon_snowball.png" />
-    <None Remove="Assets\weapons\weapon_snspistol.png" />
-    <None Remove="Assets\weapons\weapon_snspistol_mk2.png" />
-    <None Remove="Assets\weapons\weapon_specialcarbine.png" />
-    <None Remove="Assets\weapons\weapon_specialcarbine_mk2.png" />
-    <None Remove="Assets\weapons\weapon_stickybomb.png" />
-    <None Remove="Assets\weapons\weapon_stone_hatchet.png" />
-    <None Remove="Assets\weapons\weapon_stungun.png" />
-    <None Remove="Assets\weapons\weapon_stungun_mp.png" />
-    <None Remove="Assets\weapons\weapon_stunrod.png" />
-    <None Remove="Assets\weapons\weapon_switchblade.png" />
-    <None Remove="Assets\weapons\weapon_tacticalrifle.png" />
-    <None Remove="Assets\weapons\weapon_techpistol.png" />
-    <None Remove="Assets\weapons\weapon_tecpistol.png" />
-    <None Remove="Assets\weapons\weapon_unarmed.png" />
-    <None Remove="Assets\weapons\weapon_vintagepistol.png" />
-    <None Remove="Assets\weapons\weapon_wrench.png" />
+	  <None Remove="Assets\characters\**\*" />
+	  <None Remove="Assets\weapons\**\*" />
+	  <None Remove="Assets\vehicles\**\*" />
+
+	  <Content Remove="Assets\characters\**\*" />
+	  <Content Remove="Assets\weapons\**\*" />
+	  <Content Remove="Assets\vehicles\**\*" />
+
+	  <Resource Remove="Assets\characters\**\*" />
+	  <Resource Remove="Assets\weapons\**\*" />
+	  <Resource Remove="Assets\vehicles\**\*" />
+    <None Remove="remote-assets\characters\franklin.png" />
+    <None Remove="remote-assets\characters\michael.png" />
+    <None Remove="remote-assets\characters\trevor.png" />
+    <None Remove="remote-assets\weapons\gadget_parachute.png" />
+    <None Remove="remote-assets\weapons\weapon_acidpackage.png" />
+    <None Remove="remote-assets\weapons\weapon_advancedrifle.png" />
+    <None Remove="remote-assets\weapons\weapon_appistol.png" />
+    <None Remove="remote-assets\weapons\weapon_assaultrifle.png" />
+    <None Remove="remote-assets\weapons\weapon_assaultrifle_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_assaultshotgun.png" />
+    <None Remove="remote-assets\weapons\weapon_assaultsmg.png" />
+    <None Remove="remote-assets\weapons\weapon_autoshotgun.png" />
+    <None Remove="remote-assets\weapons\weapon_ball.png" />
+    <None Remove="remote-assets\weapons\weapon_bat.png" />
+    <None Remove="remote-assets\weapons\weapon_battleaxe.png" />
+    <None Remove="remote-assets\weapons\weapon_bottle.png" />
+    <None Remove="remote-assets\weapons\weapon_bullpuprifle.png" />
+    <None Remove="remote-assets\weapons\weapon_bullpuprifle_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_bullpupshotgun.png" />
+    <None Remove="remote-assets\weapons\weapon_bzgas.png" />
+    <None Remove="remote-assets\weapons\weapon_candycane.png" />
+    <None Remove="remote-assets\weapons\weapon_carbinerifle.png" />
+    <None Remove="remote-assets\weapons\weapon_carbinerifle_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_combatmg.png" />
+    <None Remove="remote-assets\weapons\weapon_combatmg_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_combatpdw.png" />
+    <None Remove="remote-assets\weapons\weapon_combatpistol.png" />
+    <None Remove="remote-assets\weapons\weapon_combatshotgun.png" />
+    <None Remove="remote-assets\weapons\weapon_compactlauncher.png" />
+    <None Remove="remote-assets\weapons\weapon_compactrifle.png" />
+    <None Remove="remote-assets\weapons\weapon_crowbar.png" />
+    <None Remove="remote-assets\weapons\weapon_dagger.png" />
+    <None Remove="remote-assets\weapons\weapon_dbshotgun.png" />
+    <None Remove="remote-assets\weapons\weapon_doubleaction.png" />
+    <None Remove="remote-assets\weapons\weapon_emplauncher.png" />
+    <None Remove="remote-assets\weapons\weapon_fertilizercan.png" />
+    <None Remove="remote-assets\weapons\weapon_fireextinguisher.png" />
+    <None Remove="remote-assets\weapons\weapon_firework.png" />
+    <None Remove="remote-assets\weapons\weapon_flare.png" />
+    <None Remove="remote-assets\weapons\weapon_flaregun.png" />
+    <None Remove="remote-assets\weapons\weapon_flashlight.png" />
+    <None Remove="remote-assets\weapons\weapon_gadgetpistol.png" />
+    <None Remove="remote-assets\weapons\weapon_golfclub.png" />
+    <None Remove="remote-assets\weapons\weapon_grenade.png" />
+    <None Remove="remote-assets\weapons\weapon_grenadelauncher.png" />
+    <None Remove="remote-assets\weapons\weapon_grenadelauncher_smoke.png" />
+    <None Remove="remote-assets\weapons\weapon_gusenberg.png" />
+    <None Remove="remote-assets\weapons\weapon_hammer.png" />
+    <None Remove="remote-assets\weapons\weapon_hatchet.png" />
+    <None Remove="remote-assets\weapons\weapon_hazardcan.png" />
+    <None Remove="remote-assets\weapons\weapon_heavypistol.png" />
+    <None Remove="remote-assets\weapons\weapon_heavyrifle.png" />
+    <None Remove="remote-assets\weapons\weapon_heavyshotgun.png" />
+    <None Remove="remote-assets\weapons\weapon_heavysniper.png" />
+    <None Remove="remote-assets\weapons\weapon_heavysniper_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_hominglauncher.png" />
+    <None Remove="remote-assets\weapons\weapon_knife.png" />
+    <None Remove="remote-assets\weapons\weapon_knuckle.png" />
+    <None Remove="remote-assets\weapons\weapon_machete.png" />
+    <None Remove="remote-assets\weapons\weapon_machinepistol.png" />
+    <None Remove="remote-assets\weapons\weapon_marksmanpistol.png" />
+    <None Remove="remote-assets\weapons\weapon_marksmanrifle.png" />
+    <None Remove="remote-assets\weapons\weapon_marksmanrifle_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_mg.png" />
+    <None Remove="remote-assets\weapons\weapon_microsmg.png" />
+    <None Remove="remote-assets\weapons\weapon_militaryrifle.png" />
+    <None Remove="remote-assets\weapons\weapon_minigun.png" />
+    <None Remove="remote-assets\weapons\weapon_minismg.png" />
+    <None Remove="remote-assets\weapons\weapon_molotov.png" />
+    <None Remove="remote-assets\weapons\weapon_musket.png" />
+    <None Remove="remote-assets\weapons\weapon_navyrevolver.png" />
+    <None Remove="remote-assets\weapons\weapon_nightstick.png" />
+    <None Remove="remote-assets\weapons\weapon_parachute.png" />
+    <None Remove="remote-assets\weapons\weapon_petrolcan.png" />
+    <None Remove="remote-assets\weapons\weapon_pipebomb.png" />
+    <None Remove="remote-assets\weapons\weapon_pistol.png" />
+    <None Remove="remote-assets\weapons\weapon_pistol50.png" />
+    <None Remove="remote-assets\weapons\weapon_pistolxm3.png" />
+    <None Remove="remote-assets\weapons\weapon_pistol_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_poolcue.png" />
+    <None Remove="remote-assets\weapons\weapon_precisionrifle.png" />
+    <None Remove="remote-assets\weapons\weapon_proxmine.png" />
+    <None Remove="remote-assets\weapons\weapon_pumpshotgun.png" />
+    <None Remove="remote-assets\weapons\weapon_pumpshotgun_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_railgun.png" />
+    <None Remove="remote-assets\weapons\weapon_railgunxm3.png" />
+    <None Remove="remote-assets\weapons\weapon_raycarbine.png" />
+    <None Remove="remote-assets\weapons\weapon_rayminigun.png" />
+    <None Remove="remote-assets\weapons\weapon_raypistol.png" />
+    <None Remove="remote-assets\weapons\weapon_revolver.png" />
+    <None Remove="remote-assets\weapons\weapon_revolver_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_rpg.png" />
+    <None Remove="remote-assets\weapons\weapon_sawnoffshotgun.png" />
+    <None Remove="remote-assets\weapons\weapon_smg.png" />
+    <None Remove="remote-assets\weapons\weapon_smg_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_smokegrenade.png" />
+    <None Remove="remote-assets\weapons\weapon_sniperrifle.png" />
+    <None Remove="remote-assets\weapons\weapon_snowball.png" />
+    <None Remove="remote-assets\weapons\weapon_snspistol.png" />
+    <None Remove="remote-assets\weapons\weapon_snspistol_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_specialcarbine.png" />
+    <None Remove="remote-assets\weapons\weapon_specialcarbine_mk2.png" />
+    <None Remove="remote-assets\weapons\weapon_stickybomb.png" />
+    <None Remove="remote-assets\weapons\weapon_stone_hatchet.png" />
+    <None Remove="remote-assets\weapons\weapon_stungun.png" />
+    <None Remove="remote-assets\weapons\weapon_stungun_mp.png" />
+    <None Remove="remote-assets\weapons\weapon_stunrod.png" />
+    <None Remove="remote-assets\weapons\weapon_switchblade.png" />
+    <None Remove="remote-assets\weapons\weapon_tacticalrifle.png" />
+    <None Remove="remote-assets\weapons\weapon_techpistol.png" />
+    <None Remove="remote-assets\weapons\weapon_tecpistol.png" />
+    <None Remove="remote-assets\weapons\weapon_unarmed.png" />
+    <None Remove="remote-assets\weapons\weapon_vintagepistol.png" />
+    <None Remove="remote-assets\weapons\weapon_wrench.png" />
     <None Remove="Keys\gtav_ng_encrypt_luts.dat" />
     <None Remove="Keys\gtav_ng_encrypt_tables.dat" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\characters\franklin.png">
+    <Content Include="remote-assets\characters\franklin.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\characters\michael.png">
+    <Content Include="remote-assets\characters\michael.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\characters\trevor.png">
+    <Content Include="remote-assets\characters\trevor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\gadget_parachute.png">
+    <Content Include="remote-assets\weapons\gadget_parachute.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_acidpackage.png">
+    <Content Include="remote-assets\weapons\weapon_acidpackage.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_advancedrifle.png">
+    <Content Include="remote-assets\weapons\weapon_advancedrifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_appistol.png">
+    <Content Include="remote-assets\weapons\weapon_appistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_assaultrifle.png">
+    <Content Include="remote-assets\weapons\weapon_assaultrifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_assaultrifle_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_assaultrifle_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_assaultshotgun.png">
+    <Content Include="remote-assets\weapons\weapon_assaultshotgun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_assaultsmg.png">
+    <Content Include="remote-assets\weapons\weapon_assaultsmg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_autoshotgun.png">
+    <Content Include="remote-assets\weapons\weapon_autoshotgun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_ball.png">
+    <Content Include="remote-assets\weapons\weapon_ball.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_bat.png">
+    <Content Include="remote-assets\weapons\weapon_bat.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_battleaxe.png">
+    <Content Include="remote-assets\weapons\weapon_battleaxe.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_bottle.png">
+    <Content Include="remote-assets\weapons\weapon_bottle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_bullpuprifle.png">
+    <Content Include="remote-assets\weapons\weapon_bullpuprifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_bullpuprifle_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_bullpuprifle_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_bullpupshotgun.png">
+    <Content Include="remote-assets\weapons\weapon_bullpupshotgun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_bzgas.png">
+    <Content Include="remote-assets\weapons\weapon_bzgas.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_candycane.png">
+    <Content Include="remote-assets\weapons\weapon_candycane.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_carbinerifle.png">
+    <Content Include="remote-assets\weapons\weapon_carbinerifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_carbinerifle_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_carbinerifle_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_combatmg.png">
+    <Content Include="remote-assets\weapons\weapon_combatmg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_combatmg_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_combatmg_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_combatpdw.png">
+    <Content Include="remote-assets\weapons\weapon_combatpdw.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_combatpistol.png">
+    <Content Include="remote-assets\weapons\weapon_combatpistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_combatshotgun.png">
+    <Content Include="remote-assets\weapons\weapon_combatshotgun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_compactlauncher.png">
+    <Content Include="remote-assets\weapons\weapon_compactlauncher.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_compactrifle.png">
+    <Content Include="remote-assets\weapons\weapon_compactrifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_crowbar.png">
+    <Content Include="remote-assets\weapons\weapon_crowbar.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_dagger.png">
+    <Content Include="remote-assets\weapons\weapon_dagger.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_dbshotgun.png">
+    <Content Include="remote-assets\weapons\weapon_dbshotgun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_doubleaction.png">
+    <Content Include="remote-assets\weapons\weapon_doubleaction.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_emplauncher.png">
+    <Content Include="remote-assets\weapons\weapon_emplauncher.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_fertilizercan.png">
+    <Content Include="remote-assets\weapons\weapon_fertilizercan.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_fireextinguisher.png">
+    <Content Include="remote-assets\weapons\weapon_fireextinguisher.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_firework.png">
+    <Content Include="remote-assets\weapons\weapon_firework.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_flare.png">
+    <Content Include="remote-assets\weapons\weapon_flare.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_flaregun.png">
+    <Content Include="remote-assets\weapons\weapon_flaregun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_flashlight.png">
+    <Content Include="remote-assets\weapons\weapon_flashlight.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_gadgetpistol.png">
+    <Content Include="remote-assets\weapons\weapon_gadgetpistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_golfclub.png">
+    <Content Include="remote-assets\weapons\weapon_golfclub.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_grenade.png">
+    <Content Include="remote-assets\weapons\weapon_grenade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_grenadelauncher.png">
+    <Content Include="remote-assets\weapons\weapon_grenadelauncher.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_grenadelauncher_smoke.png">
+    <Content Include="remote-assets\weapons\weapon_grenadelauncher_smoke.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_gusenberg.png">
+    <Content Include="remote-assets\weapons\weapon_gusenberg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_hammer.png">
+    <Content Include="remote-assets\weapons\weapon_hammer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_hatchet.png">
+    <Content Include="remote-assets\weapons\weapon_hatchet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_hazardcan.png">
+    <Content Include="remote-assets\weapons\weapon_hazardcan.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_heavypistol.png">
+    <Content Include="remote-assets\weapons\weapon_heavypistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_heavyrifle.png">
+    <Content Include="remote-assets\weapons\weapon_heavyrifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_heavyshotgun.png">
+    <Content Include="remote-assets\weapons\weapon_heavyshotgun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_heavysniper.png">
+    <Content Include="remote-assets\weapons\weapon_heavysniper.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_heavysniper_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_heavysniper_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_hominglauncher.png">
+    <Content Include="remote-assets\weapons\weapon_hominglauncher.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_knife.png">
+    <Content Include="remote-assets\weapons\weapon_knife.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_knuckle.png">
+    <Content Include="remote-assets\weapons\weapon_knuckle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_machete.png">
+    <Content Include="remote-assets\weapons\weapon_machete.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_machinepistol.png">
+    <Content Include="remote-assets\weapons\weapon_machinepistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_marksmanpistol.png">
+    <Content Include="remote-assets\weapons\weapon_marksmanpistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_marksmanrifle.png">
+    <Content Include="remote-assets\weapons\weapon_marksmanrifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_marksmanrifle_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_marksmanrifle_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_mg.png">
+    <Content Include="remote-assets\weapons\weapon_mg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_microsmg.png">
+    <Content Include="remote-assets\weapons\weapon_microsmg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_militaryrifle.png">
+    <Content Include="remote-assets\weapons\weapon_militaryrifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_minigun.png">
+    <Content Include="remote-assets\weapons\weapon_minigun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_minismg.png">
+    <Content Include="remote-assets\weapons\weapon_minismg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_molotov.png">
+    <Content Include="remote-assets\weapons\weapon_molotov.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_musket.png">
+    <Content Include="remote-assets\weapons\weapon_musket.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_navyrevolver.png">
+    <Content Include="remote-assets\weapons\weapon_navyrevolver.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_nightstick.png">
+    <Content Include="remote-assets\weapons\weapon_nightstick.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_petrolcan.png">
+    <Content Include="remote-assets\weapons\weapon_petrolcan.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_pipebomb.png">
+    <Content Include="remote-assets\weapons\weapon_pipebomb.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_pistol.png">
+    <Content Include="remote-assets\weapons\weapon_pistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_pistol50.png">
+    <Content Include="remote-assets\weapons\weapon_pistol50.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_pistolxm3.png">
+    <Content Include="remote-assets\weapons\weapon_pistolxm3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_pistol_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_pistol_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_poolcue.png">
+    <Content Include="remote-assets\weapons\weapon_poolcue.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_precisionrifle.png">
+    <Content Include="remote-assets\weapons\weapon_precisionrifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_proxmine.png">
+    <Content Include="remote-assets\weapons\weapon_proxmine.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_pumpshotgun.png">
+    <Content Include="remote-assets\weapons\weapon_pumpshotgun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_pumpshotgun_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_pumpshotgun_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_railgun.png">
+    <Content Include="remote-assets\weapons\weapon_railgun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_railgunxm3.png">
+    <Content Include="remote-assets\weapons\weapon_railgunxm3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_raycarbine.png">
+    <Content Include="remote-assets\weapons\weapon_raycarbine.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_rayminigun.png">
+    <Content Include="remote-assets\weapons\weapon_rayminigun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_raypistol.png">
+    <Content Include="remote-assets\weapons\weapon_raypistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_revolver.png">
+    <Content Include="remote-assets\weapons\weapon_revolver.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_revolver_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_revolver_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_rpg.png">
+    <Content Include="remote-assets\weapons\weapon_rpg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_sawnoffshotgun.png">
+    <Content Include="remote-assets\weapons\weapon_sawnoffshotgun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_smg.png">
+    <Content Include="remote-assets\weapons\weapon_smg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_smg_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_smg_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_smokegrenade.png">
+    <Content Include="remote-assets\weapons\weapon_smokegrenade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_sniperrifle.png">
+    <Content Include="remote-assets\weapons\weapon_sniperrifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_snowball.png">
+    <Content Include="remote-assets\weapons\weapon_snowball.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_snspistol.png">
+    <Content Include="remote-assets\weapons\weapon_snspistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_snspistol_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_snspistol_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_specialcarbine.png">
+    <Content Include="remote-assets\weapons\weapon_specialcarbine.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_specialcarbine_mk2.png">
+    <Content Include="remote-assets\weapons\weapon_specialcarbine_mk2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_stickybomb.png">
+    <Content Include="remote-assets\weapons\weapon_stickybomb.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_stone_hatchet.png">
+    <Content Include="remote-assets\weapons\weapon_stone_hatchet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_stungun.png">
+    <Content Include="remote-assets\weapons\weapon_stungun.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_stungun_mp.png">
+    <Content Include="remote-assets\weapons\weapon_stungun_mp.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_stunrod.png">
+    <Content Include="remote-assets\weapons\weapon_stunrod.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_switchblade.png">
+    <Content Include="remote-assets\weapons\weapon_switchblade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_tacticalrifle.png">
+    <Content Include="remote-assets\weapons\weapon_tacticalrifle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_tecpistol.png">
+    <Content Include="remote-assets\weapons\weapon_tecpistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_unarmed.png">
+    <Content Include="remote-assets\weapons\weapon_unarmed.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_vintagepistol.png">
+    <Content Include="remote-assets\weapons\weapon_vintagepistol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Assets\weapons\weapon_wrench.png">
+    <Content Include="remote-assets\weapons\weapon_wrench.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="icon.ico" />
@@ -517,2269 +528,2269 @@
     <None Update="Assets\LogoSplash.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\adder.png">
+    <None Update="remote-assets\vehicles\adder.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\airbus.png">
+    <None Update="remote-assets\vehicles\airbus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\airtug.png">
+    <None Update="remote-assets\vehicles\airtug.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\akula.png">
+    <None Update="remote-assets\vehicles\akula.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\akuma.png">
+    <None Update="remote-assets\vehicles\akuma.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\alkonost.png">
+    <None Update="remote-assets\vehicles\alkonost.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\alpha.png">
+    <None Update="remote-assets\vehicles\alpha.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\alphaz1.png">
+    <None Update="remote-assets\vehicles\alphaz1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ambulance.png">
+    <None Update="remote-assets\vehicles\ambulance.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\annihilator.png">
+    <None Update="remote-assets\vehicles\annihilator.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\annihilator2.png">
+    <None Update="remote-assets\vehicles\annihilator2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\apc.png">
+    <None Update="remote-assets\vehicles\apc.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ardent.png">
+    <None Update="remote-assets\vehicles\ardent.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\armytanker.png">
+    <None Update="remote-assets\vehicles\armytanker.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\armytrailer.png">
+    <None Update="remote-assets\vehicles\armytrailer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\armytrailer2.png">
+    <None Update="remote-assets\vehicles\armytrailer2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\asbo.png">
+    <None Update="remote-assets\vehicles\asbo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\asea.png">
+    <None Update="remote-assets\vehicles\asea.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\asea2.png">
+    <None Update="remote-assets\vehicles\asea2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\asterope.png">
+    <None Update="remote-assets\vehicles\asterope.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\autarch.png">
+    <None Update="remote-assets\vehicles\autarch.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\avarus.png">
+    <None Update="remote-assets\vehicles\avarus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\avenger.png">
+    <None Update="remote-assets\vehicles\avenger.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\avenger2.png">
+    <None Update="remote-assets\vehicles\avenger2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\avisa.png">
+    <None Update="remote-assets\vehicles\avisa.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bagger.png">
+    <None Update="remote-assets\vehicles\bagger.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\baletrailer.png">
+    <None Update="remote-assets\vehicles\baletrailer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\baller.png">
+    <None Update="remote-assets\vehicles\baller.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\baller2.png">
+    <None Update="remote-assets\vehicles\baller2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\baller3.png">
+    <None Update="remote-assets\vehicles\baller3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\baller4.png">
+    <None Update="remote-assets\vehicles\baller4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\baller5.png">
+    <None Update="remote-assets\vehicles\baller5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\baller6.png">
+    <None Update="remote-assets\vehicles\baller6.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\banshee.png">
+    <None Update="remote-assets\vehicles\banshee.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\banshee2.png">
+    <None Update="remote-assets\vehicles\banshee2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\barracks.png">
+    <None Update="remote-assets\vehicles\barracks.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\barracks2.png">
+    <None Update="remote-assets\vehicles\barracks2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\barracks3.png">
+    <None Update="remote-assets\vehicles\barracks3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\barrage.png">
+    <None Update="remote-assets\vehicles\barrage.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bati.png">
+    <None Update="remote-assets\vehicles\bati.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bati2.png">
+    <None Update="remote-assets\vehicles\bati2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\benson.png">
+    <None Update="remote-assets\vehicles\benson.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\besra.png">
+    <None Update="remote-assets\vehicles\besra.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bestiagts.png">
+    <None Update="remote-assets\vehicles\bestiagts.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bf400.png">
+    <None Update="remote-assets\vehicles\bf400.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bfinjection.png">
+    <None Update="remote-assets\vehicles\bfinjection.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\biff.png">
+    <None Update="remote-assets\vehicles\biff.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bifta.png">
+    <None Update="remote-assets\vehicles\bifta.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bison.png">
+    <None Update="remote-assets\vehicles\bison.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bison2.png">
+    <None Update="remote-assets\vehicles\bison2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bison3.png">
+    <None Update="remote-assets\vehicles\bison3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bjxl.png">
+    <None Update="remote-assets\vehicles\bjxl.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blade.png">
+    <None Update="remote-assets\vehicles\blade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blazer.png">
+    <None Update="remote-assets\vehicles\blazer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blazer2.png">
+    <None Update="remote-assets\vehicles\blazer2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blazer3.png">
+    <None Update="remote-assets\vehicles\blazer3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blazer4.png">
+    <None Update="remote-assets\vehicles\blazer4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blazer5.png">
+    <None Update="remote-assets\vehicles\blazer5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blimp.png">
+    <None Update="remote-assets\vehicles\blimp.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blimp2.png">
+    <None Update="remote-assets\vehicles\blimp2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blimp3.png">
+    <None Update="remote-assets\vehicles\blimp3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blista.png">
+    <None Update="remote-assets\vehicles\blista.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blista2.png">
+    <None Update="remote-assets\vehicles\blista2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\blista3.png">
+    <None Update="remote-assets\vehicles\blista3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bmx.png">
+    <None Update="remote-assets\vehicles\bmx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\boattrailer.png">
+    <None Update="remote-assets\vehicles\boattrailer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bobcatxl.png">
+    <None Update="remote-assets\vehicles\bobcatxl.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bodhi2.png">
+    <None Update="remote-assets\vehicles\bodhi2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bombushka.png">
+    <None Update="remote-assets\vehicles\bombushka.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\boxville.png">
+    <None Update="remote-assets\vehicles\boxville.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\boxville2.png">
+    <None Update="remote-assets\vehicles\boxville2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\boxville3.png">
+    <None Update="remote-assets\vehicles\boxville3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\boxville4.png">
+    <None Update="remote-assets\vehicles\boxville4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\boxville5.png">
+    <None Update="remote-assets\vehicles\boxville5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\brawler.png">
+    <None Update="remote-assets\vehicles\brawler.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\brickade.png">
+    <None Update="remote-assets\vehicles\brickade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\brioso.png">
+    <None Update="remote-assets\vehicles\brioso.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\brioso2.png">
+    <None Update="remote-assets\vehicles\brioso2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bruiser.png">
+    <None Update="remote-assets\vehicles\bruiser.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bruiser2.png">
+    <None Update="remote-assets\vehicles\bruiser2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bruiser3.png">
+    <None Update="remote-assets\vehicles\bruiser3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\brutus.png">
+    <None Update="remote-assets\vehicles\brutus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\brutus2.png">
+    <None Update="remote-assets\vehicles\brutus2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\brutus3.png">
+    <None Update="remote-assets\vehicles\brutus3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\btype.png">
+    <None Update="remote-assets\vehicles\btype.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\btype2.png">
+    <None Update="remote-assets\vehicles\btype2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\btype3.png">
+    <None Update="remote-assets\vehicles\btype3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buccaneer.png">
+    <None Update="remote-assets\vehicles\buccaneer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buccaneer2.png">
+    <None Update="remote-assets\vehicles\buccaneer2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buffalo.png">
+    <None Update="remote-assets\vehicles\buffalo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buffalo2.png">
+    <None Update="remote-assets\vehicles\buffalo2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buffalo3.png">
+    <None Update="remote-assets\vehicles\buffalo3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bulldozer.png">
+    <None Update="remote-assets\vehicles\bulldozer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bullet.png">
+    <None Update="remote-assets\vehicles\bullet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buritto.png">
+    <None Update="remote-assets\vehicles\buritto.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buritto2.png">
+    <None Update="remote-assets\vehicles\buritto2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buritto3.png">
+    <None Update="remote-assets\vehicles\buritto3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buritto4.png">
+    <None Update="remote-assets\vehicles\buritto4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buritto5.png">
+    <None Update="remote-assets\vehicles\buritto5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\burrito.png">
+    <None Update="remote-assets\vehicles\burrito.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\burrito2.png">
+    <None Update="remote-assets\vehicles\burrito2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\burrito3.png">
+    <None Update="remote-assets\vehicles\burrito3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\burrito4.png">
+    <None Update="remote-assets\vehicles\burrito4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\burrito5.png">
+    <None Update="remote-assets\vehicles\burrito5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\bus.png">
+    <None Update="remote-assets\vehicles\bus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buzzard.png">
+    <None Update="remote-assets\vehicles\buzzard.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\buzzard2.png">
+    <None Update="remote-assets\vehicles\buzzard2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cablecar.png">
+    <None Update="remote-assets\vehicles\cablecar.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\caddy.png">
+    <None Update="remote-assets\vehicles\caddy.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\caddy2.png">
+    <None Update="remote-assets\vehicles\caddy2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\caddy3.png">
+    <None Update="remote-assets\vehicles\caddy3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\calico.png">
+    <None Update="remote-assets\vehicles\calico.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\camper.png">
+    <None Update="remote-assets\vehicles\camper.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\caracara.png">
+    <None Update="remote-assets\vehicles\caracara.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\caracara2.png">
+    <None Update="remote-assets\vehicles\caracara2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\carbonizzare.png">
+    <None Update="remote-assets\vehicles\carbonizzare.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\carbonrs.png">
+    <None Update="remote-assets\vehicles\carbonrs.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cargobob.png">
+    <None Update="remote-assets\vehicles\cargobob.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cargobob2.png">
+    <None Update="remote-assets\vehicles\cargobob2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cargobob3.png">
+    <None Update="remote-assets\vehicles\cargobob3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cargobob4.png">
+    <None Update="remote-assets\vehicles\cargobob4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cargoplane.png">
+    <None Update="remote-assets\vehicles\cargoplane.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\casco.png">
+    <None Update="remote-assets\vehicles\casco.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cavalcade.png">
+    <None Update="remote-assets\vehicles\cavalcade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cavalcade2.png">
+    <None Update="remote-assets\vehicles\cavalcade2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cerberus.png">
+    <None Update="remote-assets\vehicles\cerberus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cerberus2.png">
+    <None Update="remote-assets\vehicles\cerberus2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cerberus3.png">
+    <None Update="remote-assets\vehicles\cerberus3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cheburek.png">
+    <None Update="remote-assets\vehicles\cheburek.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cheetah.png">
+    <None Update="remote-assets\vehicles\cheetah.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cheetah2.png">
+    <None Update="remote-assets\vehicles\cheetah2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\chernobog.png">
+    <None Update="remote-assets\vehicles\chernobog.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\chimera.png">
+    <None Update="remote-assets\vehicles\chimera.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\chino.png">
+    <None Update="remote-assets\vehicles\chino.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\chino2.png">
+    <None Update="remote-assets\vehicles\chino2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cliffhanger.png">
+    <None Update="remote-assets\vehicles\cliffhanger.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\clique.png">
+    <None Update="remote-assets\vehicles\clique.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\club.png">
+    <None Update="remote-assets\vehicles\club.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\coach.png">
+    <None Update="remote-assets\vehicles\coach.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cog55.png">
+    <None Update="remote-assets\vehicles\cog55.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cog552.png">
+    <None Update="remote-assets\vehicles\cog552.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cogcabrio.png">
+    <None Update="remote-assets\vehicles\cogcabrio.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cognoscenti.png">
+    <None Update="remote-assets\vehicles\cognoscenti.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cognoscenti2.png">
+    <None Update="remote-assets\vehicles\cognoscenti2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\comet2.png">
+    <None Update="remote-assets\vehicles\comet2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\comet3.png">
+    <None Update="remote-assets\vehicles\comet3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\comet4.png">
+    <None Update="remote-assets\vehicles\comet4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\comet5.png">
+    <None Update="remote-assets\vehicles\comet5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\comet6.png">
+    <None Update="remote-assets\vehicles\comet6.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\contender.png">
+    <None Update="remote-assets\vehicles\contender.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\convert.py">
+    <None Update="remote-assets\vehicles\convert.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\coquette.png">
+    <None Update="remote-assets\vehicles\coquette.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\coquette2.png">
+    <None Update="remote-assets\vehicles\coquette2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\coquette3.png">
+    <None Update="remote-assets\vehicles\coquette3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\coquette4.png">
+    <None Update="remote-assets\vehicles\coquette4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cruiser.png">
+    <None Update="remote-assets\vehicles\cruiser.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\crusader.png">
+    <None Update="remote-assets\vehicles\crusader.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cuban800.png">
+    <None Update="remote-assets\vehicles\cuban800.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cutter.png">
+    <None Update="remote-assets\vehicles\cutter.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cyclone.png">
+    <None Update="remote-assets\vehicles\cyclone.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\cypher.png">
+    <None Update="remote-assets\vehicles\cypher.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\daemon.png">
+    <None Update="remote-assets\vehicles\daemon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\daemon2.png">
+    <None Update="remote-assets\vehicles\daemon2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\deathbike.png">
+    <None Update="remote-assets\vehicles\deathbike.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\deathbike2.png">
+    <None Update="remote-assets\vehicles\deathbike2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\deathbike3.png">
+    <None Update="remote-assets\vehicles\deathbike3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\defiler.png">
+    <None Update="remote-assets\vehicles\defiler.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\deluxo.png">
+    <None Update="remote-assets\vehicles\deluxo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\deveste.png">
+    <None Update="remote-assets\vehicles\deveste.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\deviant.png">
+    <None Update="remote-assets\vehicles\deviant.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\diablous.png">
+    <None Update="remote-assets\vehicles\diablous.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\diablous2.png">
+    <None Update="remote-assets\vehicles\diablous2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dilettante.png">
+    <None Update="remote-assets\vehicles\dilettante.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dilettante2.png">
+    <None Update="remote-assets\vehicles\dilettante2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dinghy.png">
+    <None Update="remote-assets\vehicles\dinghy.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dinghy2.png">
+    <None Update="remote-assets\vehicles\dinghy2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dinghy3.png">
+    <None Update="remote-assets\vehicles\dinghy3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dinghy4.png">
+    <None Update="remote-assets\vehicles\dinghy4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dinghy5.png">
+    <None Update="remote-assets\vehicles\dinghy5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dloader.png">
+    <None Update="remote-assets\vehicles\dloader.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\docktrailer.png">
+    <None Update="remote-assets\vehicles\docktrailer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\docktug.png">
+    <None Update="remote-assets\vehicles\docktug.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dodo.png">
+    <None Update="remote-assets\vehicles\dodo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dominator.png">
+    <None Update="remote-assets\vehicles\dominator.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dominator2.png">
+    <None Update="remote-assets\vehicles\dominator2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dominator3.png">
+    <None Update="remote-assets\vehicles\dominator3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dominator4.png">
+    <None Update="remote-assets\vehicles\dominator4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dominator5.png">
+    <None Update="remote-assets\vehicles\dominator5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dominator6.png">
+    <None Update="remote-assets\vehicles\dominator6.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dominator7.png">
+    <None Update="remote-assets\vehicles\dominator7.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dominator8.png">
+    <None Update="remote-assets\vehicles\dominator8.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\double.png">
+    <None Update="remote-assets\vehicles\double.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\drafter.png">
+    <None Update="remote-assets\vehicles\drafter.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dubsta.png">
+    <None Update="remote-assets\vehicles\dubsta.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dubsta2.png">
+    <None Update="remote-assets\vehicles\dubsta2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dubsta3.png">
+    <None Update="remote-assets\vehicles\dubsta3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dukes.png">
+    <None Update="remote-assets\vehicles\dukes.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dukes2.png">
+    <None Update="remote-assets\vehicles\dukes2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dukes3.png">
+    <None Update="remote-assets\vehicles\dukes3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dump.png">
+    <None Update="remote-assets\vehicles\dump.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dune.png">
+    <None Update="remote-assets\vehicles\dune.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dune2.png">
+    <None Update="remote-assets\vehicles\dune2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dune3.png">
+    <None Update="remote-assets\vehicles\dune3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dune4.png">
+    <None Update="remote-assets\vehicles\dune4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dune5.png">
+    <None Update="remote-assets\vehicles\dune5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\duster.png">
+    <None Update="remote-assets\vehicles\duster.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\dynasty.png">
+    <None Update="remote-assets\vehicles\dynasty.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\elegy.png">
+    <None Update="remote-assets\vehicles\elegy.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\elegy2.png">
+    <None Update="remote-assets\vehicles\elegy2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ellie.png">
+    <None Update="remote-assets\vehicles\ellie.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\emerus.png">
+    <None Update="remote-assets\vehicles\emerus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\emperor.png">
+    <None Update="remote-assets\vehicles\emperor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\emperor2.png">
+    <None Update="remote-assets\vehicles\emperor2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\emperor3.png">
+    <None Update="remote-assets\vehicles\emperor3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\enduro.png">
+    <None Update="remote-assets\vehicles\enduro.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\entity2.png">
+    <None Update="remote-assets\vehicles\entity2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\entityxf.png">
+    <None Update="remote-assets\vehicles\entityxf.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\esskey.png">
+    <None Update="remote-assets\vehicles\esskey.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\euros.png">
+    <None Update="remote-assets\vehicles\euros.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\everon.png">
+    <None Update="remote-assets\vehicles\everon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\exemplar.png">
+    <None Update="remote-assets\vehicles\exemplar.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\f620.png">
+    <None Update="remote-assets\vehicles\f620.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\faction.png">
+    <None Update="remote-assets\vehicles\faction.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\faction2.png">
+    <None Update="remote-assets\vehicles\faction2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\faction3.png">
+    <None Update="remote-assets\vehicles\faction3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\fagaloa.png">
+    <None Update="remote-assets\vehicles\fagaloa.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\faggio.png">
+    <None Update="remote-assets\vehicles\faggio.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\faggio2.png">
+    <None Update="remote-assets\vehicles\faggio2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\faggio3.png">
+    <None Update="remote-assets\vehicles\faggio3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\fbi.png">
+    <None Update="remote-assets\vehicles\fbi.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\fbi2.png">
+    <None Update="remote-assets\vehicles\fbi2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\fcr.png">
+    <None Update="remote-assets\vehicles\fcr.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\fcr2.png">
+    <None Update="remote-assets\vehicles\fcr2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\felon.png">
+    <None Update="remote-assets\vehicles\felon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\felon2.png">
+    <None Update="remote-assets\vehicles\felon2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\feltzer2.png">
+    <None Update="remote-assets\vehicles\feltzer2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\feltzer3.png">
+    <None Update="remote-assets\vehicles\feltzer3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\firetruk.png">
+    <None Update="remote-assets\vehicles\firetruk.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\fixter.png">
+    <None Update="remote-assets\vehicles\fixter.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\flashgt.png">
+    <None Update="remote-assets\vehicles\flashgt.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\flatbed.png">
+    <None Update="remote-assets\vehicles\flatbed.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\fmj.png">
+    <None Update="remote-assets\vehicles\fmj.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\forklift.png">
+    <None Update="remote-assets\vehicles\forklift.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\formula.png">
+    <None Update="remote-assets\vehicles\formula.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\formula2.png">
+    <None Update="remote-assets\vehicles\formula2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\fq2.png">
+    <None Update="remote-assets\vehicles\fq2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\freecrawler.png">
+    <None Update="remote-assets\vehicles\freecrawler.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\freight.png">
+    <None Update="remote-assets\vehicles\freight.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\freightcar.png">
+    <None Update="remote-assets\vehicles\freightcar.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\freightcont1.png">
+    <None Update="remote-assets\vehicles\freightcont1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\freightcont2.png">
+    <None Update="remote-assets\vehicles\freightcont2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\freightgrain.png">
+    <None Update="remote-assets\vehicles\freightgrain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\freighttrailer.png">
+    <None Update="remote-assets\vehicles\freighttrailer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\frogger.png">
+    <None Update="remote-assets\vehicles\frogger.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\frogger2.png">
+    <None Update="remote-assets\vehicles\frogger2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\fugitive.png">
+    <None Update="remote-assets\vehicles\fugitive.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\furia.png">
+    <None Update="remote-assets\vehicles\furia.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\furoregt.png">
+    <None Update="remote-assets\vehicles\furoregt.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\fusilade.png">
+    <None Update="remote-assets\vehicles\fusilade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\futo.png">
+    <None Update="remote-assets\vehicles\futo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\futo2.png">
+    <None Update="remote-assets\vehicles\futo2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gargoyle.png">
+    <None Update="remote-assets\vehicles\gargoyle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gauntlet.png">
+    <None Update="remote-assets\vehicles\gauntlet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gauntlet2.png">
+    <None Update="remote-assets\vehicles\gauntlet2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gauntlet3.png">
+    <None Update="remote-assets\vehicles\gauntlet3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gauntlet4.png">
+    <None Update="remote-assets\vehicles\gauntlet4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gauntlet5.png">
+    <None Update="remote-assets\vehicles\gauntlet5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gb200.png">
+    <None Update="remote-assets\vehicles\gb200.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gburitto.png">
+    <None Update="remote-assets\vehicles\gburitto.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gburitto2.png">
+    <None Update="remote-assets\vehicles\gburitto2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gburrito.png">
+    <None Update="remote-assets\vehicles\gburrito.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gburrito2.png">
+    <None Update="remote-assets\vehicles\gburrito2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\glendale.png">
+    <None Update="remote-assets\vehicles\glendale.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\glendale2.png">
+    <None Update="remote-assets\vehicles\glendale2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gp1.png">
+    <None Update="remote-assets\vehicles\gp1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\graintrailer.png">
+    <None Update="remote-assets\vehicles\graintrailer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\granger.png">
+    <None Update="remote-assets\vehicles\granger.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gresley.png">
+    <None Update="remote-assets\vehicles\gresley.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\growler.png">
+    <None Update="remote-assets\vehicles\growler.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\gt500.png">
+    <None Update="remote-assets\vehicles\gt500.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\guardian.png">
+    <None Update="remote-assets\vehicles\guardian.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\habanero.png">
+    <None Update="remote-assets\vehicles\habanero.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hakuchou.png">
+    <None Update="remote-assets\vehicles\hakuchou.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hakuchou2.png">
+    <None Update="remote-assets\vehicles\hakuchou2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\halftrack.png">
+    <None Update="remote-assets\vehicles\halftrack.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\handler.png">
+    <None Update="remote-assets\vehicles\handler.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hauler.png">
+    <None Update="remote-assets\vehicles\hauler.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hauler2.png">
+    <None Update="remote-assets\vehicles\hauler2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\havok.png">
+    <None Update="remote-assets\vehicles\havok.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hellion.png">
+    <None Update="remote-assets\vehicles\hellion.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hermes.png">
+    <None Update="remote-assets\vehicles\hermes.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hexer.png">
+    <None Update="remote-assets\vehicles\hexer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hotknife.png">
+    <None Update="remote-assets\vehicles\hotknife.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hotring.png">
+    <None Update="remote-assets\vehicles\hotring.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\howard.png">
+    <None Update="remote-assets\vehicles\howard.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hunter.png">
+    <None Update="remote-assets\vehicles\hunter.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\huntley.png">
+    <None Update="remote-assets\vehicles\huntley.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hustler.png">
+    <None Update="remote-assets\vehicles\hustler.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\hydra.png">
+    <None Update="remote-assets\vehicles\hydra.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\imorgon.png">
+    <None Update="remote-assets\vehicles\imorgon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\impaler.png">
+    <None Update="remote-assets\vehicles\impaler.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\impaler2.png">
+    <None Update="remote-assets\vehicles\impaler2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\impaler3.png">
+    <None Update="remote-assets\vehicles\impaler3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\impaler4.png">
+    <None Update="remote-assets\vehicles\impaler4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\imperator.png">
+    <None Update="remote-assets\vehicles\imperator.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\imperator2.png">
+    <None Update="remote-assets\vehicles\imperator2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\imperator3.png">
+    <None Update="remote-assets\vehicles\imperator3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\infernus.png">
+    <None Update="remote-assets\vehicles\infernus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\infernus2.png">
+    <None Update="remote-assets\vehicles\infernus2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ingot.png">
+    <None Update="remote-assets\vehicles\ingot.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\innovation.png">
+    <None Update="remote-assets\vehicles\innovation.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\insurgent.png">
+    <None Update="remote-assets\vehicles\insurgent.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\insurgent2.png">
+    <None Update="remote-assets\vehicles\insurgent2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\insurgent3.png">
+    <None Update="remote-assets\vehicles\insurgent3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\intruder.png">
+    <None Update="remote-assets\vehicles\intruder.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\issi2.png">
+    <None Update="remote-assets\vehicles\issi2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\issi3.png">
+    <None Update="remote-assets\vehicles\issi3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\issi4.png">
+    <None Update="remote-assets\vehicles\issi4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\issi5.png">
+    <None Update="remote-assets\vehicles\issi5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\issi6.png">
+    <None Update="remote-assets\vehicles\issi6.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\issi7.png">
+    <None Update="remote-assets\vehicles\issi7.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\italigtb.png">
+    <None Update="remote-assets\vehicles\italigtb.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\italigtb2.png">
+    <None Update="remote-assets\vehicles\italigtb2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\italigto.png">
+    <None Update="remote-assets\vehicles\italigto.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\italirsx.png">
+    <None Update="remote-assets\vehicles\italirsx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\jackal.png">
+    <None Update="remote-assets\vehicles\jackal.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\jb700.png">
+    <None Update="remote-assets\vehicles\jb700.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\jb7002.png">
+    <None Update="remote-assets\vehicles\jb7002.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\jester.png">
+    <None Update="remote-assets\vehicles\jester.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\jester2.png">
+    <None Update="remote-assets\vehicles\jester2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\jester3.png">
+    <None Update="remote-assets\vehicles\jester3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\jester4.png">
+    <None Update="remote-assets\vehicles\jester4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\jet.png">
+    <None Update="remote-assets\vehicles\jet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\jetmax.png">
+    <None Update="remote-assets\vehicles\jetmax.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\journey.png">
+    <None Update="remote-assets\vehicles\journey.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\jugular.png">
+    <None Update="remote-assets\vehicles\jugular.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\kalahari.png">
+    <None Update="remote-assets\vehicles\kalahari.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\kamacho.png">
+    <None Update="remote-assets\vehicles\kamacho.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\kanjo.png">
+    <None Update="remote-assets\vehicles\kanjo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\khamelion.png">
+    <None Update="remote-assets\vehicles\khamelion.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\khanjali.png">
+    <None Update="remote-assets\vehicles\khanjali.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\komoda.png">
+    <None Update="remote-assets\vehicles\komoda.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\kosatka.png">
+    <None Update="remote-assets\vehicles\kosatka.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\krieger.png">
+    <None Update="remote-assets\vehicles\krieger.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\kuruma.png">
+    <None Update="remote-assets\vehicles\kuruma.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\kuruma2.png">
+    <None Update="remote-assets\vehicles\kuruma2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\landstalker.png">
+    <None Update="remote-assets\vehicles\landstalker.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\landstalker2.png">
+    <None Update="remote-assets\vehicles\landstalker2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\lazer.png">
+    <None Update="remote-assets\vehicles\lazer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\le7b.png">
+    <None Update="remote-assets\vehicles\le7b.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\lectro.png">
+    <None Update="remote-assets\vehicles\lectro.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\lguard.png">
+    <None Update="remote-assets\vehicles\lguard.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\limo2.png">
+    <None Update="remote-assets\vehicles\limo2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\locust.png">
+    <None Update="remote-assets\vehicles\locust.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\longfin.png">
+    <None Update="remote-assets\vehicles\longfin.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\lurcher.png">
+    <None Update="remote-assets\vehicles\lurcher.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\luxor.png">
+    <None Update="remote-assets\vehicles\luxor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\luxor2.png">
+    <None Update="remote-assets\vehicles\luxor2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\lynx.png">
+    <None Update="remote-assets\vehicles\lynx.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mamba.png">
+    <None Update="remote-assets\vehicles\mamba.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mammatus.png">
+    <None Update="remote-assets\vehicles\mammatus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\manana.png">
+    <None Update="remote-assets\vehicles\manana.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\manana2.png">
+    <None Update="remote-assets\vehicles\manana2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\manchez.png">
+    <None Update="remote-assets\vehicles\manchez.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\marquis.png">
+    <None Update="remote-assets\vehicles\marquis.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\marshall.png">
+    <None Update="remote-assets\vehicles\marshall.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\massacro.png">
+    <None Update="remote-assets\vehicles\massacro.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\massacro2.png">
+    <None Update="remote-assets\vehicles\massacro2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\maverick.png">
+    <None Update="remote-assets\vehicles\maverick.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\menacer.png">
+    <None Update="remote-assets\vehicles\menacer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mesa.png">
+    <None Update="remote-assets\vehicles\mesa.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mesa2.png">
+    <None Update="remote-assets\vehicles\mesa2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mesa3.png">
+    <None Update="remote-assets\vehicles\mesa3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\metrotrain.png">
+    <None Update="remote-assets\vehicles\metrotrain.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\michelli.png">
+    <None Update="remote-assets\vehicles\michelli.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\microlight.png">
+    <None Update="remote-assets\vehicles\microlight.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\miljet.png">
+    <None Update="remote-assets\vehicles\miljet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\minitank.png">
+    <None Update="remote-assets\vehicles\minitank.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\minivan.png">
+    <None Update="remote-assets\vehicles\minivan.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\minivan2.png">
+    <None Update="remote-assets\vehicles\minivan2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mixer.png">
+    <None Update="remote-assets\vehicles\mixer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mixer2.png">
+    <None Update="remote-assets\vehicles\mixer2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mogul.png">
+    <None Update="remote-assets\vehicles\mogul.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\molotok.png">
+    <None Update="remote-assets\vehicles\molotok.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\monroe.png">
+    <None Update="remote-assets\vehicles\monroe.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\monster.png">
+    <None Update="remote-assets\vehicles\monster.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\monster3.png">
+    <None Update="remote-assets\vehicles\monster3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\monster4.png">
+    <None Update="remote-assets\vehicles\monster4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\monster5.png">
+    <None Update="remote-assets\vehicles\monster5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\moonbeam.png">
+    <None Update="remote-assets\vehicles\moonbeam.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\moonbeam2.png">
+    <None Update="remote-assets\vehicles\moonbeam2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mower.png">
+    <None Update="remote-assets\vehicles\mower.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mule.png">
+    <None Update="remote-assets\vehicles\mule.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mule2.png">
+    <None Update="remote-assets\vehicles\mule2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mule3.png">
+    <None Update="remote-assets\vehicles\mule3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\mule4.png">
+    <None Update="remote-assets\vehicles\mule4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\nebula.png">
+    <None Update="remote-assets\vehicles\nebula.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\nemesis.png">
+    <None Update="remote-assets\vehicles\nemesis.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\neo.png">
+    <None Update="remote-assets\vehicles\neo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\neon.png">
+    <None Update="remote-assets\vehicles\neon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\nero.png">
+    <None Update="remote-assets\vehicles\nero.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\nero2.png">
+    <None Update="remote-assets\vehicles\nero2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\nightblade.png">
+    <None Update="remote-assets\vehicles\nightblade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\nightshade.png">
+    <None Update="remote-assets\vehicles\nightshade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\nightshark.png">
+    <None Update="remote-assets\vehicles\nightshark.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\nimbus.png">
+    <None Update="remote-assets\vehicles\nimbus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ninef.png">
+    <None Update="remote-assets\vehicles\ninef.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ninef2.png">
+    <None Update="remote-assets\vehicles\ninef2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\noimage.png">
+    <None Update="remote-assets\vehicles\noimage.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\nokota.png">
+    <None Update="remote-assets\vehicles\nokota.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\novak.png">
+    <None Update="remote-assets\vehicles\novak.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\omnis.png">
+    <None Update="remote-assets\vehicles\omnis.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\openwheel1.png">
+    <None Update="remote-assets\vehicles\openwheel1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\openwheel2.png">
+    <None Update="remote-assets\vehicles\openwheel2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\oppressor.png">
+    <None Update="remote-assets\vehicles\oppressor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\oppressor2.png">
+    <None Update="remote-assets\vehicles\oppressor2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\oracle.png">
+    <None Update="remote-assets\vehicles\oracle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\oracle2.png">
+    <None Update="remote-assets\vehicles\oracle2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\osiris.png">
+    <None Update="remote-assets\vehicles\osiris.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\outlaw.png">
+    <None Update="remote-assets\vehicles\outlaw.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\packer.png">
+    <None Update="remote-assets\vehicles\packer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\panto.png">
+    <None Update="remote-assets\vehicles\panto.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\paradise.png">
+    <None Update="remote-assets\vehicles\paradise.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\paragon.png">
+    <None Update="remote-assets\vehicles\paragon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\paragon2.png">
+    <None Update="remote-assets\vehicles\paragon2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pariah.png">
+    <None Update="remote-assets\vehicles\pariah.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\patriot.png">
+    <None Update="remote-assets\vehicles\patriot.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\patriot2.png">
+    <None Update="remote-assets\vehicles\patriot2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\patrolboat.png">
+    <None Update="remote-assets\vehicles\patrolboat.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pbus.png">
+    <None Update="remote-assets\vehicles\pbus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pbus2.png">
+    <None Update="remote-assets\vehicles\pbus2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pcj.png">
+    <None Update="remote-assets\vehicles\pcj.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\penetrator.png">
+    <None Update="remote-assets\vehicles\penetrator.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\penumbra.png">
+    <None Update="remote-assets\vehicles\penumbra.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\penumbra2.png">
+    <None Update="remote-assets\vehicles\penumbra2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\peyote.png">
+    <None Update="remote-assets\vehicles\peyote.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\peyote2.png">
+    <None Update="remote-assets\vehicles\peyote2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\peyote3.png">
+    <None Update="remote-assets\vehicles\peyote3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pfister811.png">
+    <None Update="remote-assets\vehicles\pfister811.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\phantom.png">
+    <None Update="remote-assets\vehicles\phantom.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\phantom2.png">
+    <None Update="remote-assets\vehicles\phantom2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\phantom3.png">
+    <None Update="remote-assets\vehicles\phantom3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\phoenix.png">
+    <None Update="remote-assets\vehicles\phoenix.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\picador.png">
+    <None Update="remote-assets\vehicles\picador.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pigalle.png">
+    <None Update="remote-assets\vehicles\pigalle.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\police.png">
+    <None Update="remote-assets\vehicles\police.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\police2.png">
+    <None Update="remote-assets\vehicles\police2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\police3.png">
+    <None Update="remote-assets\vehicles\police3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\police4.png">
+    <None Update="remote-assets\vehicles\police4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\policeb.png">
+    <None Update="remote-assets\vehicles\policeb.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\policeold1.png">
+    <None Update="remote-assets\vehicles\policeold1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\policeold2.png">
+    <None Update="remote-assets\vehicles\policeold2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\policepredator.png">
+    <None Update="remote-assets\vehicles\policepredator.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\policet.png">
+    <None Update="remote-assets\vehicles\policet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\polmav.png">
+    <None Update="remote-assets\vehicles\polmav.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pony.png">
+    <None Update="remote-assets\vehicles\pony.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pony2.png">
+    <None Update="remote-assets\vehicles\pony2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pounder.png">
+    <None Update="remote-assets\vehicles\pounder.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pounder2.png">
+    <None Update="remote-assets\vehicles\pounder2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\prairie.png">
+    <None Update="remote-assets\vehicles\prairie.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pranger.png">
+    <None Update="remote-assets\vehicles\pranger.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\predator.png">
+    <None Update="remote-assets\vehicles\predator.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\premier.png">
+    <None Update="remote-assets\vehicles\premier.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\previon.png">
+    <None Update="remote-assets\vehicles\previon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\primo.png">
+    <None Update="remote-assets\vehicles\primo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\primo2.png">
+    <None Update="remote-assets\vehicles\primo2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\proptrailer.png">
+    <None Update="remote-assets\vehicles\proptrailer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\prototipo.png">
+    <None Update="remote-assets\vehicles\prototipo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\pyro.png">
+    <None Update="remote-assets\vehicles\pyro.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\radi.png">
+    <None Update="remote-assets\vehicles\radi.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\raiden.png">
+    <None Update="remote-assets\vehicles\raiden.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\raketrailer.png">
+    <None Update="remote-assets\vehicles\raketrailer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rallytruck.png">
+    <None Update="remote-assets\vehicles\rallytruck.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rancherxl.png">
+    <None Update="remote-assets\vehicles\rancherxl.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rancherxl2.png">
+    <None Update="remote-assets\vehicles\rancherxl2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rapidgt.png">
+    <None Update="remote-assets\vehicles\rapidgt.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rapidgt2.png">
+    <None Update="remote-assets\vehicles\rapidgt2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rapidgt3.png">
+    <None Update="remote-assets\vehicles\rapidgt3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\raptor.png">
+    <None Update="remote-assets\vehicles\raptor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ratbike.png">
+    <None Update="remote-assets\vehicles\ratbike.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ratloader.png">
+    <None Update="remote-assets\vehicles\ratloader.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ratloader2.png">
+    <None Update="remote-assets\vehicles\ratloader2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rcbandito.png">
+    <None Update="remote-assets\vehicles\rcbandito.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\reaper.png">
+    <None Update="remote-assets\vehicles\reaper.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rebel.png">
+    <None Update="remote-assets\vehicles\rebel.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rebel2.png">
+    <None Update="remote-assets\vehicles\rebel2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rebla.png">
+    <None Update="remote-assets\vehicles\rebla.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\regina.png">
+    <None Update="remote-assets\vehicles\regina.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\remus.png">
+    <None Update="remote-assets\vehicles\remus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rentalbus.png">
+    <None Update="remote-assets\vehicles\rentalbus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\retinue.png">
+    <None Update="remote-assets\vehicles\retinue.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\retinue2.png">
+    <None Update="remote-assets\vehicles\retinue2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\revolter.png">
+    <None Update="remote-assets\vehicles\revolter.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rhapsody.png">
+    <None Update="remote-assets\vehicles\rhapsody.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rhino.png">
+    <None Update="remote-assets\vehicles\rhino.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\riata.png">
+    <None Update="remote-assets\vehicles\riata.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\riot.png">
+    <None Update="remote-assets\vehicles\riot.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\riot2.png">
+    <None Update="remote-assets\vehicles\riot2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ripley.png">
+    <None Update="remote-assets\vehicles\ripley.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rocoto.png">
+    <None Update="remote-assets\vehicles\rocoto.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rogue.png">
+    <None Update="remote-assets\vehicles\rogue.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\romero.png">
+    <None Update="remote-assets\vehicles\romero.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rrocket.png">
+    <None Update="remote-assets\vehicles\rrocket.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rt3000.png">
+    <None Update="remote-assets\vehicles\rt3000.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rubble.png">
+    <None Update="remote-assets\vehicles\rubble.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ruffian.png">
+    <None Update="remote-assets\vehicles\ruffian.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ruiner.png">
+    <None Update="remote-assets\vehicles\ruiner.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ruiner2.png">
+    <None Update="remote-assets\vehicles\ruiner2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ruiner3.png">
+    <None Update="remote-assets\vehicles\ruiner3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rumpo.png">
+    <None Update="remote-assets\vehicles\rumpo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rumpo2.png">
+    <None Update="remote-assets\vehicles\rumpo2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\rumpo3.png">
+    <None Update="remote-assets\vehicles\rumpo3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ruston.png">
+    <None Update="remote-assets\vehicles\ruston.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\s80.png">
+    <None Update="remote-assets\vehicles\s80.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sabregt.png">
+    <None Update="remote-assets\vehicles\sabregt.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sabregt2.png">
+    <None Update="remote-assets\vehicles\sabregt2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sadler.png">
+    <None Update="remote-assets\vehicles\sadler.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sadler2.png">
+    <None Update="remote-assets\vehicles\sadler2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sanchez.png">
+    <None Update="remote-assets\vehicles\sanchez.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sanchez2.png">
+    <None Update="remote-assets\vehicles\sanchez2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sanctus.png">
+    <None Update="remote-assets\vehicles\sanctus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sandking.png">
+    <None Update="remote-assets\vehicles\sandking.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sandking2.png">
+    <None Update="remote-assets\vehicles\sandking2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\savage.png">
+    <None Update="remote-assets\vehicles\savage.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\savestra.png">
+    <None Update="remote-assets\vehicles\savestra.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sc1.png">
+    <None Update="remote-assets\vehicles\sc1.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\scarab.png">
+    <None Update="remote-assets\vehicles\scarab.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\scarab2.png">
+    <None Update="remote-assets\vehicles\scarab2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\scarab3.png">
+    <None Update="remote-assets\vehicles\scarab3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\schafter2.png">
+    <None Update="remote-assets\vehicles\schafter2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\schafter3.png">
+    <None Update="remote-assets\vehicles\schafter3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\schafter4.png">
+    <None Update="remote-assets\vehicles\schafter4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\schafter5.png">
+    <None Update="remote-assets\vehicles\schafter5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\schafter6.png">
+    <None Update="remote-assets\vehicles\schafter6.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\schlagen.png">
+    <None Update="remote-assets\vehicles\schlagen.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\schwarzer.png">
+    <None Update="remote-assets\vehicles\schwarzer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\scorcher.png">
+    <None Update="remote-assets\vehicles\scorcher.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\scramjet.png">
+    <None Update="remote-assets\vehicles\scramjet.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\scrap.png">
+    <None Update="remote-assets\vehicles\scrap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\seabreeze.png">
+    <None Update="remote-assets\vehicles\seabreeze.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\seashark.png">
+    <None Update="remote-assets\vehicles\seashark.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\seashark2.png">
+    <None Update="remote-assets\vehicles\seashark2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\seashark3.png">
+    <None Update="remote-assets\vehicles\seashark3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\seasparrow.png">
+    <None Update="remote-assets\vehicles\seasparrow.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\seasparrow2.png">
+    <None Update="remote-assets\vehicles\seasparrow2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\seasparrow3.png">
+    <None Update="remote-assets\vehicles\seasparrow3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\seminole.png">
+    <None Update="remote-assets\vehicles\seminole.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\seminole2.png">
+    <None Update="remote-assets\vehicles\seminole2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sentinel.png">
+    <None Update="remote-assets\vehicles\sentinel.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sentinel2.png">
+    <None Update="remote-assets\vehicles\sentinel2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sentinel3.png">
+    <None Update="remote-assets\vehicles\sentinel3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\serrano.png">
+    <None Update="remote-assets\vehicles\serrano.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\seven70.png">
+    <None Update="remote-assets\vehicles\seven70.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\shamal.png">
+    <None Update="remote-assets\vehicles\shamal.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sheava.png">
+    <None Update="remote-assets\vehicles\sheava.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sheriff.png">
+    <None Update="remote-assets\vehicles\sheriff.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sheriff2.png">
+    <None Update="remote-assets\vehicles\sheriff2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\shotaro.png">
+    <None Update="remote-assets\vehicles\shotaro.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\skylift.png">
+    <None Update="remote-assets\vehicles\skylift.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\slamtruck.png">
+    <None Update="remote-assets\vehicles\slamtruck.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\slamvan.png">
+    <None Update="remote-assets\vehicles\slamvan.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\slamvan2.png">
+    <None Update="remote-assets\vehicles\slamvan2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\slamvan3.png">
+    <None Update="remote-assets\vehicles\slamvan3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\slamvan4.png">
+    <None Update="remote-assets\vehicles\slamvan4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\slamvan5.png">
+    <None Update="remote-assets\vehicles\slamvan5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\slamvan6.png">
+    <None Update="remote-assets\vehicles\slamvan6.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sovereign.png">
+    <None Update="remote-assets\vehicles\sovereign.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\specter.png">
+    <None Update="remote-assets\vehicles\specter.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\specter2.png">
+    <None Update="remote-assets\vehicles\specter2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\speeder.png">
+    <None Update="remote-assets\vehicles\speeder.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\speeder2.png">
+    <None Update="remote-assets\vehicles\speeder2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\speedo.png">
+    <None Update="remote-assets\vehicles\speedo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\speedo2.png">
+    <None Update="remote-assets\vehicles\speedo2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\speedo4.png">
+    <None Update="remote-assets\vehicles\speedo4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\squaddie.png">
+    <None Update="remote-assets\vehicles\squaddie.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\squalo.png">
+    <None Update="remote-assets\vehicles\squalo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stafford.png">
+    <None Update="remote-assets\vehicles\stafford.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stalion.png">
+    <None Update="remote-assets\vehicles\stalion.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stalion2.png">
+    <None Update="remote-assets\vehicles\stalion2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stanier.png">
+    <None Update="remote-assets\vehicles\stanier.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\starling.png">
+    <None Update="remote-assets\vehicles\starling.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stinger.png">
+    <None Update="remote-assets\vehicles\stinger.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stingergt.png">
+    <None Update="remote-assets\vehicles\stingergt.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stockade.png">
+    <None Update="remote-assets\vehicles\stockade.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stockade3.png">
+    <None Update="remote-assets\vehicles\stockade3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stratum.png">
+    <None Update="remote-assets\vehicles\stratum.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\streiter.png">
+    <None Update="remote-assets\vehicles\streiter.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stretch.png">
+    <None Update="remote-assets\vehicles\stretch.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\strikeforce.png">
+    <None Update="remote-assets\vehicles\strikeforce.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stromberg.png">
+    <None Update="remote-assets\vehicles\stromberg.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stryder.png">
+    <None Update="remote-assets\vehicles\stryder.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\stunt.png">
+    <None Update="remote-assets\vehicles\stunt.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\submersible.png">
+    <None Update="remote-assets\vehicles\submersible.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\submersible2.png">
+    <None Update="remote-assets\vehicles\submersible2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sugoi.png">
+    <None Update="remote-assets\vehicles\sugoi.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sultan.png">
+    <None Update="remote-assets\vehicles\sultan.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sultan2.png">
+    <None Update="remote-assets\vehicles\sultan2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sultan3.png">
+    <None Update="remote-assets\vehicles\sultan3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\sultanrs.png">
+    <None Update="remote-assets\vehicles\sultanrs.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\suntrap.png">
+    <None Update="remote-assets\vehicles\suntrap.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\superd.png">
+    <None Update="remote-assets\vehicles\superd.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\supervolito.png">
+    <None Update="remote-assets\vehicles\supervolito.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\supervolito2.png">
+    <None Update="remote-assets\vehicles\supervolito2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\surano.png">
+    <None Update="remote-assets\vehicles\surano.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\surfer.png">
+    <None Update="remote-assets\vehicles\surfer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\surfer2.png">
+    <None Update="remote-assets\vehicles\surfer2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\surge.png">
+    <None Update="remote-assets\vehicles\surge.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\swift.png">
+    <None Update="remote-assets\vehicles\swift.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\swift2.png">
+    <None Update="remote-assets\vehicles\swift2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\swinger.png">
+    <None Update="remote-assets\vehicles\swinger.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\t20.png">
+    <None Update="remote-assets\vehicles\t20.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\taco.png">
+    <None Update="remote-assets\vehicles\taco.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tailgater.png">
+    <None Update="remote-assets\vehicles\tailgater.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tailgater2.png">
+    <None Update="remote-assets\vehicles\tailgater2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\taipan.png">
+    <None Update="remote-assets\vehicles\taipan.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tampa.png">
+    <None Update="remote-assets\vehicles\tampa.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tampa2.png">
+    <None Update="remote-assets\vehicles\tampa2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tampa3.png">
+    <None Update="remote-assets\vehicles\tampa3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tanker.png">
+    <None Update="remote-assets\vehicles\tanker.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tanker2.png">
+    <None Update="remote-assets\vehicles\tanker2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tankercar.png">
+    <None Update="remote-assets\vehicles\tankercar.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\taxi.png">
+    <None Update="remote-assets\vehicles\taxi.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\technical.png">
+    <None Update="remote-assets\vehicles\technical.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\technical2.png">
+    <None Update="remote-assets\vehicles\technical2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\technical3.png">
+    <None Update="remote-assets\vehicles\technical3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tempesta.png">
+    <None Update="remote-assets\vehicles\tempesta.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\terbyte.png">
+    <None Update="remote-assets\vehicles\terbyte.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tezeract.png">
+    <None Update="remote-assets\vehicles\tezeract.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\thrax.png">
+    <None Update="remote-assets\vehicles\thrax.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\thrust.png">
+    <None Update="remote-assets\vehicles\thrust.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\thruster.png">
+    <None Update="remote-assets\vehicles\thruster.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tigon.png">
+    <None Update="remote-assets\vehicles\tigon.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tiptruck.png">
+    <None Update="remote-assets\vehicles\tiptruck.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tiptruck2.png">
+    <None Update="remote-assets\vehicles\tiptruck2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\titan.png">
+    <None Update="remote-assets\vehicles\titan.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\toreador.png">
+    <None Update="remote-assets\vehicles\toreador.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\torero.png">
+    <None Update="remote-assets\vehicles\torero.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tornado.png">
+    <None Update="remote-assets\vehicles\tornado.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tornado2.png">
+    <None Update="remote-assets\vehicles\tornado2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tornado3.png">
+    <None Update="remote-assets\vehicles\tornado3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tornado4.png">
+    <None Update="remote-assets\vehicles\tornado4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tornado5.png">
+    <None Update="remote-assets\vehicles\tornado5.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tornado6.png">
+    <None Update="remote-assets\vehicles\tornado6.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\toro.png">
+    <None Update="remote-assets\vehicles\toro.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\toro2.png">
+    <None Update="remote-assets\vehicles\toro2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\toros.png">
+    <None Update="remote-assets\vehicles\toros.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tourbus.png">
+    <None Update="remote-assets\vehicles\tourbus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\towtruck.png">
+    <None Update="remote-assets\vehicles\towtruck.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\towtruck2.png">
+    <None Update="remote-assets\vehicles\towtruck2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tr2.png">
+    <None Update="remote-assets\vehicles\tr2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tr3.png">
+    <None Update="remote-assets\vehicles\tr3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tr4.png">
+    <None Update="remote-assets\vehicles\tr4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tractor.png">
+    <None Update="remote-assets\vehicles\tractor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tractor2.png">
+    <None Update="remote-assets\vehicles\tractor2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tractor3.png">
+    <None Update="remote-assets\vehicles\tractor3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trailerlarge.png">
+    <None Update="remote-assets\vehicles\trailerlarge.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trailerlogs.png">
+    <None Update="remote-assets\vehicles\trailerlogs.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trailers.png">
+    <None Update="remote-assets\vehicles\trailers.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trailers2.png">
+    <None Update="remote-assets\vehicles\trailers2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trailers3.png">
+    <None Update="remote-assets\vehicles\trailers3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trailers4.png">
+    <None Update="remote-assets\vehicles\trailers4.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trailersmall.png">
+    <None Update="remote-assets\vehicles\trailersmall.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trailersmall2.png">
+    <None Update="remote-assets\vehicles\trailersmall2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trash.png">
+    <None Update="remote-assets\vehicles\trash.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trash2.png">
+    <None Update="remote-assets\vehicles\trash2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trflat.png">
+    <None Update="remote-assets\vehicles\trflat.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tribike.png">
+    <None Update="remote-assets\vehicles\tribike.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tribike2.png">
+    <None Update="remote-assets\vehicles\tribike2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tribike3.png">
+    <None Update="remote-assets\vehicles\tribike3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trophytruck.png">
+    <None Update="remote-assets\vehicles\trophytruck.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\trophytruck2.png">
+    <None Update="remote-assets\vehicles\trophytruck2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tropic.png">
+    <None Update="remote-assets\vehicles\tropic.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tropic2.png">
+    <None Update="remote-assets\vehicles\tropic2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tropos.png">
+    <None Update="remote-assets\vehicles\tropos.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tug.png">
+    <None Update="remote-assets\vehicles\tug.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tula.png">
+    <None Update="remote-assets\vehicles\tula.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tulip.png">
+    <None Update="remote-assets\vehicles\tulip.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\turismo2.png">
+    <None Update="remote-assets\vehicles\turismo2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\turismor.png">
+    <None Update="remote-assets\vehicles\turismor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tvtrailer.png">
+    <None Update="remote-assets\vehicles\tvtrailer.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tyrant.png">
+    <None Update="remote-assets\vehicles\tyrant.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\tyrus.png">
+    <None Update="remote-assets\vehicles\tyrus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\utilitruck.png">
+    <None Update="remote-assets\vehicles\utilitruck.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\utilitruck2.png">
+    <None Update="remote-assets\vehicles\utilitruck2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\utilitruck3.png">
+    <None Update="remote-assets\vehicles\utilitruck3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\utillitruck.png">
+    <None Update="remote-assets\vehicles\utillitruck.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\utillitruck2.png">
+    <None Update="remote-assets\vehicles\utillitruck2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\utillitruck3.png">
+    <None Update="remote-assets\vehicles\utillitruck3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vacca.png">
+    <None Update="remote-assets\vehicles\vacca.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vader.png">
+    <None Update="remote-assets\vehicles\vader.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vagner.png">
+    <None Update="remote-assets\vehicles\vagner.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vagrant.png">
+    <None Update="remote-assets\vehicles\vagrant.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\valkyrie.png">
+    <None Update="remote-assets\vehicles\valkyrie.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\valkyrie2.png">
+    <None Update="remote-assets\vehicles\valkyrie2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vamos.png">
+    <None Update="remote-assets\vehicles\vamos.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vectre.png">
+    <None Update="remote-assets\vehicles\vectre.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vehicles.csv">
+    <None Update="remote-assets\vehicles\vehicles.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\velum.png">
+    <None Update="remote-assets\vehicles\velum.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\velum2.png">
+    <None Update="remote-assets\vehicles\velum2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\verlierer2.png">
+    <None Update="remote-assets\vehicles\verlierer2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\verus.png">
+    <None Update="remote-assets\vehicles\verus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vestra.png">
+    <None Update="remote-assets\vehicles\vestra.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vetir.png">
+    <None Update="remote-assets\vehicles\vetir.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\veto.png">
+    <None Update="remote-assets\vehicles\veto.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\veto2.png">
+    <None Update="remote-assets\vehicles\veto2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vigero.png">
+    <None Update="remote-assets\vehicles\vigero.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vigilante.png">
+    <None Update="remote-assets\vehicles\vigilante.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vindicator.png">
+    <None Update="remote-assets\vehicles\vindicator.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\virgo.png">
+    <None Update="remote-assets\vehicles\virgo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\virgo2.png">
+    <None Update="remote-assets\vehicles\virgo2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\virgo3.png">
+    <None Update="remote-assets\vehicles\virgo3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\viseris.png">
+    <None Update="remote-assets\vehicles\viseris.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\visione.png">
+    <None Update="remote-assets\vehicles\visione.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\volatol.png">
+    <None Update="remote-assets\vehicles\volatol.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\volatus.png">
+    <None Update="remote-assets\vehicles\volatus.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\voltic.png">
+    <None Update="remote-assets\vehicles\voltic.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\voltic2.png">
+    <None Update="remote-assets\vehicles\voltic2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\voodoo.png">
+    <None Update="remote-assets\vehicles\voodoo.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\voodoo2.png">
+    <None Update="remote-assets\vehicles\voodoo2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vortex.png">
+    <None Update="remote-assets\vehicles\vortex.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\vstr.png">
+    <None Update="remote-assets\vehicles\vstr.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\warrener.png">
+    <None Update="remote-assets\vehicles\warrener.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\warrener2.png">
+    <None Update="remote-assets\vehicles\warrener2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\washington.png">
+    <None Update="remote-assets\vehicles\washington.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\wastelander.png">
+    <None Update="remote-assets\vehicles\wastelander.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\weevil.png">
+    <None Update="remote-assets\vehicles\weevil.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\windsor.png">
+    <None Update="remote-assets\vehicles\windsor.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\windsor2.png">
+    <None Update="remote-assets\vehicles\windsor2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\winky.png">
+    <None Update="remote-assets\vehicles\winky.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\wolfsbane.png">
+    <None Update="remote-assets\vehicles\wolfsbane.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\xa21.png">
+    <None Update="remote-assets\vehicles\xa21.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\xls.png">
+    <None Update="remote-assets\vehicles\xls.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\xls2.png">
+    <None Update="remote-assets\vehicles\xls2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\yosemite.png">
+    <None Update="remote-assets\vehicles\yosemite.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\yosemite2.png">
+    <None Update="remote-assets\vehicles\yosemite2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\yosemite3.png">
+    <None Update="remote-assets\vehicles\yosemite3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\youga.png">
+    <None Update="remote-assets\vehicles\youga.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\youga2.png">
+    <None Update="remote-assets\vehicles\youga2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\youga3.png">
+    <None Update="remote-assets\vehicles\youga3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\z190.png">
+    <None Update="remote-assets\vehicles\z190.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zentorno.png">
+    <None Update="remote-assets\vehicles\zentorno.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zhaba.png">
+    <None Update="remote-assets\vehicles\zhaba.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zion.png">
+    <None Update="remote-assets\vehicles\zion.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zion2.png">
+    <None Update="remote-assets\vehicles\zion2.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zion3.png">
+    <None Update="remote-assets\vehicles\zion3.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zombiea.png">
+    <None Update="remote-assets\vehicles\zombiea.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zombieb.png">
+    <None Update="remote-assets\vehicles\zombieb.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zorrusso.png">
+    <None Update="remote-assets\vehicles\zorrusso.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zr350.png">
+    <None Update="remote-assets\vehicles\zr350.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zr380.png">
+    <None Update="remote-assets\vehicles\zr380.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zr3802.png">
+    <None Update="remote-assets\vehicles\zr3802.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\zr3803.png">
+    <None Update="remote-assets\vehicles\zr3803.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Update="Assets\vehicles\ztype.png">
+    <None Update="remote-assets\vehicles\ztype.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Assets\vehicles\" />
+    <Folder Include="remote-assets\vehicles\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1220,7 +1220,17 @@ namespace MagicOGK_OIV_Builder.Services
 
             XmlNode? target = xmlDoc.SelectSingleNode(xpath);
             if (target == null)
+            {
+                Log?.Invoke("XML patch target not found.");
+                Log?.Invoke("XPath: " + xpath);
+                Log?.Invoke("XML file: " + xmlInternalPath);
                 throw new Exception("XPath target not found: " + xpath);
+            }
+            else
+            {
+                Log?.Invoke("XML patch target found.");
+                Log?.Invoke("XPath: " + xpath);
+            }
 
             foreach (XmlNode child in addNode.ChildNodes)
             {
@@ -1228,7 +1238,7 @@ namespace MagicOGK_OIV_Builder.Services
 
                 bool alreadyExists = target.ChildNodes
                     .Cast<XmlNode>()
-                    .Any(x => x.OuterXml == imported.OuterXml);
+                    .Any(x => XmlNodeAlreadyExists(x, imported));
 
                 if (alreadyExists)
                 {
@@ -1251,6 +1261,46 @@ namespace MagicOGK_OIV_Builder.Services
 
             Log?.Invoke("XML patched successfully:");
             Log?.Invoke($"{rpfRelativePath}::{xmlInternalPath}");
+        }
+
+        private bool XmlNodeAlreadyExists(XmlNode existing, XmlNode incoming)
+        {
+            if (existing.NodeType != XmlNodeType.Element)
+                return false;
+
+            if (existing.Name != incoming.Name)
+                return false;
+
+            string existingText = existing.InnerText.Trim();
+            string incomingText = incoming.InnerText.Trim();
+
+            // Handles simple entries like:
+            // <Item>update:/redux/elevator.rpf</Item>
+            if (!string.IsNullOrWhiteSpace(existingText) &&
+                existingText.Equals(incomingText, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            // Handles structured entries like:
+            // <Item><filename>update:/redux/elevator.rpf</filename>...</Item>
+            string? existingFilename = existing.SelectSingleNode("filename")?.InnerText.Trim();
+            string? incomingFilename = incoming.SelectSingleNode("filename")?.InnerText.Trim();
+
+            if (!string.IsNullOrWhiteSpace(existingFilename) &&
+                !string.IsNullOrWhiteSpace(incomingFilename) &&
+                existingFilename.Equals(incomingFilename, StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            return NormalizeXml(existing.OuterXml)
+                .Equals(NormalizeXml(incoming.OuterXml), StringComparison.OrdinalIgnoreCase);
+        }
+
+        private string NormalizeXml(string xml)
+        {
+            return string.Join("", xml.Where(c => !char.IsWhiteSpace(c)));
         }
 
         public enum InstallErrorCategory

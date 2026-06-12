@@ -154,6 +154,9 @@ namespace MagicOGK_OIV_Builder
 
             var author = AppendElem(doc, meta, "author");
             AppendElem(doc, author, "displayName").InnerText = p.Author;
+            string webPage = NormalizeMetadataUrl(p.Website);
+            if (!string.IsNullOrWhiteSpace(webPage))
+                AppendElem(doc, author, "webPage").InnerText = webPage;
 
             var desc = AppendElem(doc, meta, "description");
             desc.AppendChild(doc.CreateCDataSection(
@@ -290,6 +293,7 @@ namespace MagicOGK_OIV_Builder
                 }
             }
             WriteAutoContentXmlRegistrations(doc, content, project);
+            WriteAutoUpdateRpfContentChangeSetEntries(doc, content, project, resolved);
         }
 
         private static void WriteAutoContentXmlRegistrations(
@@ -301,6 +305,9 @@ namespace MagicOGK_OIV_Builder
 
             foreach (var folder in project.Folders.Where(f => f.IsRpf))
             {
+                if (!ArchiveFolderHasNonDeleteContent(folder, project))
+                    continue;
+
                 OIVFolder? parentArchive = FindNearestParentArchive(folder, project);
 
                 if (parentArchive == null)
@@ -358,6 +365,106 @@ namespace MagicOGK_OIV_Builder
                 var persistent = AppendElem(doc, item, "persistent");
                 persistent.SetAttribute("value", "true");
             }
+        }
+
+        private static void WriteAutoUpdateRpfContentChangeSetEntries(
+    XmlDocument doc,
+    XmlElement content,
+    OIVProject project,
+    Dictionary<OIVFileEntry, string> resolved)
+        {
+            var entries = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var file in project.Files)
+            {
+                if (file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                if (!file.FileName.EndsWith(".rpf", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                string fullPath = resolved[file]
+                    .Replace("\\", "/")
+                    .Trim('/');
+
+                const string updateRpfPrefix = "update/update.rpf/";
+
+                int updateRpfIndex = fullPath.IndexOf(
+                    updateRpfPrefix,
+                    StringComparison.OrdinalIgnoreCase
+                );
+
+                if (updateRpfIndex < 0)
+                    continue;
+
+                string insideUpdateRpf = fullPath.Substring(updateRpfIndex + updateRpfPrefix.Length);
+
+                if (string.IsNullOrWhiteSpace(insideUpdateRpf))
+                    continue;
+
+                string contentXmlEntry = "update:/" + insideUpdateRpf;
+
+                if (!entries.Add(contentXmlEntry))
+                    continue;
+
+                WriteUpdateRpfFilesToEnablePatch(doc, content, contentXmlEntry);
+                WriteUpdateRpfDataFilesPatch(doc, content, contentXmlEntry);
+            }
+        }
+
+        private static void WriteUpdateRpfFilesToEnablePatch(
+    XmlDocument doc,
+    XmlElement content,
+    string contentXmlEntry)
+        {
+            var updateRpf = AppendElem(doc, content, "archive");
+            updateRpf.SetAttribute("path", @"update\update.rpf");
+            updateRpf.SetAttribute("createIfNotExist", "False");
+            updateRpf.SetAttribute("type", "RPF7");
+
+            var xmlNode = AppendElem(doc, updateRpf, "xml");
+            xmlNode.SetAttribute("path", "content.xml");
+
+            var addNode = AppendElem(doc, xmlNode, "add");
+            addNode.SetAttribute("append", "Last");
+            addNode.SetAttribute(
+                "xpath",
+                "/CDataFileMgr__ContentsOfDataFileXml/contentChangeSets/Item[changeSetName='CCS_TITLE_UPDATE_STREAMING']/filesToEnable"
+            );
+
+            AppendElem(doc, addNode, "Item").InnerText = contentXmlEntry;
+        }
+
+        private static void WriteUpdateRpfDataFilesPatch(
+            XmlDocument doc,
+            XmlElement content,
+            string contentXmlEntry)
+        {
+            var updateRpf = AppendElem(doc, content, "archive");
+            updateRpf.SetAttribute("path", @"update\update.rpf");
+            updateRpf.SetAttribute("createIfNotExist", "False");
+            updateRpf.SetAttribute("type", "RPF7");
+
+            var xmlNode = AppendElem(doc, updateRpf, "xml");
+            xmlNode.SetAttribute("path", "content.xml");
+
+            var addNode = AppendElem(doc, xmlNode, "add");
+            addNode.SetAttribute("append", "Last");
+            addNode.SetAttribute("xpath", "/CDataFileMgr__ContentsOfDataFileXml/dataFiles");
+
+            var item = AppendElem(doc, addNode, "Item");
+
+            AppendElem(doc, item, "filename").InnerText = contentXmlEntry;
+            AppendElem(doc, item, "fileType").InnerText = "RPF_FILE";
+
+            var overlay = AppendElem(doc, item, "overlay");
+            overlay.SetAttribute("value", "true");
+
+            var disabled = AppendElem(doc, item, "disabled");
+            disabled.SetAttribute("value", "true");
+
+            var persistent = AppendElem(doc, item, "persistent");
+            persistent.SetAttribute("value", "true");
         }
 
         // Create zip with progress reporting. Progress is reported from 65 to 100% during this phase.
@@ -500,6 +607,22 @@ namespace MagicOGK_OIV_Builder
                 ? v.ToString() : "0";
         }
 
+        private static string NormalizeMetadataUrl(string url)
+        {
+            url = (url ?? string.Empty).Trim();
+
+            if (string.IsNullOrWhiteSpace(url))
+                return string.Empty;
+
+            if (url.Contains("://", StringComparison.Ordinal))
+                return url;
+
+            if (url.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase))
+                return url;
+
+            return "https://" + url;
+        }
+
         // OIV color format per spec: $AARRGGBB (hex, uppercase OK)
         private static string ToArgbHex(Color c)
             => $"${c.A:X2}{c.R:X2}{c.G:X2}{c.B:X2}";
@@ -560,26 +683,8 @@ namespace MagicOGK_OIV_Builder
                     arc.SetAttribute("createIfNotExist", "True");
                     arc.SetAttribute("type", "RPF7");
 
-                    // Files directly inside this archive (or subfolders under it) must be relative to THIS archive
                     foreach (var file in filesHere)
-                    {
-                        string fullPath = resolved[file];
-                        string insideThisArchive = MakeRelativePathInsideArchive(fullPath, fullArchivePath);
-
-                        if (file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase))
-                        {
-                            var delete = AppendElem(doc, arc, "delete");
-                            delete.InnerText = insideThisArchive;
-                        }
-                        else
-                        {
-                            string contentName = sourceToContentName[file.SourcePath];
-
-                            var add = AppendElem(doc, arc, "add");
-                            add.SetAttribute("source", contentName);
-                            add.InnerText = insideThisArchive;
-                        }
-                    }
+                        WriteArchiveFileAction(doc, arc, file, resolved, sourceToContentName, fullArchivePath);
 
                     // Recurse into child folders, now inside this archive
                     WriteArchiveChildren(
@@ -596,26 +701,10 @@ namespace MagicOGK_OIV_Builder
                     // Non-RPF folder:
                     // - if we're not inside an archive, files use full install path
                     // - if we ARE inside an archive, files use path relative to the current archive
-                    foreach (var file in filesHere)
+                    if (currentArchiveGamePath != null)
                     {
-                        string contentNameLocal = sourceToContentName[file.SourcePath];
-                        string fullPath = resolved[file];
-
-                        string xmlPath = currentArchiveGamePath == null
-                            ? fullPath
-                            : MakeRelativePathInsideArchive(fullPath, currentArchiveGamePath);
-
-                        if (file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase))
-                        {
-                            var delete = AppendElem(doc, parent, "delete");
-                            delete.InnerText = xmlPath;
-                        }
-                        else
-                        {
-                            var add = AppendElem(doc, parent, "add");
-                            add.SetAttribute("source", contentNameLocal);
-                            add.InnerText = xmlPath;
-                        }
+                        foreach (var file in filesHere)
+                            WriteArchiveFileAction(doc, parent, file, resolved, sourceToContentName, currentArchiveGamePath);
                     }
 
                     // Child folders stay in same archive context
@@ -629,6 +718,32 @@ namespace MagicOGK_OIV_Builder
                         currentArchiveGamePath);
                 }
             }
+        }
+
+        private static void WriteArchiveFileAction(
+            XmlDocument doc,
+            XmlElement parent,
+            OIVFileEntry file,
+            Dictionary<OIVFileEntry, string> resolved,
+            Dictionary<string, string> sourceToContentName,
+            string archiveGamePath)
+        {
+            string fullPath = resolved[file];
+            string pathInsideArchive = MakeRelativePathInsideArchive(fullPath, archiveGamePath);
+
+            if (file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase))
+            {
+                var delete = AppendElem(doc, parent, "delete");
+                delete.InnerText = pathInsideArchive;
+                return;
+            }
+
+            if (!sourceToContentName.TryGetValue(file.SourcePath, out string? contentName))
+                throw new InvalidOperationException($"No content file was registered for source file: {file.SourcePath}");
+
+            var add = AppendElem(doc, parent, "add");
+            add.SetAttribute("source", contentName);
+            add.InnerText = pathInsideArchive;
         }
 
         // Full folder path from root of target game
@@ -675,6 +790,35 @@ namespace MagicOGK_OIV_Builder
             }
 
             return null;
+        }
+
+        private static bool ArchiveFolderHasNonDeleteContent(
+            OIVFolder folder,
+            OIVProject project)
+        {
+            var folderIds = new HashSet<int> { folder.Id };
+            bool added;
+
+            do
+            {
+                added = false;
+
+                foreach (var child in project.Folders)
+                {
+                    if (child.ParentId.HasValue &&
+                        folderIds.Contains(child.ParentId.Value) &&
+                        folderIds.Add(child.Id))
+                    {
+                        added = true;
+                    }
+                }
+            }
+            while (added);
+
+            return project.Files.Any(file =>
+                file.FolderId.HasValue &&
+                folderIds.Contains(file.FolderId.Value) &&
+                !file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase));
         }
 
         private static string GetDlcNameFromArchivePath(string archivePath)
