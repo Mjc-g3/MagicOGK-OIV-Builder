@@ -463,17 +463,20 @@ namespace MagicOGK_OIV_Builder
 
         private void StyleSidebarBtn(Button btn, string text, int y)
         {
-            btn.Text      = text;
-            btn.ForeColor = Color.FromArgb(188, 143, 143);
-            btn.BackColor = Color.FromArgb(15, 15, 15);
+            btn.Text = text;
+            btn.ForeColor = Color.FromArgb(230, 208, 208);
+            btn.BackColor = Color.Transparent;
             btn.FlatStyle = FlatStyle.Flat;
-            btn.FlatAppearance.BorderSize  = 0;
-            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(50, 0, 0);
+            btn.FlatAppearance.BorderSize = 0;
+            btn.FlatAppearance.MouseOverBackColor = Color.FromArgb(38, 45, 54);
+            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(56, 64, 74);
             btn.TextAlign = ContentAlignment.MiddleLeft;
-            btn.Font      = new Font("Syne", 9F);
-            btn.Size      = new Size(200, 50);
-            btn.Location  = new Point(0, y);
-            btn.TabStop   = false;
+            btn.Font = new Font("Segoe UI", 10F, FontStyle.Regular);
+            btn.Size = new Size(200, 46);
+            btn.Location = new Point(16, y);
+            btn.TabStop = false;
+            btn.Margin = new Padding(0);
+            btn.Padding = new Padding(18, 0, 0, 0);
         }
 
         private void SetupLeftPanelControls()

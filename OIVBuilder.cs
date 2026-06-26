@@ -45,6 +45,9 @@ namespace MagicOGK_OIV_Builder
                     if (file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase))
                         continue;
 
+                    if (IsXmlEditFile(file, project))
+                        continue;
+
                     if (sourceToContentName.ContainsKey(file.SourcePath))
                         continue;
 
@@ -249,9 +252,15 @@ namespace MagicOGK_OIV_Builder
                 sourceToContentName,
                 null);
 
+            WriteWholeRpfReplacementActions(doc, content, project, sourceToContentName);
+            WriteRpfDeleteActions(doc, content, project, resolved);
+
             // Step 4: Write loose files (no RPF in path)
             foreach (var file in looseFiles)
             {
+                if (IsXmlEditFile(file, project))
+                    continue;
+
                 string installPath = resolved[file];
 
                 if (file.Type.Equals("delete", StringComparison.OrdinalIgnoreCase))
@@ -292,8 +301,99 @@ namespace MagicOGK_OIV_Builder
                     AppendElem(doc, addNode, "Item").InnerText = dlcEntry;
                 }
             }
+
+            WriteXmlEditActions(doc, content, project);
             WriteAutoContentXmlRegistrations(doc, content, project);
             WriteAutoUpdateRpfContentChangeSetEntries(doc, content, project, resolved);
+        }
+
+        private static void WriteXmlEditActions(
+            XmlDocument doc,
+            XmlElement content,
+            OIVProject project)
+        {
+            foreach (var file in project.Files.Where(f => IsXmlEditFile(f, project)))
+            {
+                string installPath = ResolveInstallPath(file, project);
+
+                if (!TrySplitXmlTargetPath(installPath, out string? archivePath, out string? xmlInternalPath))
+                    continue;
+
+                var archiveNode = AppendElem(doc, content, "archive");
+                archiveNode.SetAttribute("path", archivePath);
+                archiveNode.SetAttribute("createIfNotExist", "False");
+                archiveNode.SetAttribute("type", "RPF7");
+
+                var xmlNode = AppendElem(doc, archiveNode, "xml");
+                xmlNode.SetAttribute("path", xmlInternalPath);
+
+                var addNode = AppendElem(doc, xmlNode, "add");
+                addNode.SetAttribute("append", "Last");
+                addNode.SetAttribute("xpath", GetXmlPatchXPath(installPath));
+
+                foreach (XmlNode patchNode in LoadPatchNodes(file.SourcePath))
+                    addNode.AppendChild(doc.ImportNode(patchNode, true));
+            }
+        }
+
+        private static bool IsXmlEditFile(OIVFileEntry file, OIVProject project)
+        {
+            if (file.Type.Equals("xmledit", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            string installPath = ResolveInstallPath(file, project);
+            string fileName = Path.GetFileName(installPath);
+
+            return fileName.Equals("content.xml", StringComparison.OrdinalIgnoreCase)
+                || fileName.Equals("dlclist.xml", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool TrySplitXmlTargetPath(
+            string installPath,
+            out string? archivePath,
+            out string? xmlInternalPath)
+        {
+            archivePath = null;
+            xmlInternalPath = null;
+
+            string normalizedPath = installPath.Replace("/", "\\");
+            string[] parts = normalizedPath.Split('\\', StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (!parts[i].EndsWith(".rpf", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                archivePath = string.Join("\\", parts.Take(i + 1));
+                xmlInternalPath = string.Join("\\", parts.Skip(i + 1));
+                return !string.IsNullOrWhiteSpace(xmlInternalPath);
+            }
+
+            return false;
+        }
+
+        private static string GetXmlPatchXPath(string installPath)
+        {
+            string fileName = Path.GetFileName(installPath);
+
+            if (fileName.Equals("dlclist.xml", StringComparison.OrdinalIgnoreCase))
+                return "/SMandatoryPacksData/Paths";
+
+            if (fileName.Equals("content.xml", StringComparison.OrdinalIgnoreCase))
+                return "/CDataFileMgr__ContentsOfDataFileXml/dataFiles";
+
+            return "/*";
+        }
+
+        private static IEnumerable<XmlNode> LoadPatchNodes(string sourcePath)
+        {
+            var doc = new XmlDocument();
+            doc.Load(sourcePath);
+
+            if (doc.DocumentElement == null)
+                yield break;
+
+            yield return doc.DocumentElement;
         }
 
         private static void WriteAutoContentXmlRegistrations(
@@ -684,7 +784,7 @@ namespace MagicOGK_OIV_Builder
                     arc.SetAttribute("type", "RPF7");
 
                     foreach (var file in filesHere)
-                        WriteArchiveFileAction(doc, arc, file, resolved, sourceToContentName, fullArchivePath);
+                        WriteArchiveFileAction(doc, arc, file, project, resolved, sourceToContentName, fullArchivePath);
 
                     // Recurse into child folders, now inside this archive
                     WriteArchiveChildren(
@@ -704,7 +804,7 @@ namespace MagicOGK_OIV_Builder
                     if (currentArchiveGamePath != null)
                     {
                         foreach (var file in filesHere)
-                            WriteArchiveFileAction(doc, parent, file, resolved, sourceToContentName, currentArchiveGamePath);
+                            WriteArchiveFileAction(doc, parent, file, project, resolved, sourceToContentName, currentArchiveGamePath);
                     }
 
                     // Child folders stay in same archive context
@@ -720,14 +820,108 @@ namespace MagicOGK_OIV_Builder
             }
         }
 
+        private static void WriteWholeRpfReplacementActions(
+            XmlDocument doc,
+            XmlElement content,
+            OIVProject project,
+            Dictionary<string, string> sourceToContentName)
+        {
+            foreach (var file in project.Files.Where(f => ShouldReplaceWholeRpf(f, project)))
+            {
+                string installPath = ResolveInstallPath(file, project)
+                    .Replace("/", "\\")
+                    .Trim('\\');
+
+                if (!sourceToContentName.TryGetValue(file.SourcePath, out string? contentName))
+                    continue;
+
+                var archiveNode = AppendElem(doc, content, "archive");
+                archiveNode.SetAttribute("path", installPath);
+                archiveNode.SetAttribute("createIfNotExist", "False");
+                archiveNode.SetAttribute("type", "RPF7");
+
+                var addNode = AppendElem(doc, archiveNode, "add");
+                addNode.SetAttribute("source", contentName);
+                addNode.InnerText = installPath;
+            }
+        }
+
+        private static void WriteRpfDeleteActions(
+            XmlDocument doc,
+            XmlElement content,
+            OIVProject project,
+            Dictionary<OIVFileEntry, string> resolved)
+        {
+            foreach (var file in project.Files.Where(f => f.Type.Equals("delete", StringComparison.OrdinalIgnoreCase)))
+            {
+                string installPath = resolved[file].Replace("/", "\\").Trim('\\');
+                if (string.IsNullOrWhiteSpace(installPath))
+                    continue;
+
+                if (!TrySplitRpfTargetPath(installPath, out string? archivePath, out string? internalPath))
+                    continue;
+
+                var archiveNode = AppendElem(doc, content, "archive");
+                archiveNode.SetAttribute("path", archivePath);
+                archiveNode.SetAttribute("createIfNotExist", "False");
+                archiveNode.SetAttribute("type", "RPF7");
+
+                var deleteNode = AppendElem(doc, archiveNode, "delete");
+                deleteNode.InnerText = internalPath;
+            }
+        }
+
+        private static bool ShouldReplaceWholeRpf(OIVFileEntry file, OIVProject project)
+        {
+            if (!file.Type.Equals("replace", StringComparison.OrdinalIgnoreCase))
+                return false;
+
+            string installPath = ResolveInstallPath(file, project)
+                .Replace("/", "\\")
+                .Trim('\\');
+
+            return Path.GetFileName(installPath).EndsWith(".rpf", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static bool TrySplitRpfTargetPath(
+            string installPath,
+            out string? archivePath,
+            out string? internalPath)
+        {
+            archivePath = null;
+            internalPath = null;
+
+            string normalizedPath = installPath.Replace("/", "\\");
+            string[] parts = normalizedPath.Split('\\', StringSplitOptions.RemoveEmptyEntries);
+
+            for (int i = 0; i < parts.Length; i++)
+            {
+                if (!parts[i].EndsWith(".rpf", StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                archivePath = string.Join("\\", parts.Take(i + 1));
+                internalPath = string.Join("\\", parts.Skip(i + 1));
+                return !string.IsNullOrWhiteSpace(internalPath);
+            }
+
+            return false;
+        }
+
         private static void WriteArchiveFileAction(
             XmlDocument doc,
             XmlElement parent,
             OIVFileEntry file,
+            OIVProject project,
             Dictionary<OIVFileEntry, string> resolved,
             Dictionary<string, string> sourceToContentName,
             string archiveGamePath)
         {
+            if (IsXmlEditFile(file, project))
+                return;
+
+            if (ShouldReplaceWholeRpf(file, project))
+                return;
+
             string fullPath = resolved[file];
             string pathInsideArchive = MakeRelativePathInsideArchive(fullPath, archiveGamePath);
 

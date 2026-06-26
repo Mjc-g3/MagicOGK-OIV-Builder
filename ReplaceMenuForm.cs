@@ -181,13 +181,14 @@ namespace MagicOGK_OIV_Builder
         //Animated transitions
         private void AnimateDialogIn()
         {
+            Point finalLocation = Location;
+            Size finalSize = Size;
+            Size = new Size((int)(finalSize.Width * 0.95), (int)(finalSize.Height * 0.95));
+            Location = new Point(finalLocation.X, finalLocation.Y + 16);
             Opacity = 0;
 
-            int finalY = Location.Y;
-            Location = new Point(Location.X, finalY - 25);
-
             var timer = new System.Windows.Forms.Timer();
-            timer.Interval = 20;
+            timer.Interval = 16;
 
             int step = 0;
             int maxSteps = 14;
@@ -200,12 +201,17 @@ namespace MagicOGK_OIV_Builder
                 double eased = 1 - Math.Pow(1 - t, 3); // ease-out
 
                 Opacity = eased;
-                Location = new Point(Location.X, finalY - 25 + (int)(25 * eased));
+                Location = new Point(finalLocation.X, finalLocation.Y + 16 - (int)(16 * eased));
+                Size = new Size(
+                    (int)(finalSize.Width * (0.95 + 0.05 * eased)),
+                    (int)(finalSize.Height * (0.95 + 0.05 * eased))
+                );
 
                 if (step >= maxSteps)
                 {
                     Opacity = 1;
-                    Location = new Point(Location.X, finalY);
+                    Location = finalLocation;
+                    Size = finalSize;
                     timer.Stop();
                     timer.Dispose();
                 }
@@ -222,7 +228,8 @@ namespace MagicOGK_OIV_Builder
 
             isClosingAnimated = true;
 
-            int startY = Location.Y;
+            Point startLocation = Location;
+            Size startSize = Size;
 
             var timer = new System.Windows.Forms.Timer();
             timer.Interval = 15;
@@ -238,10 +245,13 @@ namespace MagicOGK_OIV_Builder
                 double eased = 1 - Math.Pow(1 - t, 3);
 
                 Opacity = 1.0 - eased;
-
                 Location = new Point(
-                    Location.X,
-                    startY - (int)(20 * eased)
+                    startLocation.X,
+                    startLocation.Y - (int)(18 * eased)
+                );
+                Size = new Size(
+                    (int)(startSize.Width * (1.0 - 0.04 * eased)),
+                    (int)(startSize.Height * (1.0 - 0.04 * eased))
                 );
 
                 if (step >= maxSteps)

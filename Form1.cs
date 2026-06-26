@@ -118,16 +118,20 @@ namespace MagicOGK_OIV_Builder
         private const int PackageFilesTopWithInstaller = PackageFilesTopOriginal + InstallOivAreaHeight;
 
         //colors
-        private static readonly Color ThemeBg = Color.FromArgb(13, 13, 13);
-        private static readonly Color ThemePanel = Color.FromArgb(18, 18, 18);
+        private static readonly Color ThemeBg = Color.FromArgb(10, 12, 16);
+        private static readonly Color ThemePanel = Color.FromArgb(20, 24, 30);
+        private static readonly Color ThemeSurface = Color.FromArgb(26, 30, 36);
+        private static readonly Color ThemeSurfaceElevated = Color.FromArgb(32, 37, 44);
+        private static readonly Color ThemeHeader = Color.FromArgb(12, 14, 19);
 
-        private static readonly Color ThemeRedButton = Color.FromArgb(120, 18, 24);
-        private static readonly Color ThemeRedHover = Color.FromArgb(125, 32, 38);
+        private static readonly Color ThemeRedButton = Color.FromArgb(165, 42, 58);
+        private static readonly Color ThemeRedHover = Color.FromArgb(205, 75, 95);
 
-        private static readonly Color ThemeText = Color.FromArgb(210, 150, 150);
-        private static readonly Color ThemeTextSoft = Color.FromArgb(170, 120, 120);
-        private static readonly Color ThemeTextDim = Color.FromArgb(95, 75, 75);
-        private static readonly Color ThemeBorder = Color.FromArgb(90, 45, 45);
+        private static readonly Color ThemeText = Color.FromArgb(236, 214, 214);
+        private static readonly Color ThemeTextSoft = Color.FromArgb(196, 170, 170);
+        private static readonly Color ThemeTextDim = Color.FromArgb(121, 104, 104);
+        private static readonly Color ThemeBorder = Color.FromArgb(74, 48, 53);
+        private static readonly Color ThemeAccent = Color.FromArgb(242, 170, 160);
 
         /*
         private int sidebarOpenX = 0;
@@ -250,8 +254,8 @@ namespace MagicOGK_OIV_Builder
                 Text = "PROJECT SETUP",
                 AutoSize = true,
                 BackColor = Color.Transparent,
-                ForeColor = sectionColor,
-                Font = new Font("Syne", 11F, FontStyle.Bold),
+                ForeColor = ThemeAccent,
+                Font = new Font("Segoe UI", 11F, FontStyle.Bold),
                 Location = new Point(x, 20)
             };
 
@@ -368,8 +372,8 @@ namespace MagicOGK_OIV_Builder
                 Text = "ACTIONS",
                 AutoSize = true,
                 BackColor = Color.Transparent,
-                ForeColor = sectionColor,
-                Font = new Font("Syne", 11F, FontStyle.Bold),
+                ForeColor = ThemeAccent,
+                Font = new Font("Segoe UI", 11F, FontStyle.Bold),
                 Location = new Point(x, actionsTitleY)
             };
 
@@ -423,46 +427,64 @@ namespace MagicOGK_OIV_Builder
         {
             BackColor = ThemeBg;
 
-            panelLeft.BackColor = ThemePanel;
+            panelLeft.BackColor = ThemeSurface;
             panelRight.BackColor = ThemeBg;
-            panelSidebar.BackColor = ThemeBg;
+            panelSidebar.BackColor = ThemeHeader;
+            panelDrag.BackColor = ThemeHeader;
+            panelEditorRight.BackColor = ThemeSurface;
 
             Label[] labels =
             {
-        lblAuthor,
-        lblModName,
-        lblVersionTag,
-        lblVersion,
-        lblDescription,
-        lblPhotoLabel,
-        lblColorLabel,
-        lblPackageFiles
-    };
+                lblAuthor,
+                lblModName,
+                lblVersionTag,
+                lblVersion,
+                lblDescription,
+                lblPhotoLabel,
+                lblColorLabel,
+                lblPackageFiles
+            };
 
             foreach (Label lbl in labels)
-                lbl.ForeColor = ThemeText;
+            {
+                lbl.ForeColor = ThemeTextSoft;
+                lbl.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            }
 
             TextBox[] textBoxes =
             {
-        txtAuthor,
-        txtModName,
-        txtVersion
-    };
+                txtAuthor,
+                txtModName,
+                txtVersion
+            };
 
             foreach (TextBox tb in textBoxes)
             {
-                tb.BackColor = Color.FromArgb(28, 28, 28);
+                tb.BackColor = ThemeSurfaceElevated;
                 tb.ForeColor = ThemeText;
                 tb.BorderStyle = BorderStyle.FixedSingle;
+                tb.Font = new Font("Segoe UI", 10F);
+                tb.Padding = new Padding(6, 4, 6, 4);
             }
 
-            dropdownVersionTag.BackColor = Color.FromArgb(28, 28, 28);
+            dropdownVersionTag.BackColor = ThemeSurfaceElevated;
             dropdownVersionTag.ForeColor = ThemeText;
+            dropdownVersionTag.Font = new Font("Segoe UI", 10F);
 
-            txtDescription.BackColor = Color.FromArgb(28, 28, 28);
+            txtDescription.BackColor = ThemeSurfaceElevated;
             txtDescription.ForeColor = ThemeText;
+            txtDescription.Font = new Font("Segoe UI", 10F);
+            txtDescription.Padding = new Padding(6, 4, 6, 4);
 
-            panelDropZone.BackColor = Color.FromArgb(14, 14, 14);
+            panelDropZone.BackColor = Color.FromArgb(18, 22, 28);
+            panelDropZone.BorderStyle = BorderStyle.FixedSingle;
+            panelDropZone.Padding = new Padding(12);
+            panelDropZone.Font = new Font("Segoe UI", 9F);
+            panelPhotoPreview.BackColor = ThemeSurfaceElevated;
+            panelPhotoPreview.BorderStyle = BorderStyle.FixedSingle;
+            panelColorPicker.BackColor = ThemeSurfaceElevated;
+            panelColorPicker.BorderStyle = BorderStyle.FixedSingle;
+
             lblNoFiles.ForeColor = ThemeTextDim;
             lblAddFilesHint.ForeColor = ThemeTextDim;
 
@@ -470,17 +492,27 @@ namespace MagicOGK_OIV_Builder
             ApplyRedButton(btnOpenEditor);
             ApplyRedButton(btnReplaceMods);
             ApplyRedButton(btnBuildOIV);
-            ApplyRedButton(btnAddFiles);
+            ApplyActionButton(btnAddFiles, ThemeSurfaceElevated, ThemeSurface, ThemeBorder);
         }
-        private void ApplyRedButton(Button btn)
+
+        private void ApplyActionButton(Button btn, Color backColor, Color hoverColor, Color borderColor)
         {
-            btn.BackColor = ThemeRedButton;
+            btn.BackColor = backColor;
             btn.ForeColor = ThemeText;
             btn.FlatStyle = FlatStyle.Flat;
-            btn.FlatAppearance.BorderSize = 0;
-            btn.FlatAppearance.MouseOverBackColor = ThemeRedHover;
-            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(70, 10, 14);
+            btn.FlatAppearance.BorderSize = 1;
+            btn.FlatAppearance.BorderColor = borderColor;
+            btn.FlatAppearance.MouseOverBackColor = hoverColor;
+            btn.FlatAppearance.MouseDownBackColor = Color.FromArgb(48, 24, 28);
             btn.UseVisualStyleBackColor = false;
+            btn.Cursor = Cursors.Hand;
+            btn.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+            btn.TextAlign = ContentAlignment.MiddleCenter;
+        }
+
+        private void ApplyRedButton(Button btn)
+        {
+            ApplyActionButton(btn, ThemeRedButton, ThemeRedHover, Color.FromArgb(90, 28, 34));
         }
         private void panelColorPicker_Click(object sender, EventArgs e)
         {
@@ -653,7 +685,11 @@ namespace MagicOGK_OIV_Builder
         private void ShowBlurOverlay()
         {
             if (activeOverlay != null)
+            {
+                if (activeOverlay.Opacity < 0.55)
+                    AnimateOverlayOpacity(activeOverlay, activeOverlay.Opacity, 0.55);
                 return;
+            }
 
             activeOverlay = new Form
             {
@@ -661,12 +697,13 @@ namespace MagicOGK_OIV_Builder
                 StartPosition = FormStartPosition.Manual,
                 ShowInTaskbar = false,
                 BackColor = Color.Black,
-                Opacity = 0.55,
+                Opacity = 0.0,
                 Owner = this,
                 Bounds = this.Bounds
             };
 
             activeOverlay.Show(this);
+            AnimateOverlayOpacity(activeOverlay, 0.0, 0.55);
         }
 
         private void HideBlurOverlay()
@@ -674,9 +711,42 @@ namespace MagicOGK_OIV_Builder
             if (activeOverlay == null)
                 return;
 
-            activeOverlay.Close();
-            activeOverlay.Dispose();
-            activeOverlay = null;
+            AnimateOverlayOpacity(activeOverlay, activeOverlay.Opacity, 0.0, () =>
+            {
+                activeOverlay.Close();
+                activeOverlay.Dispose();
+                activeOverlay = null;
+            });
+        }
+
+        private void AnimateOverlayOpacity(Form form, double fromOpacity, double toOpacity, Action? onFinished = null)
+        {
+            if (form == null)
+                return;
+
+            var timer = new System.Windows.Forms.Timer { Interval = 16 };
+            int step = 0;
+            int maxSteps = 10;
+            double start = fromOpacity;
+
+            timer.Tick += (s, e) =>
+            {
+                step++;
+                double t = step / (double)maxSteps;
+                double eased = 1 - Math.Pow(1 - t, 3);
+
+                form.Opacity = start + (toOpacity - start) * eased;
+
+                if (step >= maxSteps)
+                {
+                    form.Opacity = toOpacity;
+                    timer.Stop();
+                    timer.Dispose();
+                    onFinished?.Invoke();
+                }
+            };
+
+            timer.Start();
         }
         private void PositionReplaceScreen()
         {
@@ -693,6 +763,83 @@ namespace MagicOGK_OIV_Builder
 
             replaceScreenPanel.BringToFront();
             btnHamburger.BringToFront();
+        }
+
+        private void AnimateReplaceScreenOpen()
+        {
+            if (replaceScreenPanel == null)
+                return;
+
+            replaceScreenPanel.Visible = true;
+            replaceScreenPanel.BringToFront();
+
+            int topBarHeight = panelMarquee.Height;
+            Point targetLocation = new Point(0, topBarHeight);
+            Size targetSize = new Size(ClientSize.Width, ClientSize.Height - topBarHeight);
+
+            replaceScreenPanel.Location = new Point(0, ClientSize.Height);
+            replaceScreenPanel.Size = new Size(ClientSize.Width, 24);
+
+            AnimateReplaceScreenBounds(replaceScreenPanel, targetLocation, targetSize);
+        }
+
+        private void AnimateReplaceScreenClose(Action? onFinished = null)
+        {
+            if (replaceScreenPanel == null)
+                return;
+
+            AnimateReplaceScreenBounds(
+                replaceScreenPanel,
+                new Point(0, ClientSize.Height),
+                new Size(ClientSize.Width, 24),
+                () =>
+                {
+                    replaceScreenPanel.Visible = false;
+                    panelMarquee.BringToFront();
+                    btnHamburger.BringToFront();
+                    onFinished?.Invoke();
+                }
+            );
+        }
+
+        private void AnimateReplaceScreenBounds(Panel panel, Point targetLocation, Size targetSize, Action? onFinished = null)
+        {
+            if (panel == null)
+                return;
+
+            Point startLocation = panel.Location;
+            Size startSize = panel.Size;
+            var timer = new System.Windows.Forms.Timer { Interval = 16 };
+            int step = 0;
+            int maxSteps = 12;
+
+            timer.Tick += (s, e) =>
+            {
+                step++;
+                double t = step / (double)maxSteps;
+                double eased = 1 - Math.Pow(1 - t, 3);
+
+                panel.Location = new Point(
+                    (int)(startLocation.X + (targetLocation.X - startLocation.X) * eased),
+                    (int)(startLocation.Y + (targetLocation.Y - startLocation.Y) * eased)
+                );
+
+                panel.Size = new Size(
+                    (int)(startSize.Width + (targetSize.Width - startSize.Width) * eased),
+                    (int)(startSize.Height + (targetSize.Height - startSize.Height) * eased)
+                );
+
+                if (step >= maxSteps)
+                {
+                    panel.Location = targetLocation;
+                    panel.Size = targetSize;
+                    timer.Stop();
+                    timer.Dispose();
+                    onFinished?.Invoke();
+                }
+            };
+
+            timer.Start();
         }
         private void btnReplaceMods_Click(object sender, EventArgs e)
         {
@@ -738,9 +885,7 @@ namespace MagicOGK_OIV_Builder
             }
 
             replaceScreenPanel.Controls.Clear();
-            replaceScreenPanel.Visible = true;
-            replaceScreenPanel.BringToFront();
-            PositionReplaceScreen();
+            AnimateReplaceScreenOpen();
 
             var title = new Label
             {
@@ -794,12 +939,7 @@ namespace MagicOGK_OIV_Builder
                 Font = new Font("Syne", 8F, FontStyle.Bold)
             };
             back.FlatAppearance.BorderColor = Color.FromArgb(120, 30, 30);
-            back.Click += (s, e) =>
-            {
-                replaceScreenPanel.Visible = false;
-                panelMarquee.BringToFront();
-                btnHamburger.BringToFront();
-            };
+            back.Click += (s, e) => AnimateReplaceScreenClose();
 
             lblSelectedReplaceVehicle = new Label
             {
@@ -1472,9 +1612,7 @@ namespace MagicOGK_OIV_Builder
             }
 
             replaceScreenPanel.Controls.Clear();
-            replaceScreenPanel.Visible = true;
-            replaceScreenPanel.BringToFront();
-            PositionReplaceScreen();
+            AnimateReplaceScreenOpen();
 
             selectedClothesCharacter = null;
 
@@ -1490,12 +1628,7 @@ namespace MagicOGK_OIV_Builder
             Button back = CreateSecondaryButton("← Back");
             back.Size = new Size(100, 32);
             back.Location = new Point(24, 62);
-            back.Click += (s, e) =>
-            {
-                replaceScreenPanel.Visible = false;
-                panelMarquee.BringToFront();
-                btnHamburger.BringToFront();
-            };
+            back.Click += (s, e) => AnimateReplaceScreenClose();
 
             lblSelectedClothesCharacter = new Label
             {
@@ -2046,9 +2179,7 @@ namespace MagicOGK_OIV_Builder
             }
 
             replaceScreenPanel.Controls.Clear();
-            replaceScreenPanel.Visible = true;
-            replaceScreenPanel.BringToFront();
-            PositionReplaceScreen();
+            AnimateReplaceScreenOpen();
 
             selectedPedReplaceType = "streamed";
 
@@ -2073,12 +2204,7 @@ namespace MagicOGK_OIV_Builder
             Button back = CreateSecondaryButton("← Back");
             back.Size = new Size(100, 34);
             back.Location = new Point(24, 92);
-            back.Click += (s, e) =>
-            {
-                replaceScreenPanel.Visible = false;
-                panelMarquee.BringToFront();
-                btnHamburger.BringToFront();
-            };
+            back.Click += (s, e) => AnimateReplaceScreenClose();
 
             Panel leftPanel = CreatePedGlassPanel(new Point(24, 148), new Size(570, 440));
             Label leftTitle = CreatePedSectionLabel("1. CHOOSE WHAT TO REPLACE", 16, 14);
@@ -2469,9 +2595,7 @@ namespace MagicOGK_OIV_Builder
             }
 
             replaceScreenPanel.Controls.Clear();
-            replaceScreenPanel.Visible = true;
-            replaceScreenPanel.BringToFront();
-            PositionReplaceScreen();
+            AnimateReplaceScreenOpen();
 
             Label title = new Label
             {
@@ -2493,7 +2617,7 @@ namespace MagicOGK_OIV_Builder
                 Font = new Font("Syne", 8F, FontStyle.Bold)
             };
             back.FlatAppearance.BorderColor = Color.FromArgb(120, 30, 30);
-            back.Click += (s, e) => replaceScreenPanel.Visible = false;
+            back.Click += (s, e) => AnimateReplaceScreenClose();
 
             lblSelectedReplaceWeapon = new Label
             {
