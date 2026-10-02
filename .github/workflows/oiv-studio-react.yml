@@ -1,0 +1,31 @@
+name: OIV Studio React
+on:
+  push:
+    branches: [react-ui-rewrite]
+    paths: ['desktop-react/**', '.github/workflows/oiv-studio-react.yml']
+  pull_request:
+    paths: ['desktop-react/**', '.github/workflows/oiv-studio-react.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop-react
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop-react/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run pack:win
+      - uses: actions/upload-artifact@v4
+        with:
+          name: oiv-studio-windows
+          path: desktop-react/release/*.exe
+          if-no-files-found: error
